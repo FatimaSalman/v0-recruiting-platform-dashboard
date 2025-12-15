@@ -9,6 +9,16 @@ import { Briefcase, MapPin, DollarSign, Plus, MoreVertical, Pencil, Trash2 } fro
 import Link from "next/link"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { useI18n } from "@/lib/i18n-context"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 interface Job {
   id: string
@@ -28,6 +38,8 @@ interface Job {
 export function JobsManagement() {
   const [jobs, setJobs] = useState<Job[]>([])
   const [loading, setLoading] = useState(true)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [jobToDelete, setJobToDelete] = useState<string | null>(null)
   const supabase = useSupabase()
   const { t } = useI18n()
 
@@ -56,6 +68,8 @@ export function JobsManagement() {
       if (error) throw error
 
       setJobs(jobs.filter((job) => job.id !== jobId))
+      setDeleteDialogOpen(false)
+      setJobToDelete(null)
     } catch (error) {
       console.error("Error deleting job:", error)
     }
@@ -72,6 +86,11 @@ export function JobsManagement() {
       default:
         return "bg-muted text-muted-foreground"
     }
+  }
+
+  const handleDeleteClick = (jobId: string) => {
+    setJobToDelete(jobId)
+    setDeleteDialogOpen(true)
   }
 
   return (
@@ -137,7 +156,7 @@ export function JobsManagement() {
                           {t("jobs.edit")}
                         </Link>
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => deleteJob(job.id)} className="text-destructive">
+                      <DropdownMenuItem onClick={() => handleDeleteClick(job.id)} className="text-destructive">
                         <Trash2 className="mr-2 h-4 w-4" />
                         {t("jobs.delete")}
                       </DropdownMenuItem>
@@ -192,6 +211,25 @@ export function JobsManagement() {
           ))}
         </div>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("jobs.deleteConfirm.title")}</AlertDialogTitle>
+            <AlertDialogDescription>{t("jobs.deleteConfirm.description")}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("jobs.deleteConfirm.cancel")}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => jobToDelete && deleteJob(jobToDelete)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {t("jobs.deleteConfirm.confirm")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

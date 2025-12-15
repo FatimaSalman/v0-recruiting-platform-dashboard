@@ -7,6 +7,7 @@ import { Briefcase, Users, Calendar, TrendingUp } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import type { User } from "@supabase/supabase-js"
+import { useI18n } from "@/lib/i18n-context"
 
 interface DashboardStats {
   totalJobs: number
@@ -24,6 +25,7 @@ export function DashboardOverview({ user }: { user: User }) {
   })
   const [loading, setLoading] = useState(true)
   const supabase = useSupabase()
+  const { t } = useI18n()
 
   useEffect(() => {
     async function fetchStats() {
@@ -71,31 +73,31 @@ export function DashboardOverview({ user }: { user: User }) {
 
   const statCards = [
     {
-      title: "Total Jobs",
+      title: t("dashboard.stats.totalJobs"),
       value: stats.totalJobs,
       icon: Briefcase,
-      description: `${stats.activeJobs} active`,
+      description: `${stats.activeJobs} ${t("dashboard.stats.active")}`,
       href: "/dashboard/jobs",
     },
     {
-      title: "Candidates",
+      title: t("dashboard.stats.candidates"),
       value: stats.totalCandidates,
       icon: Users,
-      description: "In your pipeline",
+      description: t("dashboard.stats.pipeline"),
       href: "/dashboard/candidates",
     },
     {
-      title: "Applications",
+      title: t("dashboard.stats.applications"),
       value: stats.totalApplications,
       icon: TrendingUp,
-      description: "Total received",
+      description: t("dashboard.stats.received"),
       href: "/dashboard/applications",
     },
     {
-      title: "Interviews",
+      title: t("dashboard.stats.interviews"),
       value: 0,
       icon: Calendar,
-      description: "Scheduled",
+      description: t("dashboard.stats.scheduled"),
       href: "/dashboard/interviews",
     },
   ]
@@ -105,9 +107,9 @@ export function DashboardOverview({ user }: { user: User }) {
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight mb-2">
-          Welcome back, {user.user_metadata?.full_name || user.email}
+          {t("dashboard.welcomeFull")} {user.user_metadata?.full_name || user.email}
         </h1>
-        <p className="text-muted-foreground">Here's what's happening with your recruitment today.</p>
+        <p className="text-muted-foreground">{t("dashboard.subtitle")}</p>
       </div>
 
       {/* Stats Cards */}
@@ -133,26 +135,26 @@ export function DashboardOverview({ user }: { user: User }) {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
-            <CardDescription>Get started with common tasks</CardDescription>
+            <CardTitle>{t("dashboard.quickActions")}</CardTitle>
+            <CardDescription>{t("dashboard.quickActions.subtitle")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">
             <Button className="w-full justify-start bg-transparent" variant="outline" asChild>
               <Link href="/dashboard/jobs/new">
                 <Briefcase className="mr-2 h-4 w-4" />
-                Post a New Job
+                {t("jobs.postNew")}
               </Link>
             </Button>
             <Button className="w-full justify-start bg-transparent" variant="outline" asChild>
               <Link href="/dashboard/candidates">
                 <Users className="mr-2 h-4 w-4" />
-                Search Candidates
+                {t("candidates.title")}
               </Link>
             </Button>
             <Button className="w-full justify-start bg-transparent" variant="outline" asChild>
               <Link href="/dashboard/interviews">
                 <Calendar className="mr-2 h-4 w-4" />
-                Schedule Interview
+                {t("interviews.schedule")}
               </Link>
             </Button>
           </CardContent>
@@ -160,19 +162,19 @@ export function DashboardOverview({ user }: { user: User }) {
 
         <Card>
           <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
-            <CardDescription>Latest updates in your recruitment pipeline</CardDescription>
+            <CardTitle>{t("dashboard.activity")}</CardTitle>
+            <CardDescription>{t("dashboard.activity.subtitle")}</CardDescription>
           </CardHeader>
           <CardContent>
             {stats.totalJobs === 0 ? (
               <div className="text-sm text-muted-foreground py-8 text-center">
-                <p className="mb-4">No activity yet. Start by posting your first job!</p>
+                <p className="mb-4">{t("dashboard.noActivity")}</p>
                 <Button asChild>
-                  <Link href="/dashboard/jobs/new">Post a Job</Link>
+                  <Link href="/dashboard/jobs/new">{t("jobs.postNew")}</Link>
                 </Button>
               </div>
             ) : (
-              <div className="text-sm text-muted-foreground">Activity feed coming soon...</div>
+              <div className="text-sm text-muted-foreground">{t("dashboard.activityComingSoon")}</div>
             )}
           </CardContent>
         </Card>

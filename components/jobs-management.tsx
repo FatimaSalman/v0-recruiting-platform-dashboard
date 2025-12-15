@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Briefcase, MapPin, DollarSign, Plus, MoreVertical, Pencil, Trash2 } from "lucide-react"
 import Link from "next/link"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { useI18n } from "@/lib/i18n-context"
 
 interface Job {
   id: string
@@ -28,6 +29,7 @@ export function JobsManagement() {
   const [jobs, setJobs] = useState<Job[]>([])
   const [loading, setLoading] = useState(true)
   const supabase = useSupabase()
+  const { t } = useI18n()
 
   useEffect(() => {
     fetchJobs()
@@ -77,13 +79,13 @@ export function JobsManagement() {
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight mb-2">Job Management</h1>
-          <p className="text-muted-foreground">Create and manage your job postings</p>
+          <h1 className="text-3xl font-bold tracking-tight mb-2">{t("jobs.title")}</h1>
+          <p className="text-muted-foreground">{t("jobs.subtitle")}</p>
         </div>
         <Button asChild>
           <Link href="/dashboard/jobs/new">
             <Plus className="mr-2 h-4 w-4" />
-            Post New Job
+            {t("jobs.postNew")}
           </Link>
         </Button>
       </div>
@@ -91,18 +93,18 @@ export function JobsManagement() {
       {/* Jobs List */}
       {loading ? (
         <div className="text-center py-12">
-          <p className="text-muted-foreground">Loading jobs...</p>
+          <p className="text-muted-foreground">{t("jobs.loading")}</p>
         </div>
       ) : jobs.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center">
             <Briefcase className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-            <h3 className="text-lg font-semibold mb-2">No jobs posted yet</h3>
-            <p className="text-muted-foreground mb-4">Get started by posting your first job opening</p>
+            <h3 className="text-lg font-semibold mb-2">{t("jobs.noJobs")}</h3>
+            <p className="text-muted-foreground mb-4">{t("jobs.noJobs.subtitle")}</p>
             <Button asChild>
               <Link href="/dashboard/jobs/new">
                 <Plus className="mr-2 h-4 w-4" />
-                Post Your First Job
+                {t("jobs.postFirst")}
               </Link>
             </Button>
           </CardContent>
@@ -117,7 +119,7 @@ export function JobsManagement() {
                     <div className="flex items-center gap-2 mb-2">
                       <CardTitle className="text-xl">{job.title}</CardTitle>
                       <Badge className={getStatusColor(job.status)} variant="secondary">
-                        {job.status}
+                        {t(`jobs.status.${job.status}`)}
                       </Badge>
                     </div>
                     <CardDescription className="text-base line-clamp-2">{job.description}</CardDescription>
@@ -132,12 +134,12 @@ export function JobsManagement() {
                       <DropdownMenuItem asChild>
                         <Link href={`/dashboard/jobs/${job.id}/edit`}>
                           <Pencil className="mr-2 h-4 w-4" />
-                          Edit
+                          {t("jobs.edit")}
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => deleteJob(job.id)} className="text-destructive">
                         <Trash2 className="mr-2 h-4 w-4" />
-                        Delete
+                        {t("jobs.delete")}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -179,10 +181,10 @@ export function JobsManagement() {
 
                 <div className="flex gap-2">
                   <Button variant="outline" size="sm" asChild>
-                    <Link href={`/dashboard/jobs/${job.id}`}>View Details</Link>
+                    <Link href={`/dashboard/jobs/${job.id}`}>{t("jobs.viewDetails")}</Link>
                   </Button>
                   <Button variant="outline" size="sm" asChild>
-                    <Link href={`/dashboard/jobs/${job.id}/candidates`}>View Candidates</Link>
+                    <Link href={`/dashboard/jobs/${job.id}/candidates`}>{t("jobs.viewCandidates")}</Link>
                   </Button>
                 </div>
               </CardContent>

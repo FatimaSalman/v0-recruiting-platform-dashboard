@@ -10,6 +10,7 @@ import { CandidateCard } from "@/components/candidate-card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
+import { useI18n } from "@/lib/i18n-context"
 
 interface Candidate {
   id: string
@@ -41,6 +42,7 @@ export function CandidateSearchInterface() {
   const [experienceFilter, setExperienceFilter] = useState<string>("all")
   const [skillFilter, setSkillFilter] = useState<string>("all")
   const [allSkills, setAllSkills] = useState<string[]>([])
+  const { t } = useI18n()
 
   useEffect(() => {
     fetchCandidates()
@@ -127,18 +129,18 @@ export function CandidateSearchInterface() {
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight mb-2">Candidate Search</h1>
-          <p className="text-muted-foreground">Find and manage your candidate pipeline</p>
+          <h1 className="text-3xl font-bold tracking-tight mb-2">{t("candidates.title")}</h1>
+          <p className="text-muted-foreground">{t("candidates.subtitle")}</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" className="bg-transparent">
             <Download className="mr-2 h-4 w-4" />
-            Export
+            {t("candidates.export")}
           </Button>
           <Button asChild>
             <Link href="/dashboard/candidates/new">
               <Plus className="mr-2 h-4 w-4" />
-              Add Candidate
+              {t("candidates.addCandidate")}
             </Link>
           </Button>
         </div>
@@ -147,7 +149,7 @@ export function CandidateSearchInterface() {
       {/* Search and Filters */}
       <Card className="mb-6">
         <CardHeader>
-          <CardTitle className="text-lg">Search & Filters</CardTitle>
+          <CardTitle className="text-lg">{t("candidates.searchFilters")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -157,7 +159,7 @@ export function CandidateSearchInterface() {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
                   type="text"
-                  placeholder="Search by name, title, email, or skills..."
+                  placeholder={t("candidates.searchPlaceholder")}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10"
@@ -168,13 +170,13 @@ export function CandidateSearchInterface() {
             {/* Experience Filter */}
             <Select value={experienceFilter} onValueChange={setExperienceFilter}>
               <SelectTrigger>
-                <SelectValue placeholder="Experience" />
+                <SelectValue placeholder={t("candidate.experience")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Experience</SelectItem>
-                <SelectItem value="0-5">0-5 years</SelectItem>
-                <SelectItem value="5-10">5-10 years</SelectItem>
-                <SelectItem value="10+">10+ years</SelectItem>
+                <SelectItem value="all">{t("candidates.allExperience")}</SelectItem>
+                <SelectItem value="0-5">{t("candidates.experience.0-5")}</SelectItem>
+                <SelectItem value="5-10">{t("candidates.experience.5-10")}</SelectItem>
+                <SelectItem value="10+">{t("candidates.experience.10+")}</SelectItem>
               </SelectContent>
             </Select>
 
@@ -184,7 +186,7 @@ export function CandidateSearchInterface() {
                 <SelectValue placeholder="Skill" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Skills</SelectItem>
+                <SelectItem value="all">{t("candidates.allSkills")}</SelectItem>
                 {allSkills.map((skill) => (
                   <SelectItem key={skill} value={skill}>
                     {skill}
@@ -197,7 +199,7 @@ export function CandidateSearchInterface() {
           {/* Active Filters */}
           {(searchQuery || experienceFilter !== "all" || skillFilter !== "all") && (
             <div className="flex flex-wrap gap-2 mt-4">
-              <span className="text-sm text-muted-foreground">Active filters:</span>
+              <span className="text-sm text-muted-foreground">{t("candidates.activeFilters")}</span>
               {searchQuery && (
                 <Badge variant="secondary" className="gap-1">
                   Search: {searchQuery}
@@ -232,7 +234,7 @@ export function CandidateSearchInterface() {
                 }}
                 className="h-6 text-xs"
               >
-                Clear all
+                {t("candidates.clearAll")}
               </Button>
             </div>
           )}
@@ -242,25 +244,23 @@ export function CandidateSearchInterface() {
       {/* Results */}
       {loading ? (
         <div className="text-center py-12">
-          <p className="text-muted-foreground">Loading candidates...</p>
+          <p className="text-muted-foreground">{t("candidates.loading")}</p>
         </div>
       ) : filteredCandidates.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center">
             <Search className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
             <h3 className="text-lg font-semibold mb-2">
-              {candidates.length === 0 ? "No candidates yet" : "No candidates found"}
+              {candidates.length === 0 ? t("candidates.noCandidates") : t("candidates.noResults")}
             </h3>
             <p className="text-muted-foreground mb-4">
-              {candidates.length === 0
-                ? "Start building your candidate pipeline by adding candidates"
-                : "Try adjusting your search filters"}
+              {candidates.length === 0 ? t("candidates.noCandidates.subtitle") : t("candidates.noResults.subtitle")}
             </p>
             {candidates.length === 0 && (
               <Button asChild>
                 <Link href="/dashboard/candidates/new">
                   <Plus className="mr-2 h-4 w-4" />
-                  Add Your First Candidate
+                  {t("candidates.addFirst")}
                 </Link>
               </Button>
             )}
@@ -271,8 +271,10 @@ export function CandidateSearchInterface() {
           {/* Results Header */}
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="text-xl font-semibold">{filteredCandidates.length} Candidates Found</h2>
-              <p className="text-sm text-muted-foreground mt-1">Sorted by match score</p>
+              <h2 className="text-xl font-semibold">
+                {filteredCandidates.length} {t("candidates.found")}
+              </h2>
+              <p className="text-sm text-muted-foreground mt-1">{t("candidates.sortedByScore")}</p>
             </div>
           </div>
 

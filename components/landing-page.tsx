@@ -29,9 +29,9 @@ export function LandingPage() {
   ]
 
   const stats = [
-    { label: "Active Jobs", value: "10,000+", icon: Building2 },
-    { label: "Candidates", value: "500K+", icon: Users },
-    { label: "Success Rate", value: "95%", icon: TrendingUp },
+    { label: t("landing.stats.jobs"), value: "10,000+", icon: Building2 },
+    { label: t("landing.stats.candidates"), value: "500K+", icon: Users },
+    { label: t("landing.stats.success"), value: "95%", icon: TrendingUp },
   ]
 
   return (
@@ -51,19 +51,19 @@ export function LandingPage() {
               href="#features"
               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
             >
-              Features
+              {t("landing.nav.features")}
             </Link>
             <Link
               href="#pricing"
               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
             >
-              Pricing
+              {t("landing.nav.pricing")}
             </Link>
             <Link
               href="#about"
               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
             >
-              About
+              {t("landing.nav.about")}
             </Link>
           </nav>
 
@@ -147,10 +147,8 @@ export function LandingPage() {
         <div className="container mx-auto px-4">
           <Card className="max-w-4xl mx-auto bg-primary text-primary-foreground">
             <CardContent className="p-12 text-center">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to transform your hiring?</h2>
-              <p className="text-lg text-primary-foreground/90 mb-8 max-w-2xl mx-auto">
-                Join thousands of companies using TalentHub to find and hire the best talent.
-              </p>
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">{t("landing.cta.transform")}</h2>
+              <p className="text-lg text-primary-foreground/90 mb-8 max-w-2xl mx-auto">{t("landing.cta.join")}</p>
               <Button size="lg" variant="secondary" className="text-base" asChild>
                 <Link href="/auth/sign-up">
                   {t("landing.cta.primary")}
@@ -172,7 +170,7 @@ export function LandingPage() {
               </div>
               <span className="font-bold text-lg">TalentHub</span>
             </div>
-            <p className="text-sm text-muted-foreground">© 2025 TalentHub. All rights reserved.</p>
+            <p className="text-sm text-muted-foreground">{t("landing.footer.copyright")}</p>
           </div>
         </div>
       </footer>

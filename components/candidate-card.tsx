@@ -9,10 +9,10 @@ import { cn } from "@/lib/utils"
 interface Candidate {
   id: string
   name: string
-  title: string
+  title: string | null
   experience: string
-  location: string
-  skills: string[]
+  location: string | null
+  skills: string[] | null
   matchScore: number
   avatar: string
   email: string
@@ -86,7 +86,7 @@ export function CandidateCard({ candidate }: CandidateCardProps) {
           {/* Skills */}
           <div className="mb-4">
             <div className="flex flex-wrap gap-2">
-              {candidate.skills.map((skill, index) => (
+              {candidate.skills!!.map((skill, index) => (
                 <Badge key={index} variant="secondary" className="text-xs">
                   {skill}
                 </Badge>

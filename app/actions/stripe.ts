@@ -71,3 +71,25 @@ export async function getSubscriptionStatus() {
 
   return subscription
 }
+
+// Add to stripe.ts
+export async function handleStripeWebhook(request: Request) {
+  const sig = request.headers.get('stripe-signature');
+  const body = await request.text();
+
+  try {
+    const event = stripe.webhooks.constructEvent(
+      body,
+      sig!,
+      process.env.STRIPE_WEBHOOK_SECRET!
+    );
+
+    if (event.type === 'checkout.session.completed') {
+      const session = event.data.object;
+      // Update user subscription in database
+    }
+  } catch (err) {
+    console.error('Webhook error:', err);
+    return new Response('Webhook Error', { status: 400 });
+  }
+}

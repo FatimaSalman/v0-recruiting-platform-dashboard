@@ -42,7 +42,12 @@ export function CandidateSearchInterface() {
   const [experienceFilter, setExperienceFilter] = useState<string>("all")
   const [skillFilter, setSkillFilter] = useState<string>("all")
   const [allSkills, setAllSkills] = useState<string[]>([])
+  const [mounted, setMounted] = useState(false) // ← Add this state
   const { t } = useI18n()
+
+  useEffect(() => {
+    setMounted(true) // ← Set to true after component mounts (client-side)
+  }, [])
 
   useEffect(() => {
     fetchCandidates()
@@ -124,6 +129,69 @@ export function CandidateSearchInterface() {
     setFilteredCandidates(filtered)
   }
 
+  // Don't render Select components until after hydration
+  if (!mounted) {
+    return (
+      <div className="p-6 lg:p-8 max-w-7xl mx-auto">
+        {/* Header - static */}
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight mb-2">{t("candidates.title")}</h1>
+            <p className="text-muted-foreground">{t("candidates.subtitle")}</p>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" className="bg-transparent" disabled>
+              <Download className="mr-2 h-4 w-4" />
+              {t("candidates.export")}
+            </Button>
+            <Button asChild>
+              <Link href="/dashboard/candidates/new">
+                <Plus className="mr-2 h-4 w-4" />
+                {t("candidates.addCandidate")}
+              </Link>
+            </Button>
+          </div>
+        </div>
+
+        {/* Search and Filters - static placeholders */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="text-lg">{t("candidates.searchFilters")}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 animate-pulse">
+              {/* Search Input - static */}
+              <div className="md:col-span-2">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    type="text"
+                    placeholder={t("candidates.searchPlaceholder")}
+                    value={searchQuery || ""}
+                    disabled
+                    className="pl-10 bg-muted"
+                  />
+                </div>
+              </div>
+
+              {/* Experience Filter - placeholder */}
+              <div className="h-10 bg-muted rounded-md"></div>
+
+              {/* Skill Filter - placeholder */}
+              <div className="h-10 bg-muted rounded-md"></div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Loading state */}
+        <div className="text-center py-12">
+          <p className="text-muted-foreground">{t("candidates.loading")}</p>
+        </div>
+      </div>
+    )
+  }
+
+  // After hydration, render full component with Selects
   return (
     <div className="p-6 lg:p-8 max-w-7xl mx-auto">
       {/* Header */}

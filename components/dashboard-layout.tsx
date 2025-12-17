@@ -27,7 +27,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
   const navItems: NavItem[] = [
     { icon: Home, label: t("nav.dashboard"), href: "/dashboard" },
-    { icon: Search, label: t("nav.search"), href: "/dashboard/candidates" },
+    { icon: Search, label: t("nav.search"), href: "/dashboard/search" },
     { icon: Users, label: t("nav.candidates"), href: "/dashboard/candidates" },
     { icon: Briefcase, label: t("nav.jobs"), href: "/dashboard/jobs" },
     { icon: Calendar, label: t("nav.interviews"), href: "/dashboard/interviews" },

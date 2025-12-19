@@ -14,6 +14,21 @@ export interface PricingPlan {
 // IDs passed to the checkout session should be the same as IDs from this array
 export const PRICING_PLANS: PricingPlan[] = [
   {
+    id: "free-trial",
+    name: "Free Trial",
+    description: "Try our platform free for 14 days",
+    priceInCents: 0, // Free
+    currency: "usd",
+    billingPeriod: "monthly",
+    features: [
+      "Up to 5 active job postings",
+      "10 candidate profiles",
+      "Basic candidate search",
+      "Email support",
+      "1 team member",
+      "14-day free trial period",
+    ],
+  },{
     id: "starter-monthly",
     name: "Starter",
     description: "Perfect for small teams getting started",

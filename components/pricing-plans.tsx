@@ -1,3 +1,5 @@
+// components/pricing-plans.tsx - Add Free Trial plan
+
 "use client"
 
 import { Check } from "lucide-react"
@@ -9,22 +11,158 @@ import { cn } from "@/lib/utils"
 import { useState } from "react"
 import { CheckoutDialog } from "./checkout-dialog"
 import { useI18n } from "@/lib/i18n-context"
+import { useSupabase } from "@/lib/supabase/supabase-provider"
+import { useRouter } from "next/navigation"
 
 export function PricingPlans() {
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null)
   const { t } = useI18n()
+  const supabase = useSupabase()
+  const router = useRouter()
+
+  // Update your handleFreeTrialStart function to better log the error
+  const handleFreeTrialStart = async () => {
+    try {
+      const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+      if (authError) {
+        console.error("Auth error:", authError)
+        throw authError
+      }
+
+      if (!user) {
+        router.push("/auth/sign-up")
+        return
+      }
+
+      console.log("Starting free trial for user:", user.id)
+
+      // Check if user already has a subscription
+      const { data: existingSub, error: checkError } = await supabase
+        .from("subscriptions")
+        .select("*")
+        .eq("user_id", user.id)
+        .maybeSingle()
+
+      if (checkError) {
+        console.error("Check subscription error:", checkError)
+        throw checkError
+      }
+
+      if (existingSub) {
+        // User already has a subscription
+        console.log("User already has subscription:", existingSub)
+        alert("You already have an active subscription!")
+        router.push("/dashboard")
+        return
+      }
+
+      // Create a free trial subscription
+      const trialEnd = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString()
+
+      console.log("Creating subscription with data:", {
+        user_id: user.id,
+        plan_id: "free-trial",
+        status: "active",
+        current_period_start: new Date().toISOString(),
+        current_period_end: trialEnd,
+      })
+
+      const { data: newSub, error: createError } = await supabase
+        .from("subscriptions")
+        .insert([
+          {
+            user_id: user.id,
+            plan_id: "free-trial",
+            status: "active",
+            current_period_start: new Date().toISOString(),
+            current_period_end: trialEnd,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          }
+        ])
+        .select()
+        .single()
+
+      if (createError) {
+        console.error("Create subscription error details:", createError)
+        throw createError
+      }
+
+      console.log("Subscription created successfully:", newSub)
+
+      // Optional: Show success message
+      alert("Free trial started successfully! You now have 14 days of full access.")
+
+      router.push("/dashboard")
+
+    } catch (error) {
+      console.error("Error starting free trial:", error)
+      alert(`Failed to start free trial: ${(error as any)?.message || "Please try again."}`)
+    }
+  }
 
   return (
     <div className="py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
       {/* Header */}
       <div className="text-center mb-12">
         <h1 className="text-4xl font-bold tracking-tight mb-4">{t("pricing.title")}</h1>
-        <p className="text-xl text-muted-foreground max-w-2xl mx-auto">{t("pricing.subtitle")}</p>
+        <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          Start with a 14-day free trial, no credit card required
+        </p>
+      </div>
+
+      {/* Free Trial Banner */}
+      <div className="mb-12 bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 rounded-lg p-6">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+          <div>
+            <h3 className="text-2xl font-bold mb-2">Start Your Free Trial</h3>
+            <p className="text-muted-foreground">
+              Get 5 job posts, 10 candidate profiles, and full platform access for 14 days
+            </p>
+          </div>
+          <Button size="lg" onClick={handleFreeTrialStart}>
+            Start Free Trial
+          </Button>
+        </div>
       </div>
 
       {/* Pricing cards */}
-      <div className="grid md:grid-cols-3 gap-8 mb-12">
-        {PRICING_PLANS.map((plan) => (
+      <div className="grid md:grid-cols-4 gap-8 mb-12">
+        {/* Free Trial Card */}
+        <Card className="p-8 relative border-2 border-primary">
+          <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary">Free Trial</Badge>
+          <div className="mb-6">
+            <h3 className="text-2xl font-bold mb-2">Free Trial</h3>
+            <p className="text-muted-foreground text-sm mb-4">Try our platform free for 14 days</p>
+            <div className="flex items-baseline gap-2">
+              <span className="text-4xl font-bold">$0</span>
+              <span className="text-muted-foreground">/14 days</span>
+            </div>
+          </div>
+
+          <Button
+            className="w-full mb-6"
+            variant="outline"
+            onClick={handleFreeTrialStart}
+          >
+            Start Free Trial
+          </Button>
+
+          <div className="space-y-3">
+            {PRICING_PLANS.find(p => p.id === "free-trial")?.features.map((feature, index) => (
+              <div key={index} className="flex items-start gap-3">
+                <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <Check className="w-3 h-3 text-primary" />
+                </div>
+                <span className="text-sm">{feature}</span>
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        {/* Other plans */}
+        {PRICING_PLANS.filter(p => p.id !== "free-trial").map((plan) => (
           <Card key={plan.id} className={cn("p-8 relative", plan.popular && "border-primary shadow-lg scale-105")}>
             {plan.popular && (
               <Badge className="absolute -top-3 left-1/2 -translate-x-1/2">{t("pricing.popular")}</Badge>
@@ -44,7 +182,7 @@ export function PricingPlans() {
               variant={plan.popular ? "default" : "outline"}
               onClick={() => setSelectedPlan(plan.id)}
             >
-              {t("pricing.getStarted")}
+              {plan.id.includes("free") ? "Get Started" : `Subscribe for ${formatPrice(plan.priceInCents, plan.currency)}/month`}
             </Button>
 
             <div className="space-y-3">
@@ -72,7 +210,7 @@ export function PricingPlans() {
       </div>
 
       {/* Checkout Dialog */}
-      {selectedPlan && (
+      {selectedPlan && selectedPlan !== "free-trial" && (
         <CheckoutDialog
           planId={selectedPlan}
           open={!!selectedPlan}

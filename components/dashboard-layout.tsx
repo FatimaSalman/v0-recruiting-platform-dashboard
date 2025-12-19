@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState, useEffect } from "react"
-import { Home, Search, Users, Briefcase, Calendar, FileText, Settings, Menu, X, LogOut, CreditCard } from "lucide-react"
+import { Home, Search, Users, Briefcase, Calendar, FileText, Settings, Menu, X, LogOut, CreditCard, XCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { useSupabase } from "@/lib/supabase/supabase-provider"
@@ -52,7 +52,10 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   }
 
   return (
+
     <div className="flex h-screen overflow-hidden bg-background">
+
+
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />
@@ -125,6 +128,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
       {/* Main content */}
       <div className="flex-1 flex flex-col overflow-hidden">
+
         {/* Mobile header */}
         <header className="lg:hidden h-16 border-b border-border bg-card flex items-center px-4 justify-between">
           <div className="flex items-center">

@@ -101,12 +101,16 @@ export function LandingPage({ initialStats }: LandingPageProps) {
       <section className="py-20 lg:py-32">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
+            <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium mb-6">
+              <span>✨</span>
+              <span>14-Day Free Trial - No Credit Card Required</span>
+            </div>
             <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6 text-balance">{t("landing.title")}</h1>
-            <p className="text-xl text-muted-foreground mb-8 text-pretty max-w-2xl mx-auto">{t("landing.subtitle")}</p>
+            <p className="text-xl text-muted-foreground mb-8 text-pretty max-w-2xl mx-auto">{t("landing.subtitle")} Start with 5 free job posts and 10 candidate profiles.</p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Button size="lg" className="text-base" asChild>
                 <Link href="/auth/sign-up">
-                  {t("landing.cta.primary")}
+                  Start Free Trial
                   <ArrowRight className="ms-2 w-5 h-5" />
                 </Link>
               </Button>
@@ -114,6 +118,9 @@ export function LandingPage({ initialStats }: LandingPageProps) {
                 <Link href="#features">{t("landing.cta.secondary")}</Link>
               </Button>
             </div>
+            <p className="text-sm text-muted-foreground mt-4">
+              No credit card required • Cancel anytime
+            </p>
           </div>
 
           {/* Stats */}

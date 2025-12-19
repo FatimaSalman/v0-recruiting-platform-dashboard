@@ -266,6 +266,49 @@ const translations = {
     "about.values.transparency.desc": "Clear pricing and honest communication",
     "about.values.equality": "Equality",
     "about.values.equality.desc": "Fair opportunities for all candidates",
+
+    // Settings
+    "settings.title": "Settings",
+    "settings.subtitle": "Manage your account preferences and settings",
+    "settings.save": "Save Changes",
+    "settings.saving": "Saving...",
+    "settings.saveSuccess": "Profile updated successfully!",
+    "settings.saveError": "Error saving profile. Please try again.",
+    "settings.configure": "Configure",
+
+    "settings.profile.title": "Profile Information",
+    "settings.profile.description": "Update your personal and company information",
+    "settings.company": "Company Name",
+    "settings.companyPlaceholder": "Your company name",
+    "settings.role": "Your Role",
+    "settings.rolePlaceholder": "e.g., Hiring Manager, Recruiter",
+
+    "settings.language.title": "Language & Region",
+    "settings.language.description": "Choose your preferred language",
+    "settings.language.select": "Select Language",
+    "settings.language.note": "Changes will be applied immediately to your interface.",
+
+    "settings.notifications.title": "Notifications",
+    "settings.notifications.description": "Manage how you receive updates and alerts",
+    "settings.notifications.email": "Email Notifications",
+    "settings.notifications.emailDesc": "Receive email updates about candidates and interviews",
+    "settings.notifications.application": "Application Alerts",
+    "settings.notifications.applicationDesc": "Get notified when candidates apply to your jobs",
+
+    "settings.account.title": "Account Settings",
+    "settings.account.description": "Manage your account security and data",
+    "settings.account.delete": "Delete Account",
+    "settings.account.deleteWarning": "This action cannot be undone. All your data will be permanently deleted.",
+    "settings.account.deleteButton": "Delete My Account",
+    "settings.account.deleteSuccess": "Account deleted successfully!",
+    "settings.account.deleteError": "Error deleting account. Please try again.",
+
+    "settings.account.confirmTitle": "Are you absolutely sure?",
+    "settings.account.confirmDescription": "This action cannot be undone. This will permanently delete your account and remove all your data from our servers.",
+    "settings.account.cancel": "Cancel",
+    "settings.account.confirmDelete": "Yes, delete my account",
+    "settings.account.deleting": "Deleting...",
+
   },
   ar: {
     // Navigation
@@ -521,6 +564,48 @@ const translations = {
     "about.values.transparency.desc": "أسعار واضحة وتواصل صادق",
     "about.values.equality": "المساواة",
     "about.values.equality.desc": "فرص عادلة لجميع المرشحين",
+
+    // Settings
+    "settings.title": "الإعدادات",
+    "settings.subtitle": "إدارة تفضيلات وإعدادات حسابك",
+    "settings.save": "حفظ التغييرات",
+    "settings.saving": "جاري الحفظ...",
+    "settings.saveSuccess": "تم تحديث الملف الشخصي بنجاح!",
+    "settings.saveError": "خطأ في حفظ الملف الشخصي. الرجاء المحاولة مرة أخرى.",
+    "settings.configure": "تكوين",
+
+    "settings.profile.title": "معلومات الملف الشخصي",
+    "settings.profile.description": "تحديث معلوماتك الشخصية والمعلومات الخاصة بالشركة",
+    "settings.company": "اسم الشركة",
+    "settings.companyPlaceholder": "اسم شركتك",
+    "settings.role": "دورك",
+    "settings.rolePlaceholder": "مثال: مدير التوظيف، مسؤول التوظيف",
+
+    "settings.language.title": "اللغة والمنطقة",
+    "settings.language.description": "اختر لغتك المفضلة",
+    "settings.language.select": "اختر اللغة",
+    "settings.language.note": "سيتم تطبيق التغييرات فوراً على واجهتك.",
+
+    "settings.notifications.title": "الإشعارات",
+    "settings.notifications.description": "إدارة كيفية استلام التحديثات والتنبيهات",
+    "settings.notifications.email": "إشعارات البريد الإلكتروني",
+    "settings.notifications.emailDesc": "تلقي تحديثات البريد الإلكتروني حول المرشحين والمقابلات",
+    "settings.notifications.application": "تنبيهات الطلبات",
+    "settings.notifications.applicationDesc": "تلقي الإشعارات عندما يتقدم المرشحون لوظائفك",
+
+    "settings.account.title": "إعدادات الحساب",
+    "settings.account.description": "إدارة أمان حسابك وبياناتك",
+    "settings.account.delete": "حذف الحساب",
+    "settings.account.deleteWarning": "لا يمكن التراجع عن هذا الإجراء. سيتم حذف جميع بياناتك نهائياً.",
+    "settings.account.deleteButton": "حذف حسابي",
+    "settings.account.deleteSuccess": "تم حذف الحساب بنجاح!",
+    "settings.account.deleteError": "خطأ في حذف الحساب. الرجاء المحاولة مرة أخرى.",
+
+    "settings.account.confirmTitle": "هل أنت متأكد تمامًا؟",
+    "settings.account.confirmDescription": "لا يمكن التراجع عن هذا الإجراء. سيتم حذف حسابك بشكل دائم وإزالة جميع بياناتك من خوادمنا.",
+    "settings.account.cancel": "إلغاء",
+    "settings.account.confirmDelete": "نعم، احذف حسابي",
+    "settings.account.deleting": "جاري الحذف...",
   },
 }
 
@@ -551,7 +636,9 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const t = (key: string): string => {
-    return translations[locale][key as keyof (typeof translations)["en"]] || key
+    const k = key as keyof (typeof translations)["en"]
+    // Fallback to English if translation is missing in current locale
+    return translations[locale][k] || translations["en"][k] || key
   }
 
   return <I18nContext.Provider value={{ locale, direction, setLocale, t }}>{children}</I18nContext.Provider>

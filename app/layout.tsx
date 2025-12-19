@@ -1,7 +1,7 @@
 'use client'
 
 import type React from "react"
-import type { Metadata } from "next"
+// import type { Metadata } from "next"
 import { Geist, Geist_Mono } from 'next/font/google'
 import { Analytics } from "@vercel/analytics/next"
 import { Providers } from "./providers"
@@ -59,19 +59,11 @@ export default function RootLayout({
 
   return (
     <html suppressHydrationWarning>
-      <body className={`${geist.className} ${geistMono.className} font-sans antialiased`}>
-        {isClient ? (
-          <>
-            <Providers>{children}</Providers>
-            <Analytics />
-          </>
-        ) : (
-          // Server-side rendering fallback without extension interference
-          <>
-            <Providers>{children}</Providers>
-            <Analytics />
-          </>
-        )}
+      <body className={`${geist.className} ${geistMono.className} font-sans antialiased`}
+        suppressHydrationWarning
+      >
+        <Providers>{children}</Providers>
+        <Analytics />
       </body>
     </html>
   );

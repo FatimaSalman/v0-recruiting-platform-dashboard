@@ -7,8 +7,26 @@ import { LanguageToggle } from "@/components/language-toggle"
 import { useI18n } from "@/lib/i18n-context"
 import Link from "next/link"
 
-export function LandingPage() {
+interface LandingStats {
+  totalJobs: number
+  totalCandidates: number
+  successRate: number
+}
+
+interface LandingPageProps {
+  initialStats?: LandingStats
+}
+
+
+export function LandingPage({ initialStats }: LandingPageProps) {
   const { t } = useI18n()
+
+  // Use initial stats if provided, otherwise use defaults
+  const stats: LandingStats = initialStats || {
+    totalJobs: 10234,
+    totalCandidates: 523678,
+    successRate: 95 //default value,
+  }
 
   const features = [
     {
@@ -28,10 +46,10 @@ export function LandingPage() {
     },
   ]
 
-  const stats = [
-    { label: t("landing.stats.jobs"), value: "10,000+", icon: Building2 },
-    { label: t("landing.stats.candidates"), value: "500K+", icon: Users },
-    { label: t("landing.stats.success"), value: "95%", icon: TrendingUp },
+  const statsDisplay = [
+    { label: t("landing.stats.jobs"), value: `${stats.totalJobs.toLocaleString()}+`, icon: Building2 },
+    { label: t("landing.stats.candidates"), value: `${stats.totalCandidates.toLocaleString()}+`, icon: Users },
+    { label: t("landing.stats.success"), value: `${stats.successRate}%`, icon: TrendingUp },
   ]
 
   return (
@@ -100,7 +118,7 @@ export function LandingPage() {
 
           {/* Stats */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mt-20">
-            {stats.map((stat, index) => {
+            {statsDisplay.map((stat, index) => {
               const Icon = stat.icon
               return (
                 <Card key={index} className="text-center">

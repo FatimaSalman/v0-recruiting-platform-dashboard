@@ -13,6 +13,8 @@ import { CheckoutDialog } from "./checkout-dialog"
 import { useI18n } from "@/lib/i18n-context"
 import { useSupabase } from "@/lib/supabase/supabase-provider"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
+import { ArrowLeft } from "lucide-react"
 
 export function PricingPlans() {
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null)
@@ -104,6 +106,12 @@ export function PricingPlans() {
 
   return (
     <div className="py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+      <Button asChild>
+        <Link href="/dashboard">
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back to Dashboard
+        </Link>
+      </Button>
       {/* Header */}
       <div className="text-center mb-12">
         <h1 className="text-4xl font-bold tracking-tight mb-4">{t("pricing.title")}</h1>

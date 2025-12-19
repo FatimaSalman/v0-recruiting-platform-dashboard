@@ -13,7 +13,11 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { X } from "lucide-react"
 
-export function AddCandidateForm() {
+interface AddCandidateFormProps {
+  initialJobId?: string
+}
+
+export function AddCandidateForm({ initialJobId }: AddCandidateFormProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -45,7 +49,7 @@ export function AddCandidateForm() {
 
       if (!user) throw new Error("Not authenticated")
 
-      const { error: insertError } = await supabase.from("candidates").insert({
+      const candidateData = {
         user_id: user.id,
         name: formData.name,
         email: formData.email,
@@ -57,11 +61,33 @@ export function AddCandidateForm() {
         linkedin_url: formData.linkedin_url || null,
         portfolio_url: formData.portfolio_url || null,
         notes: formData.notes || null,
-      })
+      }
 
-      if (insertError) throw insertError
+      const { data: candidate, error: candidateError } = await supabase
+        .from("candidates")
+        .insert(candidateData)
+        .select()
+        .single()
+      if (candidateError) throw candidateError
 
-      router.push("/dashboard/candidates")
+      // If initialJobId is provided, link candidate to the job
+      if (initialJobId && candidate) {
+        const { error: linkError } = await supabase.from("applications").insert({
+          job_id: initialJobId,
+          candidate_id: candidate.id,
+          user_id: user.id,
+          status: 'applied'
+        })
+
+        if (linkError) throw linkError
+      }
+
+      // Redirect to candidate detail page after successful addition
+      router.push(initialJobId ? `/dashboard/jobs/${initialJobId}/candidates` :
+        "/dashboard/candidates")
+
+      // Alternatively, redirect to candidates list
+      // router.push("/dashboard/candidates")
     } catch (err) {
       console.error("[v0] Error adding candidate:", err)
       setError(err instanceof Error ? err.message : "An error occurred")

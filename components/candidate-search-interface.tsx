@@ -25,6 +25,12 @@ interface Candidate {
   linkedin_url: string | null
   portfolio_url: string | null
   notes: string | null
+  status: 'active' | 'inactive' | 'placed' | 'withdrawn' // Add status
+  availability: 'immediate' | '2-weeks' | '1-month' | '3-months' | 'not-available' // Add availability
+  current_salary: number | null
+  expected_salary: number | null
+  notice_period: number | null
+  last_contacted: string | null
   created_at: string
 }
 
@@ -41,12 +47,14 @@ export function CandidateSearchInterface() {
   const [loading, setLoading] = useState(true)
   const [experienceFilter, setExperienceFilter] = useState<string>("all")
   const [skillFilter, setSkillFilter] = useState<string>("all")
+  const [statusFilter, setStatusFilter] = useState<string>("all") // Add status filter
+  const [availabilityFilter, setAvailabilityFilter] = useState<string>("all") // Add availability filter
   const [allSkills, setAllSkills] = useState<string[]>([])
-  const [mounted, setMounted] = useState(false) // ← Add this state
+  const [mounted, setMounted] = useState(false)
   const { t } = useI18n()
 
   useEffect(() => {
-    setMounted(true) // ← Set to true after component mounts (client-side)
+    setMounted(true)
   }, [])
 
   useEffect(() => {
@@ -55,8 +63,10 @@ export function CandidateSearchInterface() {
 
   useEffect(() => {
     filterCandidates()
-  }, [searchQuery, experienceFilter, skillFilter, candidates])
+  }, [searchQuery, experienceFilter, skillFilter, statusFilter, availabilityFilter, candidates])
 
+
+  // Update the fetchCandidates function in CandidateSearchInterface
   async function fetchCandidates() {
     const supabase = createClient()
 
@@ -68,11 +78,14 @@ export function CandidateSearchInterface() {
       // Transform candidates to match the card component format
       const transformedCandidates: CandidateWithScore[] = (data || []).map((candidate) => ({
         ...candidate,
+        status: candidate.status || 'active', // Default to active if not set
+        availability: candidate.availability || 'immediate', // Default to immediate if not set
         experience: candidate.experience_years
           ? `${candidate.experience_years} year${candidate.experience_years > 1 ? "s" : ""}`
           : "Not specified",
         matchScore: Math.floor(Math.random() * 30) + 70, // Mock match score (70-100)
         avatar: `/placeholder.svg?height=80&width=80&query=professional+person`,
+        lastContacted: candidate.last_contacted || null, // Map last_contacted to lastContacted
       }))
 
       setCandidates(transformedCandidates)
@@ -89,6 +102,22 @@ export function CandidateSearchInterface() {
     } finally {
       setLoading(false)
     }
+  }
+
+  // Update the CandidateCard mapping in the render section
+  {
+    filteredCandidates.map((candidate) => (
+      <CandidateCard
+        key={candidate.id}
+        candidate={{
+          ...candidate,
+          lastContacted: candidate.last_contacted || null,
+          phone: candidate.phone || null,
+          linkedin_url: candidate.linkedin_url || null,
+          portfolio_url: candidate.portfolio_url || null,
+        }}
+      />
+    ))
   }
 
   function filterCandidates() {
@@ -108,7 +137,6 @@ export function CandidateSearchInterface() {
 
     // Experience filter
     if (experienceFilter !== "all") {
-      const years = Number.parseInt(experienceFilter)
       filtered = filtered.filter((candidate) => {
         if (!candidate.experience_years) return false
         if (experienceFilter === "10+") return candidate.experience_years >= 10
@@ -121,6 +149,16 @@ export function CandidateSearchInterface() {
     // Skill filter
     if (skillFilter !== "all") {
       filtered = filtered.filter((candidate) => candidate.skills?.includes(skillFilter))
+    }
+
+    // Status filter
+    if (statusFilter !== "all") {
+      filtered = filtered.filter((candidate) => candidate.status === statusFilter)
+    }
+
+    // Availability filter
+    if (availabilityFilter !== "all") {
+      filtered = filtered.filter((candidate) => candidate.availability === availabilityFilter)
     }
 
     // Sort by match score
@@ -159,7 +197,7 @@ export function CandidateSearchInterface() {
             <CardTitle className="text-lg">{t("candidates.searchFilters")}</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 animate-pulse">
+            <div className="grid grid-cols-1 md:grid-cols-6 gap-4 animate-pulse">
               {/* Search Input - static */}
               <div className="md:col-span-2">
                 <div className="relative">
@@ -178,6 +216,12 @@ export function CandidateSearchInterface() {
               <div className="h-10 bg-muted rounded-md"></div>
 
               {/* Skill Filter - placeholder */}
+              <div className="h-10 bg-muted rounded-md"></div>
+
+              {/* Status Filter - placeholder */}
+              <div className="h-10 bg-muted rounded-md"></div>
+
+              {/* Availability Filter - placeholder */}
               <div className="h-10 bg-muted rounded-md"></div>
             </div>
           </CardContent>
@@ -220,9 +264,9 @@ export function CandidateSearchInterface() {
           <CardTitle className="text-lg">{t("candidates.searchFilters")}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
             {/* Search Input */}
-            <div className="md:col-span-2">
+            <div className="md:col-span-2 lg:col-span-2">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
@@ -236,76 +280,135 @@ export function CandidateSearchInterface() {
             </div>
 
             {/* Experience Filter */}
-            <Select value={experienceFilter} onValueChange={setExperienceFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder={t("candidate.experience")} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">{t("candidates.allExperience")}</SelectItem>
-                <SelectItem value="0-5">{t("candidates.experience.0-5")}</SelectItem>
-                <SelectItem value="5-10">{t("candidates.experience.5-10")}</SelectItem>
-                <SelectItem value="10+">{t("candidates.experience.10+")}</SelectItem>
-              </SelectContent>
-            </Select>
+            <div>
+              <Select value={experienceFilter} onValueChange={setExperienceFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder={t("candidate.experience")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">{t("candidates.allExperience")}</SelectItem>
+                  <SelectItem value="0-5">{t("candidates.experience.0-5")}</SelectItem>
+                  <SelectItem value="5-10">{t("candidates.experience.5-10")}</SelectItem>
+                  <SelectItem value="10+">{t("candidates.experience.10+")}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
             {/* Skill Filter */}
-            <Select value={skillFilter} onValueChange={setSkillFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder="Skill" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">{t("candidates.allSkills")}</SelectItem>
-                {allSkills.map((skill) => (
-                  <SelectItem key={skill} value={skill}>
-                    {skill}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div>
+              <Select value={skillFilter} onValueChange={setSkillFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Skill" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">{t("candidates.allSkills")}</SelectItem>
+                  {allSkills.map((skill) => (
+                    <SelectItem key={skill} value={skill}>
+                      {skill}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Status Filter */}
+            <div>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="inactive">Inactive</SelectItem>
+                  <SelectItem value="placed">Placed</SelectItem>
+                  <SelectItem value="withdrawn">Withdrawn</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Availability Filter */}
+            <div>
+              <Select value={availabilityFilter} onValueChange={setAvailabilityFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Availability" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Availability</SelectItem>
+                  <SelectItem value="immediate">Immediate</SelectItem>
+                  <SelectItem value="2-weeks">2 Weeks</SelectItem>
+                  <SelectItem value="1-month">1 Month</SelectItem>
+                  <SelectItem value="3-months">3 Months</SelectItem>
+                  <SelectItem value="not-available">Not Available</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           {/* Active Filters */}
-          {(searchQuery || experienceFilter !== "all" || skillFilter !== "all") && (
-            <div className="flex flex-wrap gap-2 mt-4">
-              <span className="text-sm text-muted-foreground">{t("candidates.activeFilters")}</span>
-              {searchQuery && (
-                <Badge variant="secondary" className="gap-1">
-                  Search: {searchQuery}
-                  <button onClick={() => setSearchQuery("")} className="ml-1 hover:text-destructive">
-                    ×
-                  </button>
-                </Badge>
-              )}
-              {experienceFilter !== "all" && (
-                <Badge variant="secondary" className="gap-1">
-                  Experience: {experienceFilter}
-                  <button onClick={() => setExperienceFilter("all")} className="ml-1 hover:text-destructive">
-                    ×
-                  </button>
-                </Badge>
-              )}
-              {skillFilter !== "all" && (
-                <Badge variant="secondary" className="gap-1">
-                  Skill: {skillFilter}
-                  <button onClick={() => setSkillFilter("all")} className="ml-1 hover:text-destructive">
-                    ×
-                  </button>
-                </Badge>
-              )}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setSearchQuery("")
-                  setExperienceFilter("all")
-                  setSkillFilter("all")
-                }}
-                className="h-6 text-xs"
-              >
-                {t("candidates.clearAll")}
-              </Button>
-            </div>
-          )}
+          {(searchQuery ||
+            experienceFilter !== "all" ||
+            skillFilter !== "all" ||
+            statusFilter !== "all" ||
+            availabilityFilter !== "all") && (
+              <div className="flex flex-wrap gap-2 mt-4">
+                <span className="text-sm text-muted-foreground">{t("candidates.activeFilters")}</span>
+                {searchQuery && (
+                  <Badge variant="secondary" className="gap-1">
+                    Search: {searchQuery}
+                    <button onClick={() => setSearchQuery("")} className="ml-1 hover:text-destructive">
+                      ×
+                    </button>
+                  </Badge>
+                )}
+                {experienceFilter !== "all" && (
+                  <Badge variant="secondary" className="gap-1">
+                    Experience: {experienceFilter}
+                    <button onClick={() => setExperienceFilter("all")} className="ml-1 hover:text-destructive">
+                      ×
+                    </button>
+                  </Badge>
+                )}
+                {skillFilter !== "all" && (
+                  <Badge variant="secondary" className="gap-1">
+                    Skill: {skillFilter}
+                    <button onClick={() => setSkillFilter("all")} className="ml-1 hover:text-destructive">
+                      ×
+                    </button>
+                  </Badge>
+                )}
+                {statusFilter !== "all" && (
+                  <Badge variant="secondary" className="gap-1">
+                    Status: {statusFilter}
+                    <button onClick={() => setStatusFilter("all")} className="ml-1 hover:text-destructive">
+                      ×
+                    </button>
+                  </Badge>
+                )}
+                {availabilityFilter !== "all" && (
+                  <Badge variant="secondary" className="gap-1">
+                    Availability: {availabilityFilter}
+                    <button onClick={() => setAvailabilityFilter("all")} className="ml-1 hover:text-destructive">
+                      ×
+                    </button>
+                  </Badge>
+                )}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setSearchQuery("")
+                    setExperienceFilter("all")
+                    setSkillFilter("all")
+                    setStatusFilter("all")
+                    setAvailabilityFilter("all")
+                  }}
+                  className="h-6 text-xs"
+                >
+                  {t("candidates.clearAll")}
+                </Button>
+              </div>
+            )}
         </CardContent>
       </Card>
 
@@ -344,14 +447,41 @@ export function CandidateSearchInterface() {
               </h2>
               <p className="text-sm text-muted-foreground mt-1">{t("candidates.sortedByScore")}</p>
             </div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">
+                Showing {filteredCandidates.length} of {candidates.length} candidates
+              </span>
+            </div>
           </div>
 
           {/* Candidate Cards */}
           <div className="grid gap-4">
             {filteredCandidates.map((candidate) => (
-              <CandidateCard key={candidate.id} candidate={candidate} />
+              <CandidateCard key={candidate.id} candidate={{
+                ...candidate,
+                status: candidate.status || 'active',
+                availability: candidate.availability || 'immediate',
+              }} />
             ))}
           </div>
+
+          {/* Pagination (optional) */}
+          {filteredCandidates.length > 10 && (
+            <div className="flex justify-center items-center gap-2 mt-8">
+              <Button variant="outline" size="sm" disabled>
+                Previous
+              </Button>
+              <div className="flex items-center gap-1">
+                <Button variant="outline" size="sm" className="w-8 h-8 p-0">1</Button>
+                <Button variant="ghost" size="sm" className="w-8 h-8 p-0">2</Button>
+                <Button variant="ghost" size="sm" className="w-8 h-8 p-0">3</Button>
+                <span className="text-muted-foreground">...</span>
+              </div>
+              <Button variant="outline" size="sm">
+                Next
+              </Button>
+            </div>
+          )}
         </>
       )}
     </div>

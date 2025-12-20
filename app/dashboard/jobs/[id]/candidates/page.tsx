@@ -25,11 +25,12 @@ import {
     Filter,
     Download,
     UserCheck,
-    XCircle
+    XCircle,
+    UserPlus,
 } from "lucide-react"
 import Link from "next/link"
 import { format } from "date-fns"
-import { CandidateCard } from "@/components/candidate-card"
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent ,DropdownMenuItem} from "@/components/ui/dropdown-menu"
 
 interface Job {
     id: string
@@ -292,12 +293,28 @@ export default function JobCandidatesPage() {
                                 <Download className="mr-2 h-4 w-4" />
                                 Export
                             </Button>
-                            <Button asChild>
-                                <Link href={`/dashboard/candidates/new?jobId=${jobId}`}>
-                                    <Users className="mr-2 h-4 w-4" />
-                                    Add Candidate
-                                </Link>
-                            </Button>
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button>
+                                        <Users className="mr-2 h-4 w-4" />
+                                        Add Candidate
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent>
+                                    <DropdownMenuItem asChild>
+                                        <Link href={`/dashboard/candidates/new?jobId=${jobId}`}>
+                                            <UserPlus className="mr-2 h-4 w-4" />
+                                            Add New Candidate
+                                        </Link>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem asChild>
+                                        <Link href={`/dashboard/jobs/${jobId}/select-candidate`}>
+                                            <Users className="mr-2 h-4 w-4" />
+                                            Select Existing Candidate
+                                        </Link>
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
                         </div>
                     </div>
                 </div>

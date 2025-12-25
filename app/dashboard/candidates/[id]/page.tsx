@@ -46,6 +46,7 @@ import {
 import { MoreVertical, Tag, UserMinus } from "lucide-react"
 import type { Metadata } from "next"
 import { createClient } from "@/lib/supabase/server"
+import { CandidateCommunication } from "@/components/candidate-communication"
 
 interface Props {
     params: Promise<{ id: string }>
@@ -86,6 +87,18 @@ export default function CandidateProfilePage() {
     const supabase = useSupabase()
     const { t } = useI18n()
     const candidateId = params.id as string
+
+    const tabs = ['overview', 'applications', 'interviews', 'notes', 'communications']
+
+    // Add this tab content
+    {
+        activeTab === 'communications' && (
+            <CandidateCommunication
+                candidateId={candidateId}
+                candidateName={candidate.name}
+            />
+        )
+    }
 
     useEffect(() => {
         fetchCandidateDetails()

@@ -43,7 +43,34 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { MoreVertical, Tag, UserPlus, UserMinus } from "lucide-react"
+import { MoreVertical, Tag, UserMinus } from "lucide-react"
+import type { Metadata } from "next"
+import { createClient } from "@/lib/supabase/server"
+
+interface Props {
+    params: Promise<{ id: string }>
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+    const { id } = await params
+    const supabase = await createClient()
+
+    try {
+        const { data: candidate } = await supabase
+            .from("candidates")
+            .select("name")
+            .eq("id", id)
+            .single()
+
+        return {
+            title: `${candidate?.name || 'Candidate'} - TalentHub`,
+        }
+    } catch {
+        return {
+            title: "Candidate - TalentHub",
+        }
+    }
+}
 
 export default function CandidateProfilePage() {
     const [candidate, setCandidate] = useState<any>(null)

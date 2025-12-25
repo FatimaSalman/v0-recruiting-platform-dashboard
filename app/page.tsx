@@ -1,10 +1,16 @@
 // app/page.tsx
+import type { Metadata } from "next"
 import { LandingPage } from "@/components/landing-page"
 import { createServerClient } from "@/lib/supabase/server"
 
+export const metadata: Metadata = {
+  title: "TalentHub - Find Top Talent Faster",
+  description: "AI-powered recruiting platform that connects you with the best candidates",
+}
+
 async function getLandingStats() {
   const supabase = await createServerClient()
-  
+
   try {
     // Fetch total jobs count (public jobs)
     const { count: jobsCount } = await supabase
@@ -24,7 +30,7 @@ async function getLandingStats() {
 
     let successRate = 95 // Default
     if (applicationsData && applicationsData.length > 0) {
-      const successfulApps = applicationsData.filter(app => 
+      const successfulApps = applicationsData.filter(app =>
         app.status === "hired" || app.status === "offer"
       ).length
       successRate = Math.round((successfulApps / applicationsData.length) * 100)

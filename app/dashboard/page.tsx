@@ -3,6 +3,11 @@ import { redirect } from "next/navigation"
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { DashboardOverview } from "@/components/dashboard-overview"
 import { SubscriptionSuccess } from "@/components/subscription-success"
+import type { Metadata } from "next"
+
+export const metadata: Metadata = {
+  title: "Dashboard - TalentHub",
+}
 
 export default async function DashboardPage({ searchParams }: { searchParams: Promise<{ session_id?: string }> }) {
   const supabase = await createClient()

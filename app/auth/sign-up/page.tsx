@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useSupabase } from "@/lib/supabase/supabase-provider"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -12,6 +11,7 @@ import { LanguageToggle } from "@/components/language-toggle"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
+
 
 export default function SignUpPage() {
   const [email, setEmail] = useState("")

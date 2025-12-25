@@ -1,11 +1,11 @@
 <svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
   <style>
-    .background { fill: #10B981; } /* Green background */
-    .foreground { fill: white; }   /* White icon */
+    .background { fill: #0A8159; } /* Darker green for dark mode */
+    .foreground { fill: white; }
   </style>
   <rect class="background" width="180" height="180" rx="37"/>
   <g style="transform: scale(85%); transform-origin: center">
-    <!-- Your logo design here -->
+    <!-- Same logo design as light mode -->
     <path class="foreground" d="M90 45L135 90L90 135L45 90L90 45Z" fill-rule="evenodd"/>
     <path class="foreground" d="M90 60L120 90L90 120L60 90L90 60Z" fill-rule="evenodd"/>
   </g>

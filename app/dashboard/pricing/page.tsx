@@ -1,4 +1,9 @@
 import { PricingPlans } from "@/components/pricing-plans"
+import type { Metadata } from "next"
+
+export const metadata: Metadata = {
+  title: "Pricing - TalentHub",
+}
 
 export default function PricingPage() {
   return (

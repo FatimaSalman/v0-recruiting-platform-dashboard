@@ -14,10 +14,6 @@ import {
     MapPin,
     Briefcase,
     Calendar,
-    DollarSign,
-    Linkedin,
-    Globe,
-    FileText,
     Star,
     Edit,
     ArrowLeft,
@@ -31,11 +27,12 @@ import {
     CheckCircle,
     ExternalLink,
     Award,
-    GraduationCap,
-    Languages,
+    Globe,
+    FileText,
+    Linkedin,
 } from "lucide-react"
 import Link from "next/link"
-import { formatDistanceToNow } from "date-fns"
+import { formatDistanceToNow, format } from "date-fns"
 import { useI18n } from "@/lib/i18n-context"
 import {
     DropdownMenu,
@@ -44,34 +41,16 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { MoreVertical, Tag, UserMinus } from "lucide-react"
-import type { Metadata } from "next"
-import { createClient } from "@/lib/supabase/server"
 import { CandidateCommunication } from "@/components/candidate-communication"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
+import { Label } from "@/components/ui/label"
 
-interface Props {
-    params: Promise<{ id: string }>
-}
-
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-    const { id } = await params
-    const supabase = await createClient()
-
-    try {
-        const { data: candidate } = await supabase
-            .from("candidates")
-            .select("name")
-            .eq("id", id)
-            .single()
-
-        return {
-            title: `${candidate?.name || 'Candidate'} - TalentHub`,
-        }
-    } catch {
-        return {
-            title: "Candidate - TalentHub",
-        }
-    }
-}
 
 export default function CandidateProfilePage() {
     const [candidate, setCandidate] = useState<any>(null)
@@ -90,16 +69,6 @@ export default function CandidateProfilePage() {
 
     const tabs = ['overview', 'applications', 'interviews', 'notes', 'communications']
 
-    // Add this tab content
-    {
-        activeTab === 'communications' && (
-            <CandidateCommunication
-                candidateId={candidateId}
-                candidateName={candidate.name}
-            />
-        )
-    }
-
     useEffect(() => {
         fetchCandidateDetails()
     }, [candidateId])
@@ -116,30 +85,41 @@ export default function CandidateProfilePage() {
 
             if (error) throw error
 
-            // Fetch additional data like applications, interviews
-            const [applicationsData, interviewsData] = await Promise.all([
-                supabase
-                    .from("applications")
-                    .select(`
-            id,
-            status,
-            match_score,
-            applied_at,
-            jobs(title, department)
-          `)
-                    .eq("candidate_id", candidateId),
-                supabase
-                    .from("interviews")
-                    .select("*")
-                    .eq("candidate_id", candidateId)
-                    .order("scheduled_at", { ascending: false })
-            ])
+            // Fetch applications with job details
+            const { data: applicationsData } = await supabase
+                .from("applications")
+                .select(`
+                    id,
+                    status,
+                    match_score,
+                    applied_at,
+                    jobs (
+                        id,
+                        title,
+                        department,
+                        status
+                    )
+                `)
+                .eq("candidate_id", candidateId)
+                .order("applied_at", { ascending: false })
+
+            // Fetch interviews
+            const { data: interviewsData } = await supabase
+                .from("interviews")
+                .select("*")
+                .eq("candidate_id", candidateId)
+                .order("scheduled_at", { ascending: false })
 
             setCandidate({
                 ...data,
-                applications: applicationsData.data || [],
-                interviews: interviewsData.data || [],
+                applications: applicationsData || [],
+                interviews: interviewsData || [],
             })
+
+            // Load existing notes
+            if (data.notes) {
+                setNotes(data.notes)
+            }
 
         } catch (error) {
             console.error("Error fetching candidate details:", error)
@@ -163,9 +143,8 @@ export default function CandidateProfilePage() {
 
             if (checkError) throw checkError
             if (candidateCheck.user_id !== user.id) {
-                throw new Error("Yout don't have permission to update this candidate!");
+                throw new Error("You don't have permission to update this candidate!");
             }
-
 
             const { error } = await supabase
                 .from("candidates")
@@ -209,7 +188,8 @@ export default function CandidateProfilePage() {
         }
     }
 
-    async function handleContact() {
+    async function handleContact(contactMethod: string) {
+        console.log(contactMethod);
         switch (contactMethod) {
             case 'email':
                 window.location.href = `mailto:${candidate.email}?subject=Regarding your application`
@@ -262,6 +242,78 @@ export default function CandidateProfilePage() {
 
         const info = availabilityMap[availability] || { label: availability, color: 'bg-gray-500/10 text-gray-500' }
         return <Badge className={info.color}>{info.label}</Badge>
+    }
+
+    const getApplicationStatusBadge = (status: string) => {
+        switch (status) {
+            case 'applied':
+                return <Badge className="bg-blue-500/10 text-blue-500 border-blue-500/20">Applied</Badge>
+            case 'screening':
+                return <Badge className="bg-yellow-500/10 text-yellow-500 border-yellow-500/20">Screening</Badge>
+            case 'interview':
+                return <Badge className="bg-purple-500/10 text-purple-500 border-purple-500/20">Interview</Badge>
+            case 'offer':
+                return <Badge className="bg-green-500/10 text-green-500 border-green-500/20">Offer</Badge>
+            case 'hired':
+                return <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20">Hired</Badge>
+            case 'rejected':
+                return <Badge className="bg-red-500/10 text-red-500 border-red-500/20">Rejected</Badge>
+            default:
+                return <Badge variant="outline">{status}</Badge>
+        }
+    }
+
+    const getInterviewStatusBadge = (status: string) => {
+        switch (status) {
+            case 'scheduled':
+                return <Badge className="bg-blue-500/10 text-blue-500 border-blue-500/20">Scheduled</Badge>
+            case 'completed':
+                return <Badge className="bg-green-500/10 text-green-500 border-green-500/20">Completed</Badge>
+            case 'cancelled':
+                return <Badge className="bg-red-500/10 text-red-500 border-red-500/20">Cancelled</Badge>
+            case 'rescheduled':
+                return <Badge className="bg-yellow-500/10 text-yellow-500 border-yellow-500/20">Rescheduled</Badge>
+            default:
+                return <Badge variant="outline">{status}</Badge>
+        }
+    }
+
+    async function updateApplicationStatus(applicationId: string, newStatus: string) {
+        try {
+            const { error } = await supabase
+                .from("applications")
+                .update({
+                    status: newStatus,
+                    updated_at: new Date().toISOString()
+                })
+                .eq("id", applicationId)
+
+            if (error) throw error
+
+            // Refresh candidate data
+            await fetchCandidateDetails()
+        } catch (error) {
+            console.error("Error updating application status:", error)
+        }
+    }
+
+    async function updateInterviewStatus(interviewId: string, newStatus: string) {
+        try {
+            const { error } = await supabase
+                .from("interviews")
+                .update({
+                    status: newStatus,
+                    updated_at: new Date().toISOString()
+                })
+                .eq("id", interviewId)
+
+            if (error) throw error
+
+            // Refresh candidate data
+            await fetchCandidateDetails()
+        } catch (error) {
+            console.error("Error updating interview status:", error)
+        }
     }
 
     if (loading) {
@@ -389,12 +441,12 @@ export default function CandidateProfilePage() {
                                     Mark as Inactive
                                 </DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => updateCandidateStatus('placed')}
-                                    disabled={candidate.status === "place"}>
+                                    disabled={candidate.status === "placed"}>
                                     <Award className="mr-2 h-4 w-4" />
                                     Mark as Placed
                                 </DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => updateCandidateStatus('withdrawn')}
-                                    disabled={candidate.status === "inactive"}
+                                    disabled={candidate.status === "withdrawn"}
                                     className="text-red-600">
                                     <XCircle className="mr-2 h-4 w-4" />
                                     Mark as Withdrawn
@@ -432,17 +484,17 @@ export default function CandidateProfilePage() {
                     {/* Tabs Navigation */}
                     <div className="border-b">
                         <nav className="flex -mb-px">
-                            {['overview', 'applications', 'interviews', 'notes'].map((tab) => (
+                            {tabs.map((tab) => (
                                 <button
                                     key={tab}
                                     onClick={() => setActiveTab(tab)}
                                     className={`
-                    px-4 py-2 text-sm font-medium border-b-2 -mb-px capitalize
-                    ${activeTab === tab
+                                        px-4 py-2 text-sm font-medium border-b-2 -mb-px capitalize
+                                        ${activeTab === tab
                                             ? 'border-primary text-primary'
                                             : 'border-transparent text-muted-foreground hover:text-foreground hover:border-muted-foreground'
                                         }
-                  `}
+                                    `}
                                 >
                                     {tab}
                                 </button>
@@ -595,6 +647,213 @@ export default function CandidateProfilePage() {
                         </div>
                     )}
 
+                    {activeTab === 'applications' && (
+                        <div>
+                            {candidate.applications && candidate.applications.length > 0 ? (
+                                <div className="space-y-4">
+                                    <div className="flex items-center justify-between">
+                                        <h3 className="text-lg font-semibold">
+                                            Job Applications ({candidate.applications.length})
+                                        </h3>
+                                        <Button asChild variant="outline" size="sm">
+                                            <Link href="/dashboard/jobs">
+                                                Browse Jobs
+                                            </Link>
+                                        </Button>
+                                    </div>
+                                    {candidate.applications.map((app: any) => (
+                                        <Card key={app.id} className="hover:shadow-md transition-shadow">
+                                            <CardContent className="p-6">
+                                                <div className="flex flex-col lg:flex-row gap-6">
+                                                    <div className="flex-1">
+                                                        <div className="flex items-start justify-between mb-4">
+                                                            <div>
+                                                                <div className="flex items-center gap-2 mb-2">
+                                                                    <h4 className="text-lg font-semibold">
+                                                                        {app.jobs?.title || 'Unknown Job'}
+                                                                    </h4>
+                                                                    {getApplicationStatusBadge(app.status)}
+                                                                </div>
+                                                                <p className="text-sm text-muted-foreground">
+                                                                    {app.jobs?.department || 'No department'} •
+                                                                    Applied on {format(new Date(app.applied_at), 'MMM d, yyyy')}
+                                                                </p>
+                                                            </div>
+                                                            {app.match_score && (
+                                                                <div className="flex flex-col items-center">
+                                                                    <div className="flex items-center gap-1">
+                                                                        <Star className="w-4 h-4 text-primary" />
+                                                                        <span className="text-2xl font-bold text-primary">
+                                                                            {app.match_score}
+                                                                        </span>
+                                                                    </div>
+                                                                    <span className="text-xs text-muted-foreground">Match Score</span>
+                                                                </div>
+                                                            )}
+                                                        </div>
+
+                                                        <div className="space-y-3">
+                                                            <div className="flex items-center gap-4">
+                                                                <div>
+                                                                    <Label className="text-xs text-muted-foreground">Status</Label>
+                                                                    <Select
+                                                                        value={app.status}
+                                                                        onValueChange={(value) => updateApplicationStatus(app.id, value)}
+                                                                    >
+                                                                        <SelectTrigger className="w-40">
+                                                                            <SelectValue />
+                                                                        </SelectTrigger>
+                                                                        <SelectContent>
+                                                                            <SelectItem value="applied">Applied</SelectItem>
+                                                                            <SelectItem value="screening">Screening</SelectItem>
+                                                                            <SelectItem value="interview">Interview</SelectItem>
+                                                                            <SelectItem value="offer">Offer</SelectItem>
+                                                                            <SelectItem value="hired">Hired</SelectItem>
+                                                                            <SelectItem value="rejected">Rejected</SelectItem>
+                                                                        </SelectContent>
+                                                                    </Select>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="lg:w-48 space-y-3">
+                                                        <div className="flex gap-2">
+                                                            {app.jobs?.id && (
+                                                                <Button asChild size="sm" variant="outline" className="flex-1">
+                                                                    <Link href={`/dashboard/jobs/${app.jobs.id}`}>
+                                                                        View Job
+                                                                    </Link>
+                                                                </Button>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </CardContent>
+                                        </Card>
+                                    ))}
+                                </div>
+                            ) : (
+                                <Card>
+                                    <CardContent className="py-12 text-center">
+                                        <FileText className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                                        <h3 className="text-lg font-semibold mb-2">No Applications</h3>
+                                        <p className="text-muted-foreground mb-4">This candidate hasn't applied to any jobs yet.</p>
+                                        <Button asChild>
+                                            <Link href="/dashboard/jobs">Browse Jobs</Link>
+                                        </Button>
+                                    </CardContent>
+                                </Card>
+                            )}
+                        </div>
+                    )}
+
+                    {activeTab === 'interviews' && (
+                        <div>
+                            {candidate.interviews && candidate.interviews.length > 0 ? (
+                                <div className="space-y-4">
+                                    <div className="flex items-center justify-between">
+                                        <h3 className="text-lg font-semibold">
+                                            Interviews ({candidate.interviews.length})
+                                        </h3>
+                                        <Button asChild variant="outline" size="sm">
+                                            <Link href={`/dashboard/interviews/new?candidateId=${candidateId}`}>
+                                                Schedule Interview
+                                            </Link>
+                                        </Button>
+                                    </div>
+                                    {candidate.interviews.map((interview: any) => (
+                                        <Card key={interview.id} className="hover:shadow-md transition-shadow">
+                                            <CardContent className="p-6">
+                                                <div className="flex flex-col lg:flex-row gap-6">
+                                                    <div className="flex-1">
+                                                        <div className="flex items-start justify-between mb-4">
+                                                            <div>
+                                                                <div className="flex items-center gap-2 mb-2">
+                                                                    <h4 className="text-lg font-semibold">{interview.title}</h4>
+                                                                    {getInterviewStatusBadge(interview.status)}
+                                                                </div>
+                                                                <p className="text-sm text-muted-foreground">
+                                                                    {interview.interview_type || 'No type specified'} •
+                                                                    Scheduled for {format(new Date(interview.scheduled_at), 'MMM d, yyyy h:mm a')}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="space-y-3">
+                                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                                {interview.location && (
+                                                                    <div>
+                                                                        <Label className="text-xs text-muted-foreground">Location</Label>
+                                                                        <p className="text-sm">{interview.location}</p>
+                                                                    </div>
+                                                                )}
+                                                                {interview.duration_minutes && (
+                                                                    <div>
+                                                                        <Label className="text-xs text-muted-foreground">Duration</Label>
+                                                                        <p className="text-sm">{interview.duration_minutes} minutes</p>
+                                                                    </div>
+                                                                )}
+                                                                {interview.interviewer_name && (
+                                                                    <div>
+                                                                        <Label className="text-xs text-muted-foreground">Interviewer</Label>
+                                                                        <p className="text-sm">{interview.interviewer_name}</p>
+                                                                    </div>
+                                                                )}
+                                                                {interview.interviewer_email && (
+                                                                    <div>
+                                                                        <Label className="text-xs text-muted-foreground">Interviewer Email</Label>
+                                                                        <p className="text-sm">{interview.interviewer_email}</p>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+
+                                                            <div>
+                                                                <Label className="text-xs text-muted-foreground">Status</Label>
+                                                                <Select
+                                                                    value={interview.status}
+                                                                    onValueChange={(value) => updateInterviewStatus(interview.id, value)}
+                                                                >
+                                                                    <SelectTrigger className="w-40">
+                                                                        <SelectValue />
+                                                                    </SelectTrigger>
+                                                                    <SelectContent>
+                                                                        <SelectItem value="scheduled">Scheduled</SelectItem>
+                                                                        <SelectItem value="completed">Completed</SelectItem>
+                                                                        <SelectItem value="cancelled">Cancelled</SelectItem>
+                                                                        <SelectItem value="rescheduled">Rescheduled</SelectItem>
+                                                                    </SelectContent>
+                                                                </Select>
+                                                            </div>
+
+                                                            {interview.notes && (
+                                                                <div>
+                                                                    <Label className="text-xs text-muted-foreground">Notes</Label>
+                                                                    <p className="text-sm text-muted-foreground whitespace-pre-wrap">{interview.notes}</p>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </CardContent>
+                                        </Card>
+                                    ))}
+                                </div>
+                            ) : (
+                                <Card>
+                                    <CardContent className="py-12 text-center">
+                                        <Calendar className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                                        <h3 className="text-lg font-semibold mb-2">No Interviews</h3>
+                                        <p className="text-muted-foreground mb-4">No interviews scheduled for this candidate.</p>
+                                        <Button asChild>
+                                            <Link href={`/dashboard/interviews/new?candidateId=${candidateId}`}>Schedule Interview</Link>
+                                        </Button>
+                                    </CardContent>
+                                </Card>
+                            )}
+                        </div>
+                    )}
+
                     {activeTab === 'notes' && (
                         <Card>
                             <CardHeader>
@@ -617,6 +876,13 @@ export default function CandidateProfilePage() {
                             </CardContent>
                         </Card>
                     )}
+
+                    {activeTab === 'communications' && (
+                        <CandidateCommunication
+                            candidateId={candidateId}
+                            candidateName={candidate.name}
+                        />
+                    )}
                 </div>
 
                 {/* Right Column - Quick Actions & Stats */}
@@ -632,7 +898,8 @@ export default function CandidateProfilePage() {
                                 variant="outline"
                                 onClick={() => {
                                     setContactMethod('email')
-                                    handleContact()
+                                    console.log(contactMethod)
+                                    handleContact('email')
                                 }}
                             >
                                 <Mail className="mr-2 h-4 w-4" />
@@ -645,7 +912,8 @@ export default function CandidateProfilePage() {
                                     variant="outline"
                                     onClick={() => {
                                         setContactMethod('phone')
-                                        handleContact()
+                                        console.log(contactMethod)
+                                        handleContact('phone')
                                     }}
                                 >
                                     <Phone className="mr-2 h-4 w-4" />
@@ -659,7 +927,8 @@ export default function CandidateProfilePage() {
                                     variant="outline"
                                     onClick={() => {
                                         setContactMethod('linkedin')
-                                        handleContact()
+                                        console.log(contactMethod)
+                                        handleContact('linkedin')
                                     }}
                                 >
                                     <Linkedin className="mr-2 h-4 w-4" />
@@ -687,37 +956,122 @@ export default function CandidateProfilePage() {
                                 </div>
                                 <Separator />
                                 <div className="flex items-center justify-between">
-                                    <span className="text-sm text-muted-foreground">Last Updated</span>
-                                    <span className="font-semibold text-sm">
-                                        {formatDistanceToNow(new Date(candidate.updated_at), { addSuffix: true })}
+                                    <span className="text-sm text-muted-foreground">Active Applications</span>
+                                    <span className="font-semibold">
+                                        {candidate.applications?.filter((app: { status: string }) =>
+                                            app.status === 'applied' || app.status === 'screening' || app.status === 'interview' || app.status === 'offer'
+                                        )?.length || 0}
+                                    </span>
+                                </div>
+                                <Separator />
+                                <div className="flex items-center justify-between">
+                                    <span className="text-sm text-muted-foreground">Match Score Avg</span>
+                                    <span className="font-semibold">
+                                        {candidate.applications?.length > 0
+                                            ? Math.round(candidate.applications.reduce((acc: number, app: any) => acc + (app.match_score || 0), 0) / candidate.applications.length)
+                                            : 0}%
                                     </span>
                                 </div>
                             </div>
                         </CardContent>
                     </Card>
 
+                    {/* Timeline */}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Recent Timeline</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            {candidate.applications && candidate.applications.length > 0 ? (
+                                <div className="space-y-3">
+                                    {candidate.applications.slice(0, 3).map((app: any) => (
+                                        <div key={app.id} className="flex items-start gap-3">
+                                            <div className="mt-1">
+                                                <div className="w-2 h-2 rounded-full bg-primary"></div>
+                                            </div>
+                                            <div className="flex-1">
+                                                <p className="text-sm">
+                                                    Applied for <span className="font-medium">{app.jobs?.title || 'a job'}</span>
+                                                </p>
+                                                <p className="text-xs text-muted-foreground">
+                                                    {formatDistanceToNow(new Date(app.applied_at), { addSuffix: true })}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className="text-sm text-muted-foreground">No recent activity</p>
+                            )}
+                        </CardContent>
+                    </Card>
+
                     {/* Tags */}
                     <Card>
                         <CardHeader>
-                            <div className="flex items-center justify-between">
-                                <CardTitle>Tags</CardTitle>
-                                <Button size="sm" variant="ghost">
-                                    <Tag className="h-4 w-4" />
-                                </Button>
-                            </div>
+                            <CardTitle className="flex items-center gap-2">
+                                <Tag className="w-4 h-4" />
+                                Tags
+                            </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <div className="flex flex-wrap gap-2">
-                                {candidate.tags?.map((tag: string, index: number) => (
-                                    <Badge key={index} variant="outline" className="cursor-pointer hover:bg-muted">
-                                        {tag}
-                                    </Badge>
-                                )) || (
-                                        <p className="text-sm text-muted-foreground">No tags added yet</p>
-                                    )}
-                            </div>
+                            {candidate.tags && candidate.tags.length > 0 ? (
+                                <div className="flex flex-wrap gap-2">
+                                    {candidate.tags.map((tag: string, index: number) => (
+                                        <Badge key={index} variant="outline">
+                                            {tag}
+                                        </Badge>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="text-center py-4">
+                                    <p className="text-sm text-muted-foreground mb-3">No tags added</p>
+                                    <Button size="sm" variant="outline" asChild>
+                                        <Link href={`/dashboard/candidates/${candidateId}/edit`}>
+                                            Add Tags
+                                        </Link>
+                                    </Button>
+                                </div>
+                            )}
                         </CardContent>
                     </Card>
+
+                    {/* Attachments */}
+                    {(candidate.resume_url || candidate.cover_letter_url) && (
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Attachments</CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-2">
+                                {candidate.resume_url && (
+                                    <div className="flex items-center justify-between p-2 border rounded-md hover:bg-accent transition-colors">
+                                        <div className="flex items-center gap-2">
+                                            <FileText className="w-4 h-4" />
+                                            <span className="text-sm">Resume</span>
+                                        </div>
+                                        <Button size="sm" variant="ghost" asChild>
+                                            <a href={candidate.resume_url} download target="_blank" rel="noopener noreferrer">
+                                                <Download className="w-4 h-4" />
+                                            </a>
+                                        </Button>
+                                    </div>
+                                )}
+                                {candidate.cover_letter_url && (
+                                    <div className="flex items-center justify-between p-2 border rounded-md hover:bg-accent transition-colors">
+                                        <div className="flex items-center gap-2">
+                                            <FileText className="w-4 h-4" />
+                                            <span className="text-sm">Cover Letter</span>
+                                        </div>
+                                        <Button size="sm" variant="ghost" asChild>
+                                            <a href={candidate.cover_letter_url} download target="_blank" rel="noopener noreferrer">
+                                                <Download className="w-4 h-4" />
+                                            </a>
+                                        </Button>
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
+                    )}
                 </div>
             </div>
         </div>

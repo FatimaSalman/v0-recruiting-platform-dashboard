@@ -5,7 +5,7 @@ import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { useSupabase } from "@/lib/supabase/supabase-provider"
 import { DashboardLayout } from "@/components/dashboard-layout"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
@@ -30,7 +30,7 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import { format } from "date-fns"
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent ,DropdownMenuItem} from "@/components/ui/dropdown-menu"
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu"
 
 interface Job {
     id: string
@@ -452,6 +452,7 @@ export default function JobCandidatesPage() {
                                 </Button>
                             </div>
                         )}
+                        
                     </CardContent>
                 </Card>
 

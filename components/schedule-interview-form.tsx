@@ -60,7 +60,7 @@ export function ScheduleInterviewForm() {
       if (candidatesResult.data) setCandidates(candidatesResult.data)
       if (jobsResult.data) setJobs(jobsResult.data)
     } catch (err) {
-      console.error("[v0] Error fetching data:", err)
+      console.error("Error fetching data:", err)
     }
   }
 
@@ -100,7 +100,7 @@ export function ScheduleInterviewForm() {
 
       router.push("/dashboard/interviews")
     } catch (err) {
-      console.error("[v0] Error scheduling interview:", err)
+      console.error("Error scheduling interview:", err)
       setError(err instanceof Error ? err.message : "An error occurred")
     } finally {
       setLoading(false)

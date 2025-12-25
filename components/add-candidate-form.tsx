@@ -89,7 +89,7 @@ export function AddCandidateForm({ initialJobId }: AddCandidateFormProps) {
       // Alternatively, redirect to candidates list
       // router.push("/dashboard/candidates")
     } catch (err) {
-      console.error("[v0] Error adding candidate:", err)
+      console.error("Error adding candidate:", err)
       setError(err instanceof Error ? err.message : "An error occurred")
     } finally {
       setLoading(false)

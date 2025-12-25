@@ -25,6 +25,16 @@ interface Candidate {
   phone?: string | null
   linkedin_url?: string | null
   portfolio_url?: string | null
+  applications?: Array<{
+    id: string
+    status: string
+    applied_at?: string
+    updated_at?: string
+    jobs?: {
+      title: string
+    }
+  }>
+  isHired?: boolean
 }
 
 interface CandidateCardProps {
@@ -34,32 +44,39 @@ interface CandidateCardProps {
 export function CandidateCard({ candidate }: CandidateCardProps) {
   const getStatusBadge = (status?: string) => {
     if (!status) return null
-    
-    switch (status) {
-      case 'active':
-        return <Badge className="bg-green-500/10 text-green-500 border-green-500/20">
-          <UserCheck className="w-3 h-3 mr-1" /> Active
-        </Badge>
-      case 'inactive':
-        return <Badge className="bg-gray-500/10 text-gray-500 border-gray-500/20">
-          <Clock className="w-3 h-3 mr-1" /> Inactive
-        </Badge>
-      case 'placed':
-        return <Badge className="bg-blue-500/10 text-blue-500 border-blue-500/20">
+
+    if (candidate.isHired) {
+      return (
+        <Badge className="bg-blue-500/10 text-blue-500 border-blue-500/20">
           <Award className="w-3 h-3 mr-1" /> Placed
         </Badge>
-      case 'withdrawn':
-        return <Badge className="bg-red-500/10 text-red-500 border-red-500/20">
-          <XCircle className="w-3 h-3 mr-1" /> Withdrawn
-        </Badge>
-      default:
-        return null
-    }
+      )
+    } else
+      switch (status) {
+        case 'active':
+          return <Badge className="bg-green-500/10 text-green-500 border-green-500/20">
+            <UserCheck className="w-3 h-3 mr-1" /> Active
+          </Badge>
+        case 'inactive':
+          return <Badge className="bg-gray-500/10 text-gray-500 border-gray-500/20">
+            <Clock className="w-3 h-3 mr-1" /> Inactive
+          </Badge>
+        case 'placed':
+          return <Badge className="bg-blue-500/10 text-blue-500 border-blue-500/20">
+            <Award className="w-3 h-3 mr-1" /> Placed
+          </Badge>
+        case 'withdrawn':
+          return <Badge className="bg-red-500/10 text-red-500 border-red-500/20">
+            <XCircle className="w-3 h-3 mr-1" /> Withdrawn
+          </Badge>
+        default:
+          return null
+      }
   }
 
   const getAvailabilityBadge = (availability?: string) => {
     if (!availability) return null
-    
+
     const availabilityMap: Record<string, { label: string, color: string }> = {
       'immediate': { label: 'Immediate', color: 'bg-green-500/10 text-green-500' },
       '2-weeks': { label: '2 Weeks', color: 'bg-blue-500/10 text-blue-500' },
@@ -67,7 +84,7 @@ export function CandidateCard({ candidate }: CandidateCardProps) {
       '3-months': { label: '3 Months', color: 'bg-orange-500/10 text-orange-500' },
       'not-available': { label: 'Not Available', color: 'bg-red-500/10 text-red-500' },
     }
-    
+
     const info = availabilityMap[availability] || { label: availability, color: 'bg-gray-500/10 text-gray-500' }
     return <Badge className={`text-xs ${info.color}`}>{info.label}</Badge>
   }
@@ -87,33 +104,42 @@ export function CandidateCard({ candidate }: CandidateCardProps) {
         {/* Avatar and match score */}
         <div className="flex lg:flex-col items-center lg:items-start gap-4 lg:gap-3">
           <Link href={`/dashboard/candidates/${candidate.id}`} className="relative">
-            <img
-              src={candidate.avatar || "/placeholder.svg"}
-              alt={candidate.name}
-              className="w-20 h-20 rounded-full object-cover"
-            />
+            {/* {candidate.avatar ? (
+              <img
+                src={candidate.avatar || "/placeholder.svg"}
+                alt={candidate.name}
+                className="w-20 h-20 rounded-full object-cover"
+              />
+            ) : ( */}
+              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                <span className="text-2xl font-semibold text-primary">
+                  {candidate.name.charAt(0).toUpperCase()}
+                </span>
+              </div>
+            {/* )} */}
             <div className="absolute -top-1 -right-1">
+
               {getStatusBadge(candidate.status)}
             </div>
           </Link>
-          
+
           <div
             className={cn(
               "flex flex-col items-center justify-center px-4 py-2 rounded-lg",
               candidate.matchScore >= 90 ? "bg-primary/10" :
-              candidate.matchScore >= 80 ? "bg-primary/8" : "bg-primary/5"
+                candidate.matchScore >= 80 ? "bg-primary/8" : "bg-primary/5"
             )}
           >
             <div className="flex items-center gap-1">
               <Star className={cn(
                 "w-4 h-4",
                 candidate.matchScore >= 90 ? "text-primary" :
-                candidate.matchScore >= 80 ? "text-primary/80" : "text-primary/60"
+                  candidate.matchScore >= 80 ? "text-primary/80" : "text-primary/60"
               )} />
               <span className={cn(
                 "text-2xl font-bold",
                 candidate.matchScore >= 90 ? "text-primary" :
-                candidate.matchScore >= 80 ? "text-primary/80" : "text-primary/60"
+                  candidate.matchScore >= 80 ? "text-primary/80" : "text-primary/60"
               )}>
                 {candidate.matchScore}
               </span>
@@ -132,6 +158,12 @@ export function CandidateCard({ candidate }: CandidateCardProps) {
                 </h3>
               </Link>
               {getAvailabilityBadge(candidate.availability)}
+              {(candidate.status === 'placed' || candidate.isHired) && (
+                <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20">
+                  <Award className="w-3 h-3 mr-1" />
+                  Hired
+                </Badge>
+              )}
             </div>
             <p className="text-muted-foreground">{candidate.title}</p>
           </div>
@@ -154,6 +186,13 @@ export function CandidateCard({ candidate }: CandidateCardProps) {
                 <Calendar className="w-4 h-4" />
                 <span>Contacted {formatLastContacted(candidate.lastContacted)}</span>
               </div>
+            )}
+
+            {candidate.status === 'placed' && (
+              <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 ml-2">
+                <Award className="w-3 h-3 mr-1" />
+                Hired
+              </Badge>
             )}
           </div>
 

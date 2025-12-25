@@ -126,3 +126,32 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Calendar view styling */
+.calendar-day {
+  @apply border rounded-lg p-4 hover:shadow-md transition-shadow;
+}
+
+.calendar-day-today {
+  @apply border-primary/30 bg-primary/5;
+}
+
+.calendar-day-header {
+  @apply flex items-center justify-between mb-3 pb-3 border-b;
+}
+
+.calendar-event {
+  @apply p-3 border-l-4 rounded-r-lg mb-2 hover:shadow-sm transition-shadow;
+}
+
+.calendar-event-scheduled {
+  @apply border-l-blue-500 bg-blue-50/50 dark:bg-blue-950/20;
+}
+
+.calendar-event-completed {
+  @apply border-l-green-500 bg-green-50/50 dark:bg-green-950/20;
+}
+
+.calendar-event-cancelled {
+  @apply border-l-red-500 bg-red-50/50 dark:bg-red-950/20;
+}

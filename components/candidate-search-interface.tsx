@@ -48,6 +48,14 @@ interface Candidate {
   created_at: string
   updated_at: string
   tags: string[] | null
+  applications?: Array<{
+    id: string
+    status: string
+    job_id?: string
+    jobs?: {
+      title: string
+    }
+  }>
 }
 
 interface CandidateWithScore extends Candidate {
@@ -80,6 +88,7 @@ export function CandidateSearchInterface() {
 
   const { t } = useI18n()
   const router = useRouter()
+  const [hiredFilter, setHiredFilter] = useState<string>("all");
 
   useEffect(() => {
     setMounted(true)
@@ -105,17 +114,37 @@ export function CandidateSearchInterface() {
 
       if (error) throw error
 
+      const candidateIds = data?.map(c => c.id) || []
+      const { data: applicationsData } = await supabase
+        .from("applications")
+        .select("*")
+        .in("candidate_id", candidateIds)
+
+      // 3. Group applications by candidate_id
+      const applicationsByCandidate = new Map<string, any[]>()
+      applicationsData?.forEach(app => {
+        if (!applicationsByCandidate.has(app.candidate_id)) {
+          applicationsByCandidate.set(app.candidate_id, [])
+        }
+        applicationsByCandidate.get(app.candidate_id)?.push(app)
+      })
+
       // Transform candidates to match the card component format
-      const transformedCandidates: CandidateWithScore[] = (data || []).map((candidate) => ({
-        ...candidate,
-        status: candidate.status || 'active',
-        availability: candidate.availability || 'immediate',
-        experience: candidate.experience_years
-          ? `${candidate.experience_years} year${candidate.experience_years > 1 ? "s" : ""}`
-          : "Not specified",
-        matchScore: Math.floor(Math.random() * 30) + 70, // Mock match score (70-100)
-        avatar: `/placeholder.svg?height=80&width=80&query=professional+person`,
-      }))
+      const transformedCandidates: CandidateWithScore[] = (data || []).map((candidate) => {
+        const candidateApplications = applicationsByCandidate.get(candidate.id) || []
+        const hasHiredApplications = candidateApplications.some(app => app.status === 'hired');
+        return {
+          ...candidate,
+          status: candidate.status || 'active',
+          availability: candidate.availability || 'immediate',
+          experience: candidate.experience_years
+            ? `${candidate.experience_years} year${candidate.experience_years > 1 ? "s" : ""}`
+            : "Not specified",
+          matchScore: Math.floor(Math.random() * 30) + 70, // Mock match score (70-100)
+          avatar: `/placeholder.svg?height=80&width=80&query=professional+person`,
+          isHired: hasHiredApplications,
+        }
+      })
 
       setCandidates(transformedCandidates)
       setFilteredCandidates(transformedCandidates)
@@ -127,7 +156,7 @@ export function CandidateSearchInterface() {
       })
       setAllSkills(Array.from(skillsSet).sort())
     } catch (error) {
-      console.error("[v0] Error fetching candidates:", error)
+      console.error("Error fetching candidates:", error)
     } finally {
       setLoading(false)
     }
@@ -146,9 +175,11 @@ export function CandidateSearchInterface() {
           candidate.email.toLowerCase().includes(query) ||
           candidate.skills?.some((skill) => skill.toLowerCase().includes(query)) ||
           candidate.location?.toLowerCase().includes(query) ||
-          candidate.tags?.some((tag) => tag.toLowerCase().includes(query))
+          candidate.tags?.some((tag) => tag.toLowerCase().includes(query)) ||
+          candidate.applications?.some((app) => app.status.toLowerCase().includes(query))
       )
     }
+
 
     // Experience filter
     if (experienceFilter !== "all") {
@@ -723,6 +754,20 @@ export function CandidateSearchInterface() {
               </div>
             </div>
           )}
+
+          <div className="space-y-2">
+            <Label className="text-xs">Hired Status</Label>
+            <Select value={hiredFilter} onValueChange={setHiredFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="All" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Candidates</SelectItem>
+                <SelectItem value="hired">Hired Only</SelectItem>
+                <SelectItem value="not-hired">Not Hired</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </CardContent>
       </Card>
 
@@ -887,7 +932,7 @@ export function CandidateSearchInterface() {
                   type="checkbox"
                   checked={selectedCandidates.includes(candidate.id)}
                   onChange={() => toggleCandidateSelection(candidate.id)}
-                  className="absolute left-4 top-6 z-10 h-5 w-5 rounded border-gray-300 text-primary focus:ring-primary"
+                  className="absolute left-2 top-2 z-10 h-5 w-5 rounded border-gray-300 text-primary focus:ring-primary"
                 />
                 <div className={selectedCandidates.includes(candidate.id) ? "opacity-100" : "opacity-100"}>
                   <CandidateCard
@@ -900,6 +945,7 @@ export function CandidateSearchInterface() {
                       phone: candidate.phone,
                       linkedin_url: candidate.linkedin_url,
                       portfolio_url: candidate.portfolio_url,
+                      applications: (candidate.applications || []),
                     }}
                   />
                 </div>

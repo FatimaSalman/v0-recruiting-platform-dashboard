@@ -58,13 +58,10 @@ export default function CandidateProfilePage() {
     const [activeTab, setActiveTab] = useState('overview')
     const [notes, setNotes] = useState("")
     const [savingNotes, setSavingNotes] = useState(false)
-    const [contactDialogOpen, setContactDialogOpen] = useState(false)
     const [contactMethod, setContactMethod] = useState<'email' | 'phone' | 'linkedin'>('email')
 
     const params = useParams()
-    const router = useRouter()
     const supabase = useSupabase()
-    const { t } = useI18n()
     const candidateId = params.id as string
 
     const tabs = ['overview', 'applications', 'interviews', 'notes', 'communications']
@@ -88,18 +85,7 @@ export default function CandidateProfilePage() {
             // Fetch applications with job details
             const { data: applicationsData } = await supabase
                 .from("applications")
-                .select(`
-                    id,
-                    status,
-                    match_score,
-                    applied_at,
-                    jobs (
-                        id,
-                        title,
-                        department,
-                        status
-                    )
-                `)
+                .select("*")
                 .eq("candidate_id", candidateId)
                 .order("applied_at", { ascending: false })
 
@@ -205,30 +191,37 @@ export default function CandidateProfilePage() {
                 }
                 break
         }
-        setContactDialogOpen(false)
     }
 
     const getStatusBadge = (status: string) => {
-        switch (status) {
-            case 'active':
-                return <Badge className="bg-green-500/10 text-green-500 border-green-500/20">
-                    <CheckCircle className="w-3 h-3 mr-1" /> Active
-                </Badge>
-            case 'inactive':
-                return <Badge className="bg-gray-500/10 text-gray-500 border-gray-500/20">
-                    <Clock className="w-3 h-3 mr-1" /> Inactive
-                </Badge>
-            case 'placed':
-                return <Badge className="bg-blue-500/10 text-blue-500 border-blue-500/20">
+
+        if (candidate.applications?.some((app: any) => app.status === 'hired')) {
+            return (
+                <Badge className="bg-blue-500/10 text-blue-500 border-blue-500/20">
                     <Award className="w-3 h-3 mr-1" /> Placed
                 </Badge>
-            case 'withdrawn':
-                return <Badge className="bg-red-500/10 text-red-500 border-red-500/20">
-                    <XCircle className="w-3 h-3 mr-1" /> Withdrawn
-                </Badge>
-            default:
-                return <Badge variant="outline">{status}</Badge>
-        }
+            )
+        } else
+            switch (status) {
+                case 'active':
+                    return <Badge className="bg-green-500/10 text-green-500 border-green-500/20">
+                        <CheckCircle className="w-3 h-3 mr-1" /> Active
+                    </Badge>
+                case 'inactive':
+                    return <Badge className="bg-gray-500/10 text-gray-500 border-gray-500/20">
+                        <Clock className="w-3 h-3 mr-1" /> Inactive
+                    </Badge>
+                case 'placed':
+                    return <Badge className="bg-blue-500/10 text-blue-500 border-blue-500/20">
+                        <Award className="w-3 h-3 mr-1" /> Placed
+                    </Badge>
+                case 'withdrawn':
+                    return <Badge className="bg-red-500/10 text-red-500 border-red-500/20">
+                        <XCircle className="w-3 h-3 mr-1" /> Withdrawn
+                    </Badge>
+                default:
+                    return <Badge variant="outline">{status}</Badge>
+            }
     }
 
     const getAvailabilityBadge = (availability: string) => {
@@ -371,7 +364,15 @@ export default function CandidateProfilePage() {
                             </div>
 
                             <div className="flex-1">
-                                <h1 className="text-3xl font-bold tracking-tight">{candidate.name}</h1>
+                                <div className="flex items-center gap-3">
+                                    <h1 className="text-3xl font-bold tracking-tight">{candidate.name}</h1>
+                                    {candidate.applications?.some((app: any) => app.status === 'hired') && (
+                                        <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 px-3 py-1">
+                                            <Award className="w-4 h-4 mr-1" />
+                                            Hired
+                                        </Badge>
+                                    )}
+                                </div>
                                 <div className="flex flex-wrap items-center gap-2 mt-1">
                                     {candidate.title && (
                                         <div className="flex items-center gap-1 text-muted-foreground">
@@ -441,7 +442,7 @@ export default function CandidateProfilePage() {
                                     Mark as Inactive
                                 </DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => updateCandidateStatus('placed')}
-                                    disabled={candidate.status === "placed"}>
+                                    disabled={candidate.status === "placed" || candidate.applications?.some((app: any) => app.status === 'hired')}>
                                     <Award className="mr-2 h-4 w-4" />
                                     Mark as Placed
                                 </DropdownMenuItem>
@@ -477,6 +478,40 @@ export default function CandidateProfilePage() {
                     </div>
                 </div>
             </div>
+
+
+            {candidate.applications?.some((app: any) => app.status === 'hired') && (
+                <Card className="border-emerald-500/20 bg-emerald-50/50 dark:bg-emerald-950/20 mb-6">
+                    <CardHeader>
+                        <CardTitle className="text-emerald-700 dark:text-emerald-400 flex items-center gap-2">
+                            <Award className="w-5 h-5" />
+                            Hired Positions
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="space-y-3">
+                            {candidate.applications
+                                .filter((app: any) => app.status === 'hired')
+                                .map((app: any) => (
+                                    <div key={app.id} className="flex items-center justify-between p-3 border border-emerald-200 dark:border-emerald-800 rounded-lg bg-white dark:bg-emerald-950/30">
+                                        <div>
+                                            <div className="font-semibold text-emerald-800 dark:text-emerald-300">
+                                                {app.jobs?.title || 'Unknown Position'}
+                                            </div>
+                                            <div className="text-sm text-emerald-600 dark:text-emerald-400">
+                                                Hired on {app.updated_at ? format(new Date(app.updated_at), 'MMM d, yyyy') : 'Unknown date'}
+                                            </div>
+                                        </div>
+                                        <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20">
+                                            <Award className="w-3 h-3 mr-1" />
+                                            Hired
+                                        </Badge>
+                                    </div>
+                                ))}
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Left Column - Contact & Info */}

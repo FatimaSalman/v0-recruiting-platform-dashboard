@@ -9,7 +9,14 @@ export const metadata: Metadata = {
   title: "Dashboard - TalentHub",
 }
 
-export default async function DashboardPage({ searchParams }: { searchParams: Promise<{ session_id?: string }> }) {
+interface DashboardPageProps {
+  searchParams: Promise<{ 
+    session_id?: string 
+    subscription?: string
+  }>
+}
+
+export default async function DashboardPage({ searchParams }: DashboardPageProps) {
   const supabase = await createClient()
 
   const {
@@ -24,7 +31,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   const params = await searchParams
   const showSuccessMessage = params?.subscription === "success"
 
-  if(params?.session_id){
+  if (params?.session_id) {
     console.log("Successful subscription with session ID:", params.session_id);
     // You can add additional logic here, such as fetching subscription details
     // or updating the UI to reflect the successful subscription.

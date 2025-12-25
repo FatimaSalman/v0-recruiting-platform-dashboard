@@ -13,12 +13,14 @@ import { PRICING_PLANS, formatPrice } from "@/lib/products"
 import { useSearchParams } from "next/navigation"
 import { SubscriptionSuccess } from "@/components/subscription-success"
 import { useRouter } from "next/navigation"
+import { RecentActivity } from "@/components/recent-activity"
 
 interface DashboardStats {
   totalJobs: number
   activeJobs: number
   totalCandidates: number
   totalApplications: number
+  totalInterviews: number
 }
 
 interface Subscription {
@@ -40,6 +42,7 @@ export function DashboardOverview({ user }: { user: User }) {
     activeJobs: 0,
     totalCandidates: 0,
     totalApplications: 0,
+    totalInterviews: 0
   })
 
   const [subscription, setSubscription] = useState<Subscription | null>(null)
@@ -80,11 +83,17 @@ export function DashboardOverview({ user }: { user: User }) {
           .select("*", { count: "exact", head: true })
           .eq("user_id", user.id)
 
+        const { count: interviewsCount } = await supabase
+          .from("interviews")
+          .select("*", { count: "exact", head: true })
+          .eq("user_id", user.id)
+
         setStats({
           totalJobs: jobsCount || 0,
           activeJobs: activeJobsCount || 0,
           totalCandidates: candidatesCount || 0,
           totalApplications: applicationsCount || 0,
+          totalInterviews: interviewsCount || 0,
         })
 
         // Set trial usage
@@ -211,7 +220,7 @@ export function DashboardOverview({ user }: { user: User }) {
     },
     {
       title: t("dashboard.stats.interviews"),
-      value: 0,
+      value: stats.totalInterviews,
       icon: Calendar,
       description: t("dashboard.stats.scheduled"),
       href: "/dashboard/interviews",
@@ -545,7 +554,7 @@ export function DashboardOverview({ user }: { user: User }) {
                 </Button>
               </div>
             ) : (
-              <div className="text-sm text-muted-foreground">{t("dashboard.activityComingSoon")}</div>
+              <RecentActivity userId={user.id} />
             )}
           </CardContent>
         </Card>

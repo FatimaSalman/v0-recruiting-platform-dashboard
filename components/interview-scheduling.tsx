@@ -7,34 +7,34 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Calendar, List, Plus, Clock, MapPin, Users, Video, Phone, UserCheck, CheckCircle  } from "lucide-react"
 import Link from "next/link"
-import { format, isToday, isTomorrow, isPast, isThisWeek } from "date-fns"
+import { format, isToday, isTomorrow, isPast } from "date-fns"
+import { ar, enUS } from "date-fns/locale"
 import { useI18n } from "@/lib/i18n-context"
 
 
-const getInterviewIcon = (type: string) => {
-  switch (type) {
-    case "video":
-      return <Video className="w-4 h-4" />
-    case "phone":
-      return <Phone className="w-4 h-4" />
-    default:
-      return <Users className="w-4 h-4" />
+const GetInterviewIcon = ({ type }: { type: string }) => {
+  if (type === "video") {
+    return <Video className="w-4 h-4" />
+  } else if (type === "phone") {
+    return <Phone className="w-4 h-4" />
+  } else {
+    return <Users className="w-4 h-4" />
   }
 }
 
-const getStatusBadge = (status: string) => {
-  switch (status) {
-    case "scheduled":
-      return <Badge className="bg-blue-500/10 text-blue-500 border-blue-500/20">Scheduled</Badge>
-    case "completed":
-      return <Badge className="bg-green-500/10 text-green-500 border-green-500/20">Completed</Badge>
-    case "cancelled":
-      return <Badge className="bg-red-500/10 text-red-500 border-red-500/20">Cancelled</Badge>
-    case "rescheduled":
-      return <Badge className="bg-yellow-500/10 text-yellow-500 border-yellow-500/20">Rescheduled</Badge>
-    default:
-      return <Badge variant="outline">{status}</Badge>
+const GetStatusBadge = ({ status }: { status: string }) => {
+  const { t } = useI18n()
+  const statusKey = `status.interview.${status.toLowerCase()}`
+  const statusText = t(statusKey)
+
+  const colorMap: Record<string, string> = {
+    scheduled: "bg-blue-500/10 text-blue-500 border-blue-500/20",
+    completed: "bg-green-500/10 text-green-500 border-green-500/20",
+    cancelled: "bg-red-500/10 text-red-500 border-red-500/20",
+    rescheduled: "bg-yellow-500/10 text-yellow-500 border-yellow-500/20",
   }
+
+  return <Badge className={colorMap[status.toLowerCase()] || "outline"}>{statusText}</Badge>
 }
 
 export function InterviewScheduling() {
@@ -42,7 +42,8 @@ export function InterviewScheduling() {
   const [loading, setLoading] = useState(true)
   const [viewMode, setViewMode] = useState<"list" | "calendar">("list") // Add view mode state
   const supabase = useSupabase()
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
+  const dateLocale = locale === 'ar' ? ar : enUS
 
   useEffect(() => {
     fetchInterviews()
@@ -72,7 +73,7 @@ export function InterviewScheduling() {
 
   // Group interviews by date for calendar view
   const interviewsByDate = interviews.reduce((acc, interview) => {
-    const date = format(new Date(interview.scheduled_at), 'yyyy-MM-dd')
+    const date = format(new Date(interview.scheduled_at), 'yyyy-MM-dd', { locale: dateLocale })
     if (!acc[date]) {
       acc[date] = []
     }
@@ -98,9 +99,9 @@ export function InterviewScheduling() {
   )
 
   const getDayLabel = (date: Date) => {
-    if (isToday(date)) return "Today"
-    if (isTomorrow(date)) return "Tomorrow"
-    return format(date, "EEEE") // Day name
+    if (isToday(date)) return t("interviews.today")
+    if (isTomorrow(date)) return t("interviews.tomorrow")
+    return format(date, "EEEE", { locale: dateLocale }) // Day name
   }
 
   if (loading) {
@@ -108,7 +109,7 @@ export function InterviewScheduling() {
       <div className="p-6">
         <div className="text-center py-12">
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          <p className="text-muted-foreground mt-4">Loading interviews...</p>
+          <p className="text-muted-foreground mt-4">{t("interviews.loading")}</p>
         </div>
       </div>
     )
@@ -119,9 +120,9 @@ export function InterviewScheduling() {
       {/* Header with View Toggle */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight mb-2">Interviews</h1>
+          <h1 className="text-3xl font-bold tracking-tight mb-2">{t("interviews.title")}</h1>
           <p className="text-muted-foreground">
-            Schedule and manage candidate interviews
+            {t("interviews.subtitle")}
           </p>
         </div>
 
@@ -135,7 +136,7 @@ export function InterviewScheduling() {
               className="gap-2"
             >
               <List className="h-4 w-4" />
-              List
+              {t("interviews.view.list")}
             </Button>
             <Button
               variant={viewMode === "calendar" ? "default" : "ghost"}
@@ -144,14 +145,14 @@ export function InterviewScheduling() {
               className="gap-2"
             >
               <Calendar className="h-4 w-4" />
-              Calendar
+              {t("interviews.view.calendar")}
             </Button>
           </div>
 
           <Button asChild>
             <Link href="/dashboard/interviews/new">
               <Plus className="mr-2 h-4 w-4" />
-              Schedule Interview
+              {t("interviews.schedule")}
             </Link>
           </Button>
         </div>
@@ -163,7 +164,7 @@ export function InterviewScheduling() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Total Interviews</p>
+                <p className="text-sm text-muted-foreground">{t("reports.totalInterviews")}</p>
                 <p className="text-2xl font-bold">{interviews.length}</p>
               </div>
               <Calendar className="w-8 h-8 text-primary/30" />
@@ -175,7 +176,7 @@ export function InterviewScheduling() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Today</p>
+                <p className="text-sm text-muted-foreground">{t("interviews.today")}</p>
                 <p className="text-2xl font-bold">{todayInterviews.length}</p>
               </div>
               <Clock className="w-8 h-8 text-blue-500/30" />
@@ -187,7 +188,7 @@ export function InterviewScheduling() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Upcoming</p>
+                <p className="text-sm text-muted-foreground">{t("interviews.upcoming")}</p>
                 <p className="text-2xl font-bold">{upcomingInterviews.length}</p>
               </div>
               <UserCheck className="w-8 h-8 text-green-500/30" />
@@ -199,7 +200,7 @@ export function InterviewScheduling() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Completed</p>
+                <p className="text-sm text-muted-foreground">{t("status.completed")}</p>
                 <p className="text-2xl font-bold">
                   {interviews.filter(i => i.status === "completed").length}
                 </p>
@@ -220,7 +221,7 @@ export function InterviewScheduling() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Clock className="w-5 h-5 text-blue-500" />
-                  Today's Interviews ({todayInterviews.length})
+                  {t("interviews.todaysInterviews")} ({todayInterviews.length})
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -239,7 +240,7 @@ export function InterviewScheduling() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Calendar className="w-5 h-5 text-green-500" />
-                  Upcoming Interviews ({upcomingInterviews.length})
+                  {t("interviews.upcoming")} ({upcomingInterviews.length})
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -258,7 +259,7 @@ export function InterviewScheduling() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Clock className="w-5 h-5 text-muted-foreground" />
-                  Past Interviews ({pastInterviews.length})
+                  {t("interviews.past")} ({pastInterviews.length})
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -275,14 +276,14 @@ export function InterviewScheduling() {
             <Card>
               <CardContent className="py-12 text-center">
                 <Calendar className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                <h3 className="text-lg font-semibold mb-2">No interviews scheduled</h3>
+                <h3 className="text-lg font-semibold mb-2">{t("interviews.noInterviews")}</h3>
                 <p className="text-muted-foreground mb-4">
-                  Start by scheduling your first interview
+                  {t("interviews.startScheduling")}
                 </p>
                 <Button asChild>
                   <Link href="/dashboard/interviews/new">
                     <Plus className="mr-2 h-4 w-4" />
-                    Schedule Interview
+                    {t("interviews.schedule")}
                   </Link>
                 </Button>
               </CardContent>
@@ -296,14 +297,14 @@ export function InterviewScheduling() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Calendar className="w-5 h-5" />
-                Calendar View
+                {t("interviews.calendarView")}
               </CardTitle>
             </CardHeader>
             <CardContent>
               {interviewDates.length === 0 ? (
                 <div className="text-center py-8">
                   <Calendar className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                  <p className="text-muted-foreground">No interviews scheduled</p>
+                  <p className="text-muted-foreground">{t("interviews.noInterviews")}</p>
                 </div>
               ) : (
                 <div className="space-y-6">
@@ -316,18 +317,18 @@ export function InterviewScheduling() {
                         <div className="flex items-center gap-3">
                           <div className="w-16 text-center">
                             <div className="text-2xl font-bold text-primary">
-                              {format(date, "d")}
+                              {format(date, "d", { locale: dateLocale })}
                             </div>
                             <div className="text-sm text-muted-foreground">
-                              {format(date, "MMM")}
+                              {format(date, "MMM", { locale: dateLocale })}
                             </div>
                           </div>
                           <div>
                             <h3 className="font-semibold text-lg">
-                              {getDayLabel(date)} • {format(date, "MMMM d, yyyy")}
+                              {getDayLabel(date)} • {format(date, "MMMM d, yyyy", { locale: dateLocale })}
                             </h3>
                             <p className="text-sm text-muted-foreground">
-                              {dayInterviews.length} interview{dayInterviews.length !== 1 ? 's' : ''}
+                              {dayInterviews.length} {dayInterviews.length !== 1 ? t("interviews.plural") : t("interviews.singular")}
                             </p>
                           </div>
                         </div>
@@ -342,14 +343,14 @@ export function InterviewScheduling() {
                                 <div className="flex-1">
                                   <div className="flex items-center gap-3 mb-2">
                                     <h4 className="font-semibold">{interview.title}</h4>
-                                    {getStatusBadge(interview.status)}
-                                    {getInterviewIcon(interview.interview_type)}
+                                    <GetStatusBadge status={interview.status} />
+                                    <GetInterviewIcon type={interview.interview_type} />
                                   </div>
 
                                   <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
                                     <div className="flex items-center gap-1.5">
                                       <Clock className="w-4 h-4" />
-                                      <span>{format(new Date(interview.scheduled_at), "h:mm a")}</span>
+                                      <span>{format(new Date(interview.scheduled_at), "h:mm a", { locale: dateLocale })}</span>
                                       <span>• {interview.duration_minutes || 60} min</span>
                                     </div>
 
@@ -370,7 +371,7 @@ export function InterviewScheduling() {
 
                                   {interview.interviewer_name && (
                                     <div className="mt-2 text-sm">
-                                      <span className="text-muted-foreground">Interviewer: </span>
+                                      <span className="text-muted-foreground">{t("interviews.interviewer")} </span>
                                       <span className="font-medium">{interview.interviewer_name}</span>
                                       {interview.interviewer_email && (
                                         <span className="text-muted-foreground ml-2">
@@ -388,7 +389,7 @@ export function InterviewScheduling() {
                                     asChild
                                   >
                                     <Link href={`/dashboard/interviews/${interview.id}`}>
-                                      View
+                                      {t("common.view")}
                                     </Link>
                                   </Button>
                                   <Button
@@ -397,7 +398,7 @@ export function InterviewScheduling() {
                                     asChild
                                   >
                                     <Link href={`/dashboard/interviews/${interview.id}/edit`}>
-                                      Edit
+                                      {t("common.edit")}
                                     </Link>
                                   </Button>
                                 </div>
@@ -420,17 +421,19 @@ export function InterviewScheduling() {
 
 // Interview Card Component for List View
 function InterviewCard({ interview }: { interview: any }) {
+  const { t, locale } = useI18n()
+  const dateLocale = locale === 'ar' ? ar : enUS
 
   return (
     <div className="p-4 border rounded-lg hover:shadow-md transition-shadow">
       <div className="flex flex-col lg:flex-row lg:items-start gap-4">
         <div className="lg:w-48">
           <div className="text-sm font-medium text-primary">
-            {format(new Date(interview.scheduled_at), "EEEE, MMM d")}
+            {format(new Date(interview.scheduled_at), "EEEE, MMM d", { locale: dateLocale })}
           </div>
           <div className="flex items-center gap-1.5 text-sm text-muted-foreground mt-1">
             <Clock className="w-4 h-4" />
-            <span>{format(new Date(interview.scheduled_at), "h:mm a")}</span>
+            <span>{format(new Date(interview.scheduled_at), "h:mm a", { locale: dateLocale })}</span>
             <span>• {interview.duration_minutes || 60} min</span>
           </div>
         </div>
@@ -440,7 +443,7 @@ function InterviewCard({ interview }: { interview: any }) {
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <h4 className="font-semibold">{interview.title}</h4>
-                {getInterviewIcon(interview.interview_type)}
+                <GetInterviewIcon type={interview.interview_type} />
               </div>
 
               <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
@@ -464,13 +467,13 @@ function InterviewCard({ interview }: { interview: any }) {
             </div>
 
             <div>
-              {getStatusBadge(interview.status)}
+              <GetStatusBadge status={interview.status} />
             </div>
           </div>
 
           {interview.interviewer_name && (
             <div className="text-sm">
-              <span className="text-muted-foreground">Interviewer: </span>
+              <span className="text-muted-foreground">{t("interviews.interviewer")} </span>
               <span className="font-medium">{interview.interviewer_name}</span>
             </div>
           )}
@@ -485,12 +488,12 @@ function InterviewCard({ interview }: { interview: any }) {
         <div className="flex lg:flex-col gap-2">
           <Button asChild size="sm">
             <Link href={`/dashboard/interviews/${interview.id}`}>
-              View Details
+              {t("jobs.viewDetails")}
             </Link>
           </Button>
           <Button asChild variant="outline" size="sm">
             <Link href={`/dashboard/interviews/${interview.id}/edit`}>
-              Edit
+              {t("jobs.edit")}
             </Link>
           </Button>
         </div>

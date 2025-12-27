@@ -1,7 +1,9 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { format } from "date-fns"
+import { format, formatDistanceToNow } from "date-fns"
+import { ar, enUS } from "date-fns/locale"
+import { useI18n } from "@/lib/i18n-context"
 import {
     Briefcase,
     UserPlus,
@@ -49,10 +51,12 @@ export function RecentActivity({ userId }: { userId: string }) {
     const [showAll, setShowAll] = useState(false)
     const [activities, setActivities] = useState<ActivityItem[]>([])
     const [loading, setLoading] = useState(true)
+    const { t, locale } = useI18n()
+    const dateLocale = locale === 'ar' ? ar : enUS
 
     useEffect(() => {
         fetchRecentActivity()
-    }, [userId])
+    }, [userId, t])
 
     const fetchRecentActivity = async () => {
         try {
@@ -109,8 +113,8 @@ export function RecentActivity({ userId }: { userId: string }) {
                 allActivities.push({
                     id: `job_${job.id}`,
                     type: 'job_created' as const,
-                    title: 'Job Created',
-                    description: `Created job: ${job.title}`,
+                    title: t("activity.jobCreated"),
+                    description: `${t("activity.desc.jobCreated")} ${job.title}`,
                     timestamp: job.created_at,
                 })
             })
@@ -120,16 +124,16 @@ export function RecentActivity({ userId }: { userId: string }) {
                 allActivities.push({
                     id: `candidate_${candidate.id}`,
                     type: 'candidate_added' as const,
-                    title: 'Candidate Added',
-                    description: `Added candidate: ${candidate.name || candidate.email}`,
+                    title: t("activity.candidateAdded"),
+                    description: `${t("activity.desc.candidateAdded")} ${candidate.name || candidate.email}`,
                     timestamp: candidate.created_at,
                 })
             })
 
             // Add application activities
             applications?.forEach((application: ApplicationWithDetails) => {
-                let candidateName = "Unknown Candidate"
-                let jobTitle = "Unknown Job"
+                let candidateName = t("activity.unknownCandidate")
+                let jobTitle = t("activity.unknownJob")
 
                 // Get candidate name
                 if (application.candidate && application.candidate.length > 0) {
@@ -148,16 +152,16 @@ export function RecentActivity({ userId }: { userId: string }) {
                 allActivities.push({
                     id: `application_${application.id}`,
                     type: 'application_received' as const,
-                    title: 'Application Received',
-                    description: `${candidateName} applied for ${jobTitle}`,
+                    title: t("activity.applicationReceived"),
+                    description: `${candidateName} ${t("activity.desc.applicationReceived")} ${jobTitle}`,
                     timestamp: application.updated_at || application.created_at,
                 })
             })
 
             // Add interview activities
             interviews?.forEach((interview: InterviewWithDetails) => {
-                let candidateName = "Unknown Candidate"
-                let jobTitle = "Unknown Job"
+                let candidateName = t("activity.unknownCandidate")
+                let jobTitle = t("activity.unknownJob")
 
                 // Get candidate name
                 if (interview.candidate && interview.candidate.length > 0) {
@@ -176,8 +180,8 @@ export function RecentActivity({ userId }: { userId: string }) {
                 allActivities.push({
                     id: `interview_${interview.id}`,
                     type: 'interview_scheduled' as const,
-                    title: 'Interview Scheduled',
-                    description: `Interview with ${candidateName} for ${jobTitle}`,
+                    title: t("activity.interviewScheduled"),
+                    description: `${t("activity.desc.interviewScheduled")} ${candidateName} ${t("activity.desc.for")} ${jobTitle}`,
                     timestamp: interview.created_at, // Use scheduled_at for interviews
                     metadata: { status: interview.status }
                 })
@@ -235,31 +239,7 @@ export function RecentActivity({ userId }: { userId: string }) {
     }
 
     const getTimeAgo = (timestamp: string) => {
-        const date = new Date(timestamp)
-        const now = new Date()
-        const diffInMilliseconds = date.getTime() - now.getTime()
-        const absDiffInMinutes = Math.floor(Math.abs(diffInMilliseconds) / (1000 * 60))
-        const absDiffInHours = Math.floor(absDiffInMinutes / 60)
-        const absDiffInDays = Math.floor(absDiffInHours / 24)
-
-        // Determine if it's past or future
-        const isPast = diffInMilliseconds < 0
-        const prefix = isPast ? '' : 'in '
-        const suffix = isPast ? ' ago' : ''
-
-        if (absDiffInMinutes < 60) {
-            return `${prefix}${absDiffInMinutes}m${suffix}`
-        } else if (absDiffInHours < 24) {
-            return `${prefix}${absDiffInHours}h${suffix}`
-        } else if (absDiffInDays < 7) {
-            return `${prefix}${absDiffInDays}d${suffix}`
-        } else {
-            if (isPast) {
-                return format(date, 'MMM d')
-            } else {
-                return `on ${format(date, 'MMM d')}`
-            }
-        }
+        return formatDistanceToNow(new Date(timestamp), { addSuffix: true, locale: dateLocale })
     }
 
     if (loading) {
@@ -341,12 +321,12 @@ export function RecentActivity({ userId }: { userId: string }) {
                         {showAll ? (
                             <>
                                 <ChevronUp className="mr-2 h-4 w-4" />
-                                Show Less
+                                {t("activity.showLess")}
                             </>
                         ) : (
                             <>
                                 <ChevronDown className="mr-2 h-4 w-4" />
-                                Show All ({activities.length - initialCount} more)
+                                {t("activity.showAll")} ({activities.length - initialCount} {t("activity.more")})
                             </>
                         )}
                     </Button>
@@ -358,9 +338,9 @@ export function RecentActivity({ userId }: { userId: string }) {
                     <div className="w-12 h-12 mx-auto rounded-full bg-muted flex items-center justify-center mb-3">
                         <Briefcase className="w-6 h-6 text-muted-foreground" />
                     </div>
-                    <p className="text-sm text-muted-foreground">No recent activity</p>
+                    <p className="text-sm text-muted-foreground">{t("activity.noActivity")}</p>
                     <p className="text-xs text-muted-foreground mt-1">
-                        Your activities will appear here
+                        {t("activity.appearHere")}
                     </p>
                 </div>
             )}

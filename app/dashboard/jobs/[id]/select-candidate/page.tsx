@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge"
 import { Search, UserPlus, ArrowLeft, Check, Users } from "lucide-react"
 import Link from "next/link"
 import { CandidateCard } from "@/components/candidate-card"
+import { useI18n } from "@/lib/i18n-context"
 
 interface Candidate {
     id: string
@@ -36,6 +37,7 @@ export default function SelectCandidatePage() {
     const [selectedCandidates, setSelectedCandidates] = useState<string[]>([])
     const [adding, setAdding] = useState(false)
 
+    const { t } = useI18n()
     const params = useParams()
     const router = useRouter()
     const supabase = useSupabase()
@@ -70,7 +72,7 @@ export default function SelectCandidatePage() {
             const transformedCandidates: Candidate[] = (data || []).map((candidate) => ({
                 ...candidate,
                 experience: candidate.experience_years
-                    ? `${candidate.experience_years} year${candidate.experience_years > 1 ? "s" : ""}`
+                    ? `${candidate.experience_years} ${t("candidates.years")}`
                     : "Not specified",
                 matchScore: Math.floor(Math.random() * 30) + 70,
                 avatar: `/placeholder.svg?height=80&width=80&query=professional+person`,
@@ -168,15 +170,15 @@ export default function SelectCandidatePage() {
                     <Button variant="ghost" asChild className="mb-4">
                         <Link href={`/dashboard/jobs/${jobId}/candidates`}>
                             <ArrowLeft className="mr-2 h-4 w-4" />
-                            Back to Job Candidates
+                            {t("jobs.backToCandidates")}
                         </Link>
                     </Button>
 
                     <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
                         <div className="flex-1">
-                            <h1 className="text-3xl font-bold tracking-tight mb-2">Add Candidates to Job</h1>
+                            <h1 className="text-3xl font-bold tracking-tight mb-2">{t("jobs.addCandidatesToJob")}</h1>
                             <p className="text-muted-foreground">
-                                Select existing candidates to add to this job position
+                                {t("jobs.selectCandidatesDesc")}
                             </p>
                         </div>
 
@@ -188,7 +190,7 @@ export default function SelectCandidatePage() {
                             >
                                 <Link href={`/dashboard/candidates/new?jobId=${jobId}`}>
                                     <UserPlus className="mr-2 h-4 w-4" />
-                                    Add New Candidate
+                                    {t("candidates.addNew")}
                                 </Link>
                             </Button>
                             <Button
@@ -196,7 +198,7 @@ export default function SelectCandidatePage() {
                                 disabled={selectedCandidates.length === 0 || adding}
                             >
                                 <Check className="mr-2 h-4 w-4" />
-                                {adding ? 'Adding...' : `Add ${selectedCandidates.length} Candidate${selectedCandidates.length !== 1 ? 's' : ''}`}
+                                {adding ? t("candidates.form.adding") : t("candidates.addCount").replace("{count}", selectedCandidates.length.toString())}
                             </Button>
                         </div>
                     </div>
@@ -208,7 +210,7 @@ export default function SelectCandidatePage() {
                         <div className="relative">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                             <Input
-                                placeholder="Search candidates by name, email, or skills..."
+                                placeholder={t("candidates.searchPlaceholder")}
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 className="pl-10"
@@ -221,24 +223,24 @@ export default function SelectCandidatePage() {
                 {loading ? (
                     <div className="text-center py-12">
                         <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                        <p className="text-muted-foreground mt-4">Loading candidates...</p>
+                        <p className="text-muted-foreground mt-4">{t("candidates.loading")}</p>
                     </div>
                 ) : filteredCandidates.length === 0 ? (
                     <Card>
                         <CardContent className="py-12 text-center">
                             <Users className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
                             <h3 className="text-lg font-semibold mb-2">
-                                {candidates.length === 0 ? "No candidates found" : "No matching candidates"}
+                                {candidates.length === 0 ? t("candidates.noResults") : t("candidates.noMatching")}
                             </h3>
                             <p className="text-muted-foreground mb-4">
                                 {candidates.length === 0
-                                    ? "You haven't added any candidates yet."
-                                    : "Try adjusting your search query"}
+                                    ? t("candidates.noCandidatesYet")
+                                    : t("candidates.adjustSearch")}
                             </p>
                             <Button asChild>
                                 <Link href={`/dashboard/candidates/new?jobId=${jobId}`}>
                                     <UserPlus className="mr-2 h-4 w-4" />
-                                    Add New Candidate
+                                    {t("candidates.addNew")}
                                 </Link>
                             </Button>
                         </CardContent>
@@ -249,15 +251,15 @@ export default function SelectCandidatePage() {
                         <div className="mb-6 flex items-center justify-between">
                             <div>
                                 <h2 className="text-xl font-semibold">
-                                    {filteredCandidates.length} candidate{filteredCandidates.length !== 1 ? 's' : ''} found
+                                    {t("candidates.resultsCount").replace("{count}", filteredCandidates.length.toString())}
                                 </h2>
                                 <p className="text-sm text-muted-foreground mt-1">
-                                    {selectedCandidates.length} candidate{selectedCandidates.length !== 1 ? 's' : ''} selected
+                                    {t("candidates.selectedCount").replace("{count}", selectedCandidates.length.toString())}
                                 </p>
                             </div>
                             {selectedCandidates.length > 0 && (
                                 <Badge variant="default" className="text-sm">
-                                    {selectedCandidates.length} selected
+                                    {t("candidates.countSelected").replace("{count}", selectedCandidates.length.toString())}
                                 </Badge>
                             )}
                         </div>
@@ -288,7 +290,7 @@ export default function SelectCandidatePage() {
                                                         <h3 className="text-xl font-semibold">{candidate.name}</h3>
                                                         {isAlreadyAdded && (
                                                             <Badge variant="outline" className="text-xs">
-                                                                Already Added
+                                                                {t("candidates.alreadyAdded")}
                                                             </Badge>
                                                         )}
                                                     </div>
@@ -320,7 +322,7 @@ export default function SelectCandidatePage() {
                                                             ))}
                                                             {candidate.skills.length > 4 && (
                                                                 <Badge variant="outline" className="text-xs">
-                                                                    +{candidate.skills.length - 4} more
+                                                                    +{candidate.skills.length - 4} {t("candidate.moreSkills")}
                                                                 </Badge>
                                                             )}
                                                         </div>
@@ -334,7 +336,7 @@ export default function SelectCandidatePage() {
                                                             {candidate.matchScore}
                                                         </span>
                                                     </div>
-                                                    <span className="text-xs text-muted-foreground">Match Score</span>
+                                                    <span className="text-xs text-muted-foreground">{t("candidate.match")}</span>
                                                 </div>
                                             </div>
                                         </CardContent>

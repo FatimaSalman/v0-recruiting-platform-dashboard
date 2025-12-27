@@ -5,9 +5,11 @@ import { useCallback, useState } from "react"
 // import { loadStripe } from "@stripe/stripe-js"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { startCheckoutSession } from "@/app/actions/stripe"
-import { PRICING_PLANS, formatPrice } from "@/lib/products"
+import { PRICING_PLANS, formatPrice, getTranslatedPlans } from "@/lib/products"
 import { Loader2 } from "lucide-react"
 import { Button } from "./ui/button"
+import { useI18n } from "@/lib/i18n-context"
+
 // const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!)
 
 interface CheckoutDialogProps {
@@ -17,9 +19,12 @@ interface CheckoutDialogProps {
 }
 
 export function CheckoutDialog({ planId, open, onOpenChange }: CheckoutDialogProps) {
+  const { t } = useI18n()
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null)
-  const plan = PRICING_PLANS.find((p) => p.id === planId)
+  const plan = getTranslatedPlans(t).find(p => p.id === planId)
+  // const plan = PRICING_PLANS.find((p) => p.id === planId)
+
   const startCheckoutSessionForPlan = useCallback(() => startCheckoutSession(planId), [planId])
 
   const handleCheckout = async () => {
@@ -47,13 +52,13 @@ export function CheckoutDialog({ planId, open, onOpenChange }: CheckoutDialogPro
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Subscribe to {plan.name}</DialogTitle>
-          <DialogDescription>{formatPrice(plan.priceInCents, plan.currency)}/month</DialogDescription>
+          <DialogTitle>{t("pricing.subscribeTo")} {plan.name}</DialogTitle>
+          <DialogDescription>{formatPrice(plan.priceInCents, plan.currency)}/{t("pricing.month")}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
           <div className="bg-muted p-4 rounded-lg">
-            <h4 className="font-medium mb-2">Plan includes:</h4>
+            <h4 className="font-medium mb-2">{t("pricing.planIncludes")}</h4>
             <ul className="space-y-1 text-sm">
               {plan.features.map((feature, index) => (
                 <li key={index} className="flex items-start gap-2">
@@ -81,10 +86,10 @@ export function CheckoutDialog({ planId, open, onOpenChange }: CheckoutDialogPro
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Processing...
+                  {t("pricing.processing")}
                 </>
               ) : (
-                `Subscribe for ${formatPrice(plan.priceInCents, plan.currency)}/month`
+                `${t("pricing.subscribePrefix")} ${formatPrice(plan.priceInCents, plan.currency)}/${t("pricing.month")}`
               )}
             </Button>
             <Button
@@ -92,12 +97,12 @@ export function CheckoutDialog({ planId, open, onOpenChange }: CheckoutDialogPro
               onClick={() => onOpenChange(false)}
               disabled={loading}
             >
-              Cancel
+              {t("pricing.cancel")}
             </Button>
           </div>
 
           <p className="text-xs text-muted-foreground text-center">
-            You'll be redirected to Stripe to complete your payment
+            {t("pricing.message")}
           </p>
         </div>
       </DialogContent>

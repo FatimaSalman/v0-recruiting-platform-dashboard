@@ -5,9 +5,11 @@ import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
+import { useI18n } from "@/lib/i18n-context"
 
 export function SubscriptionSuccess() {
     const [show, setShow] = useState(true)
+    const { t } = useI18n()
     const router = useRouter()
 
     useEffect(() => {
@@ -27,10 +29,10 @@ export function SubscriptionSuccess() {
                     <CheckCircle className="w-5 h-5 text-green-600" />
                     <div className="flex-1">
                         <h3 className="font-semibold text-green-800 dark:text-green-300">
-                            Subscription Successful!
+                            {t("subscription.success.title")}
                         </h3>
                         <p className="text-sm text-green-700 dark:text-green-400">
-                            Your subscription is now active. Enjoy all premium features.
+                            {t("subscription.success.message")}
                         </p>
                     </div>
                     <Button
@@ -39,7 +41,7 @@ export function SubscriptionSuccess() {
                         className="text-green-700 hover:text-green-800 hover:bg-green-100"
                         onClick={() => setShow(false)}
                     >
-                        Dismiss
+                        {t("subscription.success.dismiss")}
                     </Button>
                 </div>
             </div>

@@ -11,33 +11,7 @@ import { Separator } from "@/components/ui/separator"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
 import {
-  Users,
-  Briefcase,
-  Calendar,
-  DollarSign,
-  TrendingUp,
-  Download,
-  FileText,
-  PieChart,
-  BarChart3,
-  Clock,
-  Target,
-  Award,
-  UserCheck,
-  UserX,
-  Filter,
-  RefreshCw,
-  CheckCircle,
-  XCircle,
-  Clock as ClockIcon,
-  MapPin,
-  Building2,
-  Mail,
-  Phone,
-  GraduationCap,
-  Check,
-  X,
-  AlertCircle,
+  Users, Briefcase, Calendar, TrendingUp, Download, FileText, BarChart3, Target, Award, UserCheck, RefreshCw, CheckCircle, Clock as ClockIcon, MapPin, Building2, Mail, Phone, GraduationCap, Check, AlertCircle
 } from "lucide-react"
 import { format, subMonths, subDays, startOfMonth, endOfMonth, differenceInDays } from "date-fns"
 import { useI18n } from "@/lib/i18n-context"
@@ -106,14 +80,14 @@ export default function ReportsPage() {
     try {
       setLoading(true)
       setError(null)
-      
+
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error("Not authenticated")
 
       const now = new Date()
       let startDate: Date
       let endDate: Date = now
-      
+
       switch (dateRange) {
         case "7":
           startDate = subDays(now, 7)
@@ -194,7 +168,7 @@ export default function ReportsPage() {
       let totalTimeToHire = 0
       let hireCount = 0
       const hiredApps = applications?.filter(a => a.status === 'hired') || []
-      
+
       hiredApps.forEach(app => {
         const appliedAt = new Date(app.applied_at)
         const hiredAt = app.updated_at ? new Date(app.updated_at) : new Date(app.applied_at)
@@ -202,7 +176,7 @@ export default function ReportsPage() {
         totalTimeToHire += days
         hireCount++
       })
-      
+
       const averageTimeToHire = hireCount > 0 ? Math.round(totalTimeToHire / hireCount) : 0
 
       // Applications by status
@@ -222,12 +196,12 @@ export default function ReportsPage() {
         const date = subMonths(now, 5 - i)
         const monthStart = startOfMonth(date)
         const monthEnd = endOfMonth(date)
-        
+
         const monthApplications = applications?.filter(app => {
           const appDate = new Date(app.applied_at)
           return appDate >= monthStart && appDate <= monthEnd
         }).length || 0
-        
+
         const monthHires = applications?.filter(app => {
           const appDate = new Date(app.applied_at)
           return app.status === 'hired' && appDate >= monthStart && appDate <= monthEnd
@@ -253,12 +227,11 @@ export default function ReportsPage() {
 
       // Candidates by experience
       const experienceRanges = {
-        '0-2 years': { min: 0, max: 2 },
-        '3-5 years': { min: 3, max: 5 },
-        '6-10 years': { min: 6, max: 10 },
-        '10+ years': { min: 11, max: Infinity }
+        [t("experience.0-2")]: { min: 0, max: 2 },
+        [t("experience.3-5")]: { min: 3, max: 5 },
+        [t("experience.6-10")]: { min: 6, max: 10 },
+        [t("experience.10+")]: { min: 11, max: Infinity }
       }
-
       const candidatesByExperience = Object.entries(experienceRanges).map(([range, { min, max }]) => ({
         experience: range,
         count: candidates?.filter(c => {
@@ -276,7 +249,7 @@ export default function ReportsPage() {
       })
 
       const candidatesByAvailability = Object.entries(availabilityCounts).map(([availability, count]) => ({
-        availability: availability.replace('-', ' '),
+        availability: t(`availability.${availability}`) || availability.replace('-', ' '),
         count
       }))
 
@@ -324,7 +297,7 @@ export default function ReportsPage() {
         const jobApplications = applications?.filter(a => a.job_id === job.id) || []
         const hires = jobApplications.filter(a => a.status === 'hired').length
         const fillRate = jobApplications.length > 0 ? Math.round((hires / jobApplications.length) * 100) : 0
-        
+
         return {
           id: job.id,
           title: job.title,
@@ -377,29 +350,29 @@ export default function ReportsPage() {
         ...(applications?.slice(0, 3).map(app => ({
           id: app.id,
           type: 'application' as const,
-          title: `New application for ${app.job?.title || 'job'}`,
-          description: `${app.candidate?.name || 'Candidate'} applied`,
+          title: `${t('reports.newApp')} ${app.job?.title || `${t("common.job")}`}`,
+          description: `${app.candidate?.name || `${t("common.candidate")}`} applied`,
           timestamp: app.applied_at,
-          user: app.candidate?.name || 'Unknown'
+          user: app.candidate?.name || `{t("common.unknown")}`
         })) || []),
         ...(interviews?.slice(0, 2).map(interview => ({
           id: interview.id,
           type: 'interview' as const,
-          title: `${interview.status === 'scheduled' ? 'Scheduled' : 'Completed'} interview`,
+          title: `${interview.status === 'scheduled' ? t('status.scheduled') : t('status.completed')} ${t('reports.interview')}`,
           description: interview.title,
           timestamp: interview.created_at,
-          user: 'System'
+          user: `${t("common.system")}`
         })) || []),
         ...(candidates?.slice(0, 2).map(candidate => ({
           id: candidate.id,
           type: 'candidate' as const,
-          title: `New candidate added`,
+          title: `${t('reports.newCandidate')}`,
           description: candidate.name,
           timestamp: candidate.created_at,
-          user: 'Recruiter'
+          user: `${t('common.recruiter')}`
         })) || [])
       ].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-       .slice(0, 5)
+        .slice(0, 5)
 
       // Set analytics data
       setAnalytics({
@@ -424,10 +397,10 @@ export default function ReportsPage() {
           byStatus: applicationsByStatus,
           monthlyTrend,
           sourceBreakdown: [
-            { source: 'Direct Application', count: Math.round(totalApplications * 0.6), percentage: 60 },
-            { source: 'Referral', count: Math.round(totalApplications * 0.2), percentage: 20 },
-            { source: 'Job Board', count: Math.round(totalApplications * 0.15), percentage: 15 },
-            { source: 'Agency', count: Math.round(totalApplications * 0.05), percentage: 5 }
+            { source: t('source.direct'), count: Math.round(totalApplications * 0.6), percentage: 60 },
+            { source: t('source.referral'), count: Math.round(totalApplications * 0.2), percentage: 20 },
+            { source: t('source.jobBoard'), count: Math.round(totalApplications * 0.15), percentage: 15 },
+            { source: t('source.agency'), count: Math.round(totalApplications * 0.05), percentage: 5 }
           ]
         },
         candidates: {
@@ -464,7 +437,7 @@ export default function ReportsPage() {
 
   const handleExport = () => {
     if (!analytics) return
-    
+
     // Create CSV content
     const csvContent = [
       ['TalentHub Recruitment Analytics Report'],
@@ -549,7 +522,7 @@ export default function ReportsPage() {
         <div className="p-6 lg:p-8 max-w-7xl mx-auto">
           <div className="text-center py-12">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-            <p className="text-muted-foreground mt-4">Loading reports...</p>
+            <p className="text-muted-foreground mt-4">{t("reports.loading")}</p>
           </div>
         </div>
       </DashboardLayout>
@@ -562,11 +535,11 @@ export default function ReportsPage() {
         <div className="p-6 lg:p-8 max-w-7xl mx-auto">
           <div className="text-center py-12">
             <AlertCircle className="w-12 h-12 mx-auto mb-4 text-destructive" />
-            <h3 className="text-lg font-semibold mb-2">Error Loading Reports</h3>
+            <h3 className="text-lg font-semibold mb-2">{t("reports.error")}</h3>
             <p className="text-muted-foreground mb-4">{error}</p>
             <Button onClick={refreshData}>
               <RefreshCw className="mr-2 h-4 w-4" />
-              Try Again
+              {t("reports.tryAgain")}
             </Button>
           </div>
         </div>
@@ -580,8 +553,8 @@ export default function ReportsPage() {
         <div className="p-6 lg:p-8 max-w-7xl mx-auto">
           <div className="text-center py-12">
             <FileText className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-            <h3 className="text-lg font-semibold mb-2">No data available</h3>
-            <p className="text-muted-foreground mb-4">Start by adding candidates and jobs to generate reports.</p>
+            <h3 className="text-lg font-semibold mb-2">{t("reports.noData")}</h3>
+            <p className="text-muted-foreground mb-4">{t("reports.noDataDesc")}</p>
           </div>
         </div>
       </DashboardLayout>
@@ -594,39 +567,39 @@ export default function ReportsPage() {
         {/* Header */}
         <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight mb-2">Reports & Analytics</h1>
+            <h1 className="text-3xl font-bold tracking-tight mb-2">{t("reports.title")}</h1>
             <p className="text-muted-foreground">
-              Real-time insights and metrics for your recruitment pipeline
+              {t("reports.subtitle")}
             </p>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-2">
             <div className="flex items-center gap-2">
               <Label htmlFor="date-range" className="text-sm whitespace-nowrap">
-                Date Range:
+                {t("reports.dateRange")}:
               </Label>
               <Select value={dateRange} onValueChange={setDateRange}>
                 <SelectTrigger className="w-32">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="7">Last 7 days</SelectItem>
-                  <SelectItem value="30">Last 30 days</SelectItem>
-                  <SelectItem value="90">Last 90 days</SelectItem>
-                  <SelectItem value="year">Last year</SelectItem>
-                  <SelectItem value="all">All time</SelectItem>
+                  <SelectItem value="7">{t("reports.last7Days")}</SelectItem>
+                  <SelectItem value="30">{t("reports.last30Days")}</SelectItem>
+                  <SelectItem value="90">{t("reports.last90Days")}</SelectItem>
+                  <SelectItem value="year">{t("reports.lastYear")}</SelectItem>
+                  <SelectItem value="all">{t("reports.allTime")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-            
+
             <div className="flex gap-2">
               <Button variant="outline" onClick={refreshData} className="bg-transparent">
                 <RefreshCw className="mr-2 h-4 w-4" />
-                Refresh
+                {t("reports.refresh")}
               </Button>
               <Button onClick={handleExport} disabled={!analytics}>
                 <Download className="mr-2 h-4 w-4" />
-                Export CSV
+                {t("reports.export")}
               </Button>
             </div>
           </div>
@@ -637,7 +610,7 @@ export default function ReportsPage() {
           <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
             <div className="flex items-center gap-2 text-destructive">
               <AlertCircle className="w-4 h-4" />
-              <span className="font-medium">Error:</span>
+              <span className="font-medium"> {t("common.error")}</span>
               <span>{error}</span>
             </div>
           </div>
@@ -649,7 +622,7 @@ export default function ReportsPage() {
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Total Candidates</p>
+                  <p className="text-sm text-muted-foreground">{t("reports.totalCandidates")}</p>
                   <p className="text-2xl font-bold">{analytics.overview.totalCandidates}</p>
                 </div>
                 <div className="p-2 bg-primary/10 rounded-lg">
@@ -663,7 +636,7 @@ export default function ReportsPage() {
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Active Jobs</p>
+                  <p className="text-sm text-muted-foreground">{t("reports.activeJobs")}</p>
                   <p className="text-2xl font-bold">{analytics.overview.openJobs}</p>
                 </div>
                 <div className="p-2 bg-blue-500/10 rounded-lg">
@@ -677,7 +650,7 @@ export default function ReportsPage() {
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Hired Candidates</p>
+                  <p className="text-sm text-muted-foreground">{t("reports.hiredCandidates")}</p>
                   <p className="text-2xl font-bold">{analytics.overview.hiredCount}</p>
                 </div>
                 <div className="p-2 bg-emerald-500/10 rounded-lg">
@@ -691,8 +664,8 @@ export default function ReportsPage() {
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Avg. Time to Hire</p>
-                  <p className="text-2xl font-bold">{analytics.overview.averageTimeToHire} days</p>
+                  <p className="text-sm text-muted-foreground">{t("reports.avgTimeToHire")}</p>
+                  <p className="text-2xl font-bold">{analytics.overview.averageTimeToHire} {t("reports.days")}</p>
                 </div>
                 <div className="p-2 bg-purple-500/10 rounded-lg">
                   <ClockIcon className="w-6 h-6 text-purple-500" />
@@ -711,9 +684,9 @@ export default function ReportsPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <TrendingUp className="w-5 h-5" />
-                  Applications Overview
+                  {t("reports.applicationsOverview")}
                 </CardTitle>
-                <CardDescription>Status distribution of all applications</CardDescription>
+                <CardDescription>{t("reports.statusDistribution")}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -741,15 +714,15 @@ export default function ReportsPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Users className="w-5 h-5" />
-                  Candidates Analysis
+                  {t("reports.candidatesAnalysis")}
                 </CardTitle>
-                <CardDescription>Breakdown of candidate data</CardDescription>
+                <CardDescription>{t("reports.candidateBreakdown")}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* By Status */}
                   <div className="space-y-4">
-                    <h4 className="font-semibold">By Status</h4>
+                    <h4 className="font-semibold">{t("reports.byStatus")}</h4>
                     {analytics.candidates.byStatus.map((status, index) => (
                       <div key={index} className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
@@ -763,7 +736,7 @@ export default function ReportsPage() {
 
                   {/* By Experience */}
                   <div className="space-y-4">
-                    <h4 className="font-semibold">By Experience</h4>
+                    <h4 className="font-semibold">{t("reports.byExperience")}</h4>
                     {analytics.candidates.byExperience.map((exp, index) => (
                       <div key={index} className="flex items-center justify-between">
                         <span className="text-sm">{exp.experience}</span>
@@ -780,9 +753,9 @@ export default function ReportsPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Briefcase className="w-5 h-5" />
-                  Top Performing Jobs
+                  {t("reports.topJobs")}
                 </CardTitle>
-                <CardDescription>Jobs with highest application and hire rates</CardDescription>
+                <CardDescription>{t("reports.topJobsDesc")}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -790,16 +763,16 @@ export default function ReportsPage() {
                     <div key={index} className="border rounded-lg p-4 hover:bg-muted/50 transition-colors">
                       <div className="flex items-center justify-between mb-2">
                         <h4 className="font-semibold">{job.title}</h4>
-                        <Badge variant="outline">{job.applications} applications</Badge>
+                        <Badge variant="outline">{job.applications} {t("reports.applications")}</Badge>
                       </div>
                       <div className="flex items-center gap-4 text-sm text-muted-foreground">
                         <div className="flex items-center gap-1">
                           <UserCheck className="w-4 h-4" />
-                          <span>{job.hires} hires</span>
+                          <span>{job.hires} {t("reports.hires")}</span>
                         </div>
                         <div className="flex items-center gap-1">
                           <Target className="w-4 h-4" />
-                          <span>{job.fillRate}% fill rate</span>
+                          <span>{job.fillRate}% {t("reports.fillRate")}</span>
                         </div>
                       </div>
                     </div>
@@ -816,17 +789,17 @@ export default function ReportsPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Target className="w-5 h-5" />
-                  Hiring Metrics
+                  {t("reports.hiringMetrics")}
                 </CardTitle>
-                <CardDescription>Key performance indicators</CardDescription>
+                <CardDescription>{t("reports.kpi")}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm">Time to Hire</span>
+                      <span className="text-sm">{t("reports.timeToHire")}</span>
                       <Badge className={analytics.hiringMetrics.timeToHire < 30 ? 'bg-green-500/10 text-green-500' : 'bg-yellow-500/10 text-yellow-500'}>
-                        {analytics.hiringMetrics.timeToHire} days
+                        {analytics.hiringMetrics.timeToHire} {t("reports.days")}
                       </Badge>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
@@ -839,30 +812,30 @@ export default function ReportsPage() {
 
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm">Offer Acceptance Rate</span>
+                      <span className="text-sm">{t("reports.offerAcceptance")}</span>
                       <Badge className={analytics.hiringMetrics.offerAcceptanceRate > 80 ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}>
-                        {analytics.hiringMetrics.offerAcceptanceRate}%
+                        {analytics.hiringMetrics.offerAcceptanceRate} %
                       </Badge>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
                       <div
                         className={`h-2 rounded-full ${analytics.hiringMetrics.offerAcceptanceRate > 80 ? 'bg-green-500' : 'bg-red-500'}`}
-                        style={{ width: `${analytics.hiringMetrics.offerAcceptanceRate}%` }}
+                        style={{ width: `${analytics.hiringMetrics.offerAcceptanceRate} %` }}
                       />
                     </div>
                   </div>
 
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm">Interview Success Rate</span>
+                      <span className="text-sm">{t("reports.interviewSuccess")}</span>
                       <Badge className={analytics.hiringMetrics.interviewSuccessRate > 70 ? 'bg-green-500/10 text-green-500' : 'bg-yellow-500/10 text-yellow-500'}>
-                        {analytics.hiringMetrics.interviewSuccessRate}%
+                        {analytics.hiringMetrics.interviewSuccessRate} %
                       </Badge>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
                       <div
                         className={`h-2 rounded-full ${analytics.hiringMetrics.interviewSuccessRate > 70 ? 'bg-green-500' : 'bg-yellow-500'}`}
-                        style={{ width: `${analytics.hiringMetrics.interviewSuccessRate}%` }}
+                        style={{ width: `${analytics.hiringMetrics.interviewSuccessRate} %` }}
                       />
                     </div>
                   </div>
@@ -875,19 +848,18 @@ export default function ReportsPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Calendar className="w-5 h-5" />
-                  Recent Activity
+                  {t("reports.recentActivity")}
                 </CardTitle>
-                <CardDescription>Latest updates in your pipeline</CardDescription>
+                <CardDescription>{t("reports.latestUpdates")}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   {analytics.recentActivity.map((activity, index) => (
                     <div key={index} className="flex items-start gap-3">
-                      <div className={`mt-1 w-2 h-2 rounded-full ${
-                        activity.type === 'application' ? 'bg-blue-500' :
+                      <div className={`mt-1 w-2 h-2 rounded-full ${activity.type === 'application' ? 'bg-blue-500' :
                         activity.type === 'interview' ? 'bg-purple-500' :
-                        'bg-green-500'
-                      }`} />
+                          'bg-green-500'
+                        }`} />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium truncate">{activity.title}</p>
                         <p className="text-xs text-muted-foreground truncate">{activity.description}</p>
@@ -910,28 +882,28 @@ export default function ReportsPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <BarChart3 className="w-5 h-5" />
-                  Quick Stats
+                  {t("reports.quickStats")}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Total Applications</span>
+                    <span className="text-sm text-muted-foreground">{t("reports.totalApplications")}</span>
                     <span className="font-semibold">{analytics.overview.totalApplications}</span>
                   </div>
                   <Separator />
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Total Interviews</span>
+                    <span className="text-sm text-muted-foreground">{t("reports.totalInterviews")}</span>
                     <span className="font-semibold">{analytics.overview.totalInterviews}</span>
                   </div>
                   <Separator />
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Open Positions</span>
+                    <span className="text-sm text-muted-foreground">{t("reports.openPositions")}</span>
                     <span className="font-semibold">{analytics.overview.openJobs}</span>
                   </div>
                   <Separator />
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Active Candidates</span>
+                    <span className="text-sm text-muted-foreground">{t("reports.activeCandidates")}</span>
                     <span className="font-semibold">{analytics.overview.activeCandidates}</span>
                   </div>
                 </div>
@@ -945,74 +917,74 @@ export default function ReportsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <FileText className="w-5 h-5" />
-              Report Summary
+              {t("reports.reportSummary")}
             </CardTitle>
             <CardDescription>
-              Generated on {format(new Date(), "MMMM d, yyyy 'at' h:mm a")} | Data from last {dateRange} days
+              {t("reports.generatedOn")} {format(new Date(), "MMMM d, yyyy 'at' h:mm a")} |  {t("reports.dataFrom")} {dateRange}  {t("reports.days")}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <div className="space-y-3">
-                <h4 className="font-semibold">Performance Highlights</h4>
+                <h4 className="font-semibold">{t("reports.highlights")}</h4>
                 <ul className="text-sm text-muted-foreground space-y-2">
                   <li className="flex items-start gap-2">
                     <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span>Successfully placed {analytics.overview.placedCandidates} candidates</span>
+                    <span>{t("reports.successfullyPlaced")} {analytics.overview.placedCandidates} {t("reports.candidates")}</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span>Maintained {analytics.overview.openJobs} active job openings</span>
+                    <span>{t("reports.maintained")} {analytics.overview.openJobs} {t("reports.activejobOpenings")}</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span>Processed {analytics.overview.totalApplications} applications</span>
+                    <span>{t("reports.processedAppsCount")} {analytics.overview.totalApplications} {t("reports.applications")}</span>
                   </li>
                   {analytics.hiringMetrics.offerAcceptanceRate > 80 && (
                     <li className="flex items-start gap-2">
                       <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                      <span>High offer acceptance rate of {analytics.hiringMetrics.offerAcceptanceRate}%</span>
+                      <span>{t("reports.highOfferRate")} {analytics.hiringMetrics.offerAcceptanceRate}%</span>
                     </li>
                   )}
                 </ul>
               </div>
 
               <div className="space-y-3">
-                <h4 className="font-semibold">Areas for Improvement</h4>
+                <h4 className="font-semibold">{t("reports.improvements")}</h4>
                 <ul className="text-sm text-muted-foreground space-y-2">
                   {analytics.overview.averageTimeToHire > 30 && (
                     <li className="flex items-start gap-2">
                       <AlertCircle className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />
-                      <span>Reduce time to hire (currently {analytics.overview.averageTimeToHire} days)</span>
+                      <span>{t("reports.reduceTime")} ({t("reports.currently")} {analytics.overview.averageTimeToHire} {t("reports.days")})</span>
                     </li>
                   )}
                   {analytics.interviews.noShowRate > 10 && (
                     <li className="flex items-start gap-2">
                       <AlertCircle className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />
-                      <span>Improve interview attendance (no-show rate: {analytics.interviews.noShowRate}%)</span>
+                      <span>{t("reports.improveAttendance")} ({t("reports.noShowRate")}{analytics.interviews.noShowRate}%)</span>
                     </li>
                   )}
                   {analytics.overview.hiredCount === 0 && (
                     <li className="flex items-start gap-2">
                       <AlertCircle className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />
-                      <span>Focus on converting interviews to hires</span>
+                      <span>{t("reports.convertInterviews")}</span>
                     </li>
                   )}
                   <li className="flex items-start gap-2">
                     <AlertCircle className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />
-                    <span>Enhance candidate engagement and communication</span>
+                    <span>{t("reports.enhanceEngagement")}</span>
                   </li>
                 </ul>
               </div>
 
               <div className="space-y-3">
-                <h4 className="font-semibold">Recommendations</h4>
+                <h4 className="font-semibold">{t("reports.recommendations")}</h4>
                 <ul className="text-sm text-muted-foreground space-y-2">
-                  <li>• Streamline interview scheduling process</li>
-                  <li>• Implement automated follow-up system</li>
-                  <li>• Focus on quality candidates over quantity</li>
-                  <li>• Enhance employer branding efforts</li>
-                  <li>• Track candidate sources for better targeting</li>
+                  <li>• {t("reports.rec1")}</li>
+                  <li>• {t("reports.rec2")}</li>
+                  <li>• {t("reports.rec3")}</li>
+                  <li>• {t("reports.rec4")}</li>
+                  <li>• {t("reports.rec5")}</li>
                 </ul>
               </div>
             </div>

@@ -12,6 +12,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { format } from "date-fns"
+import { ar, enUS } from "date-fns/locale"
+import { useI18n } from "@/lib/i18n-context"
 import { CalendarIcon, Clock, MapPin, Users, Mail, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 
@@ -41,6 +43,7 @@ export function EditInterviewForm({ interviewId }: EditInterviewFormProps) {
 
     const router = useRouter()
     const supabase = useSupabase()
+    const { t, locale } = useI18n()
 
     useEffect(() => {
         fetchInterviewDetails()
@@ -102,7 +105,7 @@ export function EditInterviewForm({ interviewId }: EditInterviewFormProps) {
             }
         } catch (error) {
             console.error("Error fetching interview details:", error)
-            setError("Failed to load interview details")
+            setError(t("editInterview.errorLoad"))
         } finally {
             setLoading(false)
         }
@@ -131,7 +134,7 @@ export function EditInterviewForm({ interviewId }: EditInterviewFormProps) {
             // Redirect back to interview details or interviews list
             router.push(`/dashboard/interviews`)
         } catch (err: any) {
-            setError(err.message || "Failed to update interview")
+            setError(err.message || t("editInterview.errorUpdate"))
         } finally {
             setSaving(false)
         }
@@ -142,7 +145,7 @@ export function EditInterviewForm({ interviewId }: EditInterviewFormProps) {
             <div className="p-6 lg:p-8 max-w-4xl mx-auto">
                 <div className="text-center py-12">
                     <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                    <p className="text-muted-foreground mt-4">Loading interview details...</p>
+                    <p className="text-muted-foreground mt-4">{t("editInterview.loading")}</p>
                 </div>
             </div>
         )
@@ -155,13 +158,13 @@ export function EditInterviewForm({ interviewId }: EditInterviewFormProps) {
                 <Button variant="ghost" asChild className="mb-4">
                     <Link href="/dashboard/interviews">
                         <ArrowLeft className="mr-2 h-4 w-4" />
-                        Back to Interviews
+                        {t("editInterview.back")}
                     </Link>
                 </Button>
 
-                <h1 className="text-3xl font-bold tracking-tight mb-2">Edit Interview</h1>
+                <h1 className="text-3xl font-bold tracking-tight mb-2">{t("editInterview.title")}</h1>
                 <p className="text-muted-foreground">
-                    Update interview details and scheduling
+                    {t("editInterview.subtitle")}
                 </p>
             </div>
 
@@ -174,8 +177,8 @@ export function EditInterviewForm({ interviewId }: EditInterviewFormProps) {
             <form onSubmit={handleSubmit}>
                 <Card>
                     <CardHeader>
-                        <CardTitle>Interview Details</CardTitle>
-                        <CardDescription>Update the interview information</CardDescription>
+                        <CardTitle>{t("editInterview.detailsTitle")}</CardTitle>
+                        <CardDescription>{t("editInterview.detailsDesc")}</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
                         {/* Candidate & Job Info */}
@@ -184,14 +187,14 @@ export function EditInterviewForm({ interviewId }: EditInterviewFormProps) {
                                 {candidate && (
                                     <div className="flex items-center gap-2">
                                         <Users className="h-4 w-4 text-muted-foreground" />
-                                        <span className="font-medium">Candidate:</span>
+                                        <span className="font-medium">{t("editInterview.candidate")}</span>
                                         <span>{candidate.name}</span>
                                         <span className="text-muted-foreground">({candidate.email})</span>
                                     </div>
                                 )}
                                 {job && (
                                     <div className="flex items-center gap-2">
-                                        <span className="font-medium">Job:</span>
+                                        <span className="font-medium">{t("editInterview.job")}</span>
                                         <span>{job.title}</span>
                                     </div>
                                 )}
@@ -200,20 +203,20 @@ export function EditInterviewForm({ interviewId }: EditInterviewFormProps) {
 
                         {/* Title */}
                         <div className="space-y-2">
-                            <Label htmlFor="title">Interview Title *</Label>
+                            <Label htmlFor="title">{t("editInterview.interviewTitle")}</Label>
                             <Input
                                 id="title"
                                 required
                                 value={formData.title}
                                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                                placeholder="e.g., Technical Interview, Cultural Fit, etc."
+                                placeholder={t("editInterview.titlePlaceholder")}
                             />
                         </div>
 
                         {/* Interview Type & Status */}
                         <div className="grid md:grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label htmlFor="interview_type">Interview Type</Label>
+                                <Label htmlFor="interview_type">{t("editInterview.type")}</Label>
                                 <Select
                                     value={formData.interview_type}
                                     onValueChange={(value: "phone" | "video" | "in_person") =>
@@ -224,15 +227,15 @@ export function EditInterviewForm({ interviewId }: EditInterviewFormProps) {
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="phone">Phone Interview</SelectItem>
-                                        <SelectItem value="video">Video Interview</SelectItem>
-                                        <SelectItem value="in_person">In-Person Interview</SelectItem>
+                                        <SelectItem value="phone">{t("editInterview.type.phone")}</SelectItem>
+                                        <SelectItem value="video">{t("editInterview.type.video")}</SelectItem>
+                                        <SelectItem value="in_person">{t("editInterview.type.inPerson")}</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="status">Status</Label>
+                                <Label htmlFor="status">{t("editInterview.status")}</Label>
                                 <Select
                                     value={formData.status}
                                     onValueChange={(value: "scheduled" | "completed" | "cancelled" | "rescheduled") =>
@@ -243,10 +246,10 @@ export function EditInterviewForm({ interviewId }: EditInterviewFormProps) {
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="scheduled">Scheduled</SelectItem>
-                                        <SelectItem value="completed">Completed</SelectItem>
-                                        <SelectItem value="cancelled">Cancelled</SelectItem>
-                                        <SelectItem value="rescheduled">Rescheduled</SelectItem>
+                                        <SelectItem value="scheduled">{t("status.interview.scheduled")}</SelectItem>
+                                        <SelectItem value="completed">{t("status.interview.completed")}</SelectItem>
+                                        <SelectItem value="cancelled">{t("status.interview.cancelled")}</SelectItem>
+                                        <SelectItem value="rescheduled">{t("status.interview.rescheduled")}</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
@@ -254,7 +257,7 @@ export function EditInterviewForm({ interviewId }: EditInterviewFormProps) {
 
                         {/* Date & Time */}
                         <div className="space-y-2">
-                            <Label>Scheduled Date & Time *</Label>
+                            <Label>{t("editInterview.dateTime")}</Label>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <Popover>
                                     <PopoverTrigger asChild>
@@ -264,9 +267,9 @@ export function EditInterviewForm({ interviewId }: EditInterviewFormProps) {
                                         >
                                             <CalendarIcon className="mr-2 h-4 w-4" />
                                             {formData.scheduled_at ? (
-                                                format(formData.scheduled_at, "PPP")
+                                                format(formData.scheduled_at, "PPP", { locale: locale === 'ar' ? ar : enUS })
                                             ) : (
-                                                <span>Pick a date</span>
+                                                <span>{t("editInterview.pickDate")}</span>
                                             )}
                                         </Button>
                                     </PopoverTrigger>
@@ -300,7 +303,7 @@ export function EditInterviewForm({ interviewId }: EditInterviewFormProps) {
                         {/* Duration & Location */}
                         <div className="grid md:grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label htmlFor="duration">Duration (minutes)</Label>
+                                <Label htmlFor="duration">{t("editInterview.duration")}</Label>
                                 <div className="flex items-center gap-2">
                                     <Clock className="h-4 w-4 text-muted-foreground" />
                                     <Input
@@ -315,7 +318,7 @@ export function EditInterviewForm({ interviewId }: EditInterviewFormProps) {
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="location">Location / Meeting Link</Label>
+                                <Label htmlFor="location">{t("editInterview.location")}</Label>
                                 <div className="flex items-center gap-2">
                                     <MapPin className="h-4 w-4 text-muted-foreground" />
                                     <Input
@@ -324,8 +327,8 @@ export function EditInterviewForm({ interviewId }: EditInterviewFormProps) {
                                         onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                                         placeholder={
                                             formData.interview_type === "video"
-                                                ? "Zoom/Google Meet link"
-                                                : "Office address or location"
+                                                ? t("editInterview.locationPlaceholderVideo")
+                                                : t("editInterview.locationPlaceholderInPerson")
                                         }
                                     />
                                 </div>
@@ -334,10 +337,10 @@ export function EditInterviewForm({ interviewId }: EditInterviewFormProps) {
 
                         {/* Interviewer Info */}
                         <div className="space-y-4">
-                            <h3 className="text-lg font-semibold">Interviewer Information</h3>
+                            <h3 className="text-lg font-semibold">{t("editInterview.interviewerInfo")}</h3>
                             <div className="grid md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor="interviewer_name">Interviewer Name</Label>
+                                    <Label htmlFor="interviewer_name">{t("editInterview.interviewerName")}</Label>
                                     <div className="flex items-center gap-2">
                                         <Users className="h-4 w-4 text-muted-foreground" />
                                         <Input
@@ -350,7 +353,7 @@ export function EditInterviewForm({ interviewId }: EditInterviewFormProps) {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label htmlFor="interviewer_email">Interviewer Email</Label>
+                                    <Label htmlFor="interviewer_email">{t("editInterview.interviewerEmail")}</Label>
                                     <div className="flex items-center gap-2">
                                         <Mail className="h-4 w-4 text-muted-foreground" />
                                         <Input
@@ -367,13 +370,13 @@ export function EditInterviewForm({ interviewId }: EditInterviewFormProps) {
 
                         {/* Notes */}
                         <div className="space-y-2">
-                            <Label htmlFor="notes">Notes</Label>
+                            <Label htmlFor="notes">{t("editInterview.notes")}</Label>
                             <Textarea
                                 id="notes"
                                 rows={4}
                                 value={formData.notes}
                                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                                placeholder="Additional notes about the interview..."
+                                placeholder={t("editInterview.notesPlaceholder")}
                             />
                         </div>
                     </CardContent>
@@ -387,10 +390,10 @@ export function EditInterviewForm({ interviewId }: EditInterviewFormProps) {
                         onClick={() => router.back()}
                         disabled={saving}
                     >
-                        Cancel
+                        {t("editInterview.cancel")}
                     </Button>
                     <Button type="submit" disabled={saving}>
-                        {saving ? "Updating..." : "Update Interview"}
+                        {saving ? t("editInterview.updating") : t("editInterview.update")}
                     </Button>
                 </div>
             </form>

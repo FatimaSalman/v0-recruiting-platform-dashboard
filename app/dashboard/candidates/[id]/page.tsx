@@ -33,6 +33,7 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import { formatDistanceToNow, format } from "date-fns"
+import { ar, enUS } from "date-fns/locale"
 import { useI18n } from "@/lib/i18n-context"
 import {
     DropdownMenu,
@@ -59,7 +60,7 @@ export default function CandidateProfilePage() {
     const [notes, setNotes] = useState("")
     const [savingNotes, setSavingNotes] = useState(false)
     const [contactMethod, setContactMethod] = useState<'email' | 'phone' | 'linkedin'>('email')
-
+    const { t, locale } = useI18n()
     const params = useParams()
     const supabase = useSupabase()
     const candidateId = params.id as string
@@ -118,7 +119,7 @@ export default function CandidateProfilePage() {
         try {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) {
-                throw new Error("User not authenticated!");
+                throw new Error(t("auth.error"));
             }
 
             const { data: candidateCheck, error: checkError } = await supabase
@@ -129,7 +130,7 @@ export default function CandidateProfilePage() {
 
             if (checkError) throw checkError
             if (candidateCheck.user_id !== user.id) {
-                throw new Error("You don't have permission to update this candidate!");
+                throw new Error(t("auth.error"));
             }
 
             const { error } = await supabase
@@ -198,26 +199,26 @@ export default function CandidateProfilePage() {
         if (candidate.applications?.some((app: any) => app.status === 'hired')) {
             return (
                 <Badge className="bg-blue-500/10 text-blue-500 border-blue-500/20">
-                    <Award className="w-3 h-3 mr-1" /> Placed
+                    <Award className="w-3 h-3 mr-1" /> {t("status.placed")}
                 </Badge>
             )
         } else
             switch (status) {
                 case 'active':
                     return <Badge className="bg-green-500/10 text-green-500 border-green-500/20">
-                        <CheckCircle className="w-3 h-3 mr-1" /> Active
+                        <CheckCircle className="w-3 h-3 mr-1" /> {t("status.active")}
                     </Badge>
                 case 'inactive':
                     return <Badge className="bg-gray-500/10 text-gray-500 border-gray-500/20">
-                        <Clock className="w-3 h-3 mr-1" /> Inactive
+                        <Clock className="w-3 h-3 mr-1" /> {t("status.inactive")}
                     </Badge>
                 case 'placed':
                     return <Badge className="bg-blue-500/10 text-blue-500 border-blue-500/20">
-                        <Award className="w-3 h-3 mr-1" /> Placed
+                        <Award className="w-3 h-3 mr-1" /> {t("status.placed")}
                     </Badge>
                 case 'withdrawn':
                     return <Badge className="bg-red-500/10 text-red-500 border-red-500/20">
-                        <XCircle className="w-3 h-3 mr-1" /> Withdrawn
+                        <XCircle className="w-3 h-3 mr-1" /> {t("status.withdrawn")}
                     </Badge>
                 default:
                     return <Badge variant="outline">{status}</Badge>
@@ -226,11 +227,11 @@ export default function CandidateProfilePage() {
 
     const getAvailabilityBadge = (availability: string) => {
         const availabilityMap: Record<string, { label: string, color: string }> = {
-            'immediate': { label: 'Immediate', color: 'bg-green-500/10 text-green-500' },
-            '2-weeks': { label: '2 Weeks', color: 'bg-blue-500/10 text-blue-500' },
-            '1-month': { label: '1 Month', color: 'bg-yellow-500/10 text-yellow-500' },
-            '3-months': { label: '3 Months', color: 'bg-orange-500/10 text-orange-500' },
-            'not-available': { label: 'Not Available', color: 'bg-red-500/10 text-red-500' },
+            'immediate': { label: t("availability.immediate"), color: 'bg-green-500/10 text-green-500' },
+            '2-weeks': { label: t("availability.2-weeks"), color: 'bg-blue-500/10 text-blue-500' },
+            '1-month': { label: t("availability.1-month"), color: 'bg-yellow-500/10 text-yellow-500' },
+            '3-months': { label: t("availability.3-month"), color: 'bg-orange-500/10 text-orange-500' },
+            'not-available': { label: t("availability.not-available"), color: 'bg-red-500/10 text-red-500' },
         }
 
         const info = availabilityMap[availability] || { label: availability, color: 'bg-gray-500/10 text-gray-500' }
@@ -240,17 +241,17 @@ export default function CandidateProfilePage() {
     const getApplicationStatusBadge = (status: string) => {
         switch (status) {
             case 'applied':
-                return <Badge className="bg-blue-500/10 text-blue-500 border-blue-500/20">Applied</Badge>
+                return <Badge className="bg-blue-500/10 text-blue-500 border-blue-500/20">{t("status.application.applied")}</Badge>
             case 'screening':
-                return <Badge className="bg-yellow-500/10 text-yellow-500 border-yellow-500/20">Screening</Badge>
+                return <Badge className="bg-yellow-500/10 text-yellow-500 border-yellow-500/20">{t("status.application.screening")}</Badge>
             case 'interview':
-                return <Badge className="bg-purple-500/10 text-purple-500 border-purple-500/20">Interview</Badge>
+                return <Badge className="bg-purple-500/10 text-purple-500 border-purple-500/20">{t("status.application.interview")}</Badge>
             case 'offer':
-                return <Badge className="bg-green-500/10 text-green-500 border-green-500/20">Offer</Badge>
+                return <Badge className="bg-green-500/10 text-green-500 border-green-500/20">{t("status.application.offer")}</Badge>
             case 'hired':
-                return <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20">Hired</Badge>
+                return <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20">{t("status.application.hired")}</Badge>
             case 'rejected':
-                return <Badge className="bg-red-500/10 text-red-500 border-red-500/20">Rejected</Badge>
+                return <Badge className="bg-red-500/10 text-red-500 border-red-500/20">{t("status.application.rejected")}</Badge>
             default:
                 return <Badge variant="outline">{status}</Badge>
         }
@@ -259,13 +260,13 @@ export default function CandidateProfilePage() {
     const getInterviewStatusBadge = (status: string) => {
         switch (status) {
             case 'scheduled':
-                return <Badge className="bg-blue-500/10 text-blue-500 border-blue-500/20">Scheduled</Badge>
+                return <Badge className="bg-blue-500/10 text-blue-500 border-blue-500/20">{t("status.interview.scheduled")}</Badge>
             case 'completed':
-                return <Badge className="bg-green-500/10 text-green-500 border-green-500/20">Completed</Badge>
+                return <Badge className="bg-green-500/10 text-green-500 border-green-500/20">{t("status.interview.completed")}</Badge>
             case 'cancelled':
-                return <Badge className="bg-red-500/10 text-red-500 border-red-500/20">Cancelled</Badge>
+                return <Badge className="bg-red-500/10 text-red-500 border-red-500/20">{t("status.interview.cancelled")}</Badge>
             case 'rescheduled':
-                return <Badge className="bg-yellow-500/10 text-yellow-500 border-yellow-500/20">Rescheduled</Badge>
+                return <Badge className="bg-yellow-500/10 text-yellow-500 border-yellow-500/20">{t("status.interview.rescheduled")}</Badge>
             default:
                 return <Badge variant="outline">{status}</Badge>
         }
@@ -314,7 +315,7 @@ export default function CandidateProfilePage() {
             <div className="p-6 lg:p-8 max-w-7xl mx-auto">
                 <div className="text-center py-12">
                     <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                    <p className="text-muted-foreground mt-4">Loading candidate profile...</p>
+                    <p className="text-muted-foreground mt-4">{t("loading.candidate.profile")}</p>
                 </div>
             </div>
         )
@@ -325,12 +326,12 @@ export default function CandidateProfilePage() {
             <div className="p-6 lg:p-8 max-w-7xl mx-auto">
                 <div className="text-center py-12">
                     <UserCheck className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                    <h3 className="text-lg font-semibold mb-2">Candidate not found</h3>
-                    <p className="text-muted-foreground mb-4">The candidate you're looking for doesn't exist or you don't have access.</p>
+                    <h3 className="text-lg font-semibold mb-2">{t("candidate.not.found")}</h3>
+                    <p className="text-muted-foreground mb-4">{t("candidate.not.exist")}</p>
                     <Button asChild>
                         <Link href="/dashboard/candidates">
                             <ArrowLeft className="mr-2 h-4 w-4" />
-                            Back to Candidates
+                            {t("back.to.candidates")}
                         </Link>
                     </Button>
                 </div>
@@ -345,7 +346,7 @@ export default function CandidateProfilePage() {
                 <Button variant="ghost" asChild className="mb-4">
                     <Link href="/dashboard/candidates">
                         <ArrowLeft className="mr-2 h-4 w-4" />
-                        Back to Candidates
+                        {t("back.to.candidates")}
                     </Link>
                 </Button>
 
@@ -369,7 +370,7 @@ export default function CandidateProfilePage() {
                                     {candidate.applications?.some((app: any) => app.status === 'hired') && (
                                         <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 px-3 py-1">
                                             <Award className="w-4 h-4 mr-1" />
-                                            Hired
+                                            {t("status.hired")}
                                         </Badge>
                                     )}
                                 </div>
@@ -389,7 +390,7 @@ export default function CandidateProfilePage() {
                                     {candidate.experience_years && (
                                         <div className="flex items-center gap-1 text-muted-foreground">
                                             <Calendar className="w-4 h-4" />
-                                            <span>{candidate.experience_years} years experience</span>
+                                            <span>{candidate.experience_years} {t("candidate.profile.yearsExperience")}</span>
                                         </div>
                                     )}
                                 </div>
@@ -401,21 +402,21 @@ export default function CandidateProfilePage() {
                             {candidate.availability && (
                                 <div className="flex items-center gap-1">
                                     <Clock className="w-4 h-4 text-muted-foreground" />
-                                    <span className="text-sm">Availability:</span>
+                                    <span className="text-sm">{t("candidate.profile.availability")}</span>
                                     {getAvailabilityBadge(candidate.availability)}
                                 </div>
                             )}
                             {candidate.notice_period && (
                                 <div className="flex items-center gap-1">
                                     <Shield className="w-4 h-4 text-muted-foreground" />
-                                    <span className="text-sm">Notice: {candidate.notice_period} days</span>
+                                    <span className="text-sm">{t("candidate.profile.notice")} {candidate.notice_period} {t("candidate.profile.days")}</span>
                                 </div>
                             )}
                             {candidate.last_contacted && (
                                 <div className="flex items-center gap-1">
                                     <MessageSquare className="w-4 h-4 text-muted-foreground" />
                                     <span className="text-sm">
-                                        Last contacted {formatDistanceToNow(new Date(candidate.last_contacted), { addSuffix: true })}
+                                        {t("candidate.profile.lastContacted")} {formatDistanceToNow(new Date(candidate.last_contacted), { addSuffix: true, locale: locale === 'ar' ? ar : enUS })}
                                     </span>
                                 </div>
                             )}
@@ -434,29 +435,29 @@ export default function CandidateProfilePage() {
                                 <DropdownMenuItem onClick={() => updateCandidateStatus('active')}
                                     disabled={candidate.status === 'active'}>
                                     <UserCheck className="mr-2 h-4 w-4" />
-                                    Mark as Active
+                                    {t("candidate.profile.markActive")}
                                 </DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => updateCandidateStatus('inactive')}
                                     disabled={candidate.status === "inactive"}>
                                     <UserMinus className="mr-2 h-4 w-4" />
-                                    Mark as Inactive
+                                    {t("candidate.profile.markInactive")}
                                 </DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => updateCandidateStatus('placed')}
                                     disabled={candidate.status === "placed" || candidate.applications?.some((app: any) => app.status === 'hired')}>
                                     <Award className="mr-2 h-4 w-4" />
-                                    Mark as Placed
+                                    {t("candidate.profile.markPlaced")}
                                 </DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => updateCandidateStatus('withdrawn')}
                                     disabled={candidate.status === "withdrawn"}
                                     className="text-red-600">
                                     <XCircle className="mr-2 h-4 w-4" />
-                                    Mark as Withdrawn
+                                    {t("candidate.profile.markWithdrawn")}
                                 </DropdownMenuItem>
                                 <Separator />
                                 <DropdownMenuItem asChild>
                                     <Link href={`/dashboard/candidates/${candidateId}/edit`}>
                                         <Edit className="mr-2 h-4 w-4" />
-                                        Edit Profile
+                                        {t("candidate.profile.editProfile")}
                                     </Link>
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
@@ -465,15 +466,15 @@ export default function CandidateProfilePage() {
                         <Button
                             variant="outline"
                             className="bg-transparent"
-                            onClick={() => window.location.href = `mailto:${candidate.email}?subject=Regarding your application`}
+                            onClick={() => window.location.href = `mailto:${candidate.email}?subject=${t("candidate.emailSubject")}`}
                         >
                             <MessageSquare className="mr-2 h-4 w-4" />
-                            Contact
+                            {t("candidate.contact")}
                         </Button>
 
                         <Button>
                             <Star className="mr-2 h-4 w-4" />
-                            Add to Shortlist
+                            {t("candidate.profile.addToShortlist")}
                         </Button>
                     </div>
                 </div>
@@ -485,7 +486,7 @@ export default function CandidateProfilePage() {
                     <CardHeader>
                         <CardTitle className="text-emerald-700 dark:text-emerald-400 flex items-center gap-2">
                             <Award className="w-5 h-5" />
-                            Hired Positions
+                            {t("candidate.profile.hiredPositions")}
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -496,15 +497,15 @@ export default function CandidateProfilePage() {
                                     <div key={app.id} className="flex items-center justify-between p-3 border border-emerald-200 dark:border-emerald-800 rounded-lg bg-white dark:bg-emerald-950/30">
                                         <div>
                                             <div className="font-semibold text-emerald-800 dark:text-emerald-300">
-                                                {app.jobs?.title || 'Unknown Position'}
+                                                {app.jobs?.title || t("candidate.profile.unknownPosition")}
                                             </div>
                                             <div className="text-sm text-emerald-600 dark:text-emerald-400">
-                                                Hired on {app.updated_at ? format(new Date(app.updated_at), 'MMM d, yyyy') : 'Unknown date'}
+                                                {t("candidate.profile.hiredOn")} {app.updated_at ? format(new Date(app.updated_at), 'MMM d, yyyy', { locale: locale === 'ar' ? ar : enUS }) : t("candidate.profile.unknownDate")}
                                             </div>
                                         </div>
                                         <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20">
                                             <Award className="w-3 h-3 mr-1" />
-                                            Hired
+                                            {t("status.hired")}
                                         </Badge>
                                     </div>
                                 ))}
@@ -531,7 +532,7 @@ export default function CandidateProfilePage() {
                                         }
                                     `}
                                 >
-                                    {tab}
+                                    {t(`tabs.${tab}`)}
                                 </button>
                             ))}
                         </nav>
@@ -543,14 +544,14 @@ export default function CandidateProfilePage() {
                             {/* Contact Information */}
                             <Card>
                                 <CardHeader>
-                                    <CardTitle>Contact Information</CardTitle>
+                                    <CardTitle>{t("candidate.profile.contactInfo")}</CardTitle>
                                 </CardHeader>
                                 <CardContent className="space-y-4">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div className="flex items-center gap-3">
                                             <Mail className="w-5 h-5 text-muted-foreground" />
                                             <div>
-                                                <p className="text-sm text-muted-foreground">Email</p>
+                                                <p className="text-sm text-muted-foreground">{t("candidates.form.email")}</p>
                                                 <a href={`mailto:${candidate.email}`} className="hover:text-primary hover:underline">
                                                     {candidate.email}
                                                 </a>
@@ -561,7 +562,7 @@ export default function CandidateProfilePage() {
                                             <div className="flex items-center gap-3">
                                                 <Phone className="w-5 h-5 text-muted-foreground" />
                                                 <div>
-                                                    <p className="text-sm text-muted-foreground">Phone</p>
+                                                    <p className="text-sm text-muted-foreground">{t("candidates.form.phone")}</p>
                                                     <a href={`tel:${candidate.phone}`} className="hover:text-primary hover:underline">
                                                         {candidate.phone}
                                                     </a>
@@ -580,7 +581,7 @@ export default function CandidateProfilePage() {
                                                         rel="noopener noreferrer"
                                                         className="hover:text-primary hover:underline flex items-center gap-1"
                                                     >
-                                                        View Profile <ExternalLink className="w-3 h-3" />
+                                                        {t("candidate.profile.viewProfile")} <ExternalLink className="w-3 h-3" />
                                                     </a>
                                                 </div>
                                             </div>
@@ -597,7 +598,7 @@ export default function CandidateProfilePage() {
                                                         rel="noopener noreferrer"
                                                         className="hover:text-primary hover:underline flex items-center gap-1"
                                                     >
-                                                        Visit Website <ExternalLink className="w-3 h-3" />
+                                                        {t("candidate.profile.visitWebsite")} <ExternalLink className="w-3 h-3" />
                                                     </a>
                                                 </div>
                                             </div>
@@ -609,12 +610,12 @@ export default function CandidateProfilePage() {
                                             <div className="flex items-center gap-3">
                                                 <FileText className="w-5 h-5 text-muted-foreground" />
                                                 <div>
-                                                    <p className="text-sm text-muted-foreground">Resume</p>
+                                                    <p className="text-sm text-muted-foreground">{t("candidate.profile.resume")}</p>
                                                     <div className="flex gap-2 mt-1">
                                                         <Button size="sm" variant="outline" asChild>
                                                             <a href={candidate.resume_url} target="_blank" rel="noopener noreferrer">
                                                                 <ExternalLink className="mr-2 h-3 w-3" />
-                                                                View Resume
+                                                                {t("candidate.profile.viewResume")}
                                                             </a>
                                                         </Button>
                                                         <Button size="sm" variant="outline" onClick={() => {
@@ -623,7 +624,7 @@ export default function CandidateProfilePage() {
                                                             }
                                                         }}>
                                                             <Download className="mr-2 h-3 w-3" />
-                                                            Download
+                                                            {t("candidate.profile.download")}
                                                         </Button>
                                                     </div>
                                                 </div>
@@ -637,7 +638,7 @@ export default function CandidateProfilePage() {
                             {candidate.skills && candidate.skills.length > 0 && (
                                 <Card>
                                     <CardHeader>
-                                        <CardTitle>Skills & Expertise</CardTitle>
+                                        <CardTitle>{t("candidate.profile.skills")}</CardTitle>
                                     </CardHeader>
                                     <CardContent>
                                         <div className="flex flex-wrap gap-2">
@@ -655,13 +656,13 @@ export default function CandidateProfilePage() {
                             {(candidate.current_salary || candidate.expected_salary) && (
                                 <Card>
                                     <CardHeader>
-                                        <CardTitle>Salary Information</CardTitle>
+                                        <CardTitle>{t("candidate.profile.salaryInfo")}</CardTitle>
                                     </CardHeader>
                                     <CardContent>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             {candidate.current_salary && (
                                                 <div className="space-y-1">
-                                                    <p className="text-sm text-muted-foreground">Current Salary</p>
+                                                    <p className="text-sm text-muted-foreground">{t("candidate.profile.currentSalary")}</p>
                                                     <p className="text-lg font-semibold">
                                                         ${candidate.current_salary.toLocaleString()}
                                                     </p>
@@ -669,7 +670,7 @@ export default function CandidateProfilePage() {
                                             )}
                                             {candidate.expected_salary && (
                                                 <div className="space-y-1">
-                                                    <p className="text-sm text-muted-foreground">Expected Salary</p>
+                                                    <p className="text-sm text-muted-foreground">{t("candidate.profile.expectedSalary")}</p>
                                                     <p className="text-lg font-semibold">
                                                         ${candidate.expected_salary.toLocaleString()}
                                                     </p>
@@ -688,11 +689,11 @@ export default function CandidateProfilePage() {
                                 <div className="space-y-4">
                                     <div className="flex items-center justify-between">
                                         <h3 className="text-lg font-semibold">
-                                            Job Applications ({candidate.applications.length})
+                                            {t("candidate.profile.jobApplications")} ({candidate.applications.length})
                                         </h3>
                                         <Button asChild variant="outline" size="sm">
                                             <Link href="/dashboard/jobs">
-                                                Browse Jobs
+                                                {t("candidate.profile.browseJobs")}
                                             </Link>
                                         </Button>
                                     </div>
@@ -705,13 +706,13 @@ export default function CandidateProfilePage() {
                                                             <div>
                                                                 <div className="flex items-center gap-2 mb-2">
                                                                     <h4 className="text-lg font-semibold">
-                                                                        {app.jobs?.title || 'Unknown Job'}
+                                                                        {app.jobs?.title || t("candidate.profile.unknownJob")}
                                                                     </h4>
                                                                     {getApplicationStatusBadge(app.status)}
                                                                 </div>
                                                                 <p className="text-sm text-muted-foreground">
-                                                                    {app.jobs?.department || 'No department'} •
-                                                                    Applied on {format(new Date(app.applied_at), 'MMM d, yyyy')}
+                                                                    {app.jobs?.department || t("candidate.profile.noDepartment")} •
+                                                                    {t("candidate.profile.appliedOn")} {format(new Date(app.applied_at), 'MMM d, yyyy', { locale: locale === 'ar' ? ar : enUS })}
                                                                 </p>
                                                             </div>
                                                             {app.match_score && (
@@ -722,7 +723,7 @@ export default function CandidateProfilePage() {
                                                                             {app.match_score}
                                                                         </span>
                                                                     </div>
-                                                                    <span className="text-xs text-muted-foreground">Match Score</span>
+                                                                    <span className="text-xs text-muted-foreground">{t("candidate.match")}</span>
                                                                 </div>
                                                             )}
                                                         </div>
@@ -730,7 +731,7 @@ export default function CandidateProfilePage() {
                                                         <div className="space-y-3">
                                                             <div className="flex items-center gap-4">
                                                                 <div>
-                                                                    <Label className="text-xs text-muted-foreground">Status</Label>
+                                                                    <Label className="text-xs text-muted-foreground">{t("jobs.form.status")}</Label>
                                                                     <Select
                                                                         value={app.status}
                                                                         onValueChange={(value) => updateApplicationStatus(app.id, value)}
@@ -739,12 +740,12 @@ export default function CandidateProfilePage() {
                                                                             <SelectValue />
                                                                         </SelectTrigger>
                                                                         <SelectContent>
-                                                                            <SelectItem value="applied">Applied</SelectItem>
-                                                                            <SelectItem value="screening">Screening</SelectItem>
-                                                                            <SelectItem value="interview">Interview</SelectItem>
-                                                                            <SelectItem value="offer">Offer</SelectItem>
-                                                                            <SelectItem value="hired">Hired</SelectItem>
-                                                                            <SelectItem value="rejected">Rejected</SelectItem>
+                                                                            <SelectItem value="applied">{t("status.application.applied")}</SelectItem>
+                                                                            <SelectItem value="screening">{t("status.application.screening")}</SelectItem>
+                                                                            <SelectItem value="interview">{t("status.application.interview")}</SelectItem>
+                                                                            <SelectItem value="offer">{t("status.application.offer")}</SelectItem>
+                                                                            <SelectItem value="hired">{t("status.application.hired")}</SelectItem>
+                                                                            <SelectItem value="rejected">{t("status.application.rejected")}</SelectItem>
                                                                         </SelectContent>
                                                                     </Select>
                                                                 </div>
@@ -757,7 +758,7 @@ export default function CandidateProfilePage() {
                                                             {app.jobs?.id && (
                                                                 <Button asChild size="sm" variant="outline" className="flex-1">
                                                                     <Link href={`/dashboard/jobs/${app.jobs.id}`}>
-                                                                        View Job
+                                                                        {t("candidate.profile.viewJob")}
                                                                     </Link>
                                                                 </Button>
                                                             )}
@@ -772,10 +773,10 @@ export default function CandidateProfilePage() {
                                 <Card>
                                     <CardContent className="py-12 text-center">
                                         <FileText className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                                        <h3 className="text-lg font-semibold mb-2">No Applications</h3>
-                                        <p className="text-muted-foreground mb-4">This candidate hasn't applied to any jobs yet.</p>
+                                        <h3 className="text-lg font-semibold mb-2">{t("candidate.profile.noApplications")}</h3>
+                                        <p className="text-muted-foreground mb-4">{t("candidate.profile.noApplicationsDesc")}</p>
                                         <Button asChild>
-                                            <Link href="/dashboard/jobs">Browse Jobs</Link>
+                                            <Link href="/dashboard/jobs">{t("candidate.profile.browseJobs")}</Link>
                                         </Button>
                                     </CardContent>
                                 </Card>
@@ -789,11 +790,11 @@ export default function CandidateProfilePage() {
                                 <div className="space-y-4">
                                     <div className="flex items-center justify-between">
                                         <h3 className="text-lg font-semibold">
-                                            Interviews ({candidate.interviews.length})
+                                            {t("candidate.profile.interviews")} ({candidate.interviews.length})
                                         </h3>
                                         <Button asChild variant="outline" size="sm">
                                             <Link href={`/dashboard/interviews/new?candidateId=${candidateId}`}>
-                                                Schedule Interview
+                                                {t("candidate.profile.scheduleInterview")}
                                             </Link>
                                         </Button>
                                     </div>
@@ -809,8 +810,8 @@ export default function CandidateProfilePage() {
                                                                     {getInterviewStatusBadge(interview.status)}
                                                                 </div>
                                                                 <p className="text-sm text-muted-foreground">
-                                                                    {interview.interview_type || 'No type specified'} •
-                                                                    Scheduled for {format(new Date(interview.scheduled_at), 'MMM d, yyyy h:mm a')}
+                                                                    {interview.interview_type || t("candidate.profile.noType")} •
+                                                                    {t("candidate.profile.scheduledFor")} {format(new Date(interview.scheduled_at), 'MMM d, yyyy h:mm a', { locale: locale === 'ar' ? ar : enUS })}
                                                                 </p>
                                                             </div>
                                                         </div>
@@ -819,32 +820,32 @@ export default function CandidateProfilePage() {
                                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                                 {interview.location && (
                                                                     <div>
-                                                                        <Label className="text-xs text-muted-foreground">Location</Label>
+                                                                        <Label className="text-xs text-muted-foreground">{t("candidate.profile.location")}</Label>
                                                                         <p className="text-sm">{interview.location}</p>
                                                                     </div>
                                                                 )}
                                                                 {interview.duration_minutes && (
                                                                     <div>
-                                                                        <Label className="text-xs text-muted-foreground">Duration</Label>
-                                                                        <p className="text-sm">{interview.duration_minutes} minutes</p>
+                                                                        <Label className="text-xs text-muted-foreground">{t("candidate.profile.duration")}</Label>
+                                                                        <p className="text-sm">{interview.duration_minutes} {t("candidate.profile.minutes")}</p>
                                                                     </div>
                                                                 )}
                                                                 {interview.interviewer_name && (
                                                                     <div>
-                                                                        <Label className="text-xs text-muted-foreground">Interviewer</Label>
+                                                                        <Label className="text-xs text-muted-foreground">{t("candidate.profile.interviewer")}</Label>
                                                                         <p className="text-sm">{interview.interviewer_name}</p>
                                                                     </div>
                                                                 )}
                                                                 {interview.interviewer_email && (
                                                                     <div>
-                                                                        <Label className="text-xs text-muted-foreground">Interviewer Email</Label>
+                                                                        <Label className="text-xs text-muted-foreground">{t("candidate.profile.interviewerEmail")}</Label>
                                                                         <p className="text-sm">{interview.interviewer_email}</p>
                                                                     </div>
                                                                 )}
                                                             </div>
 
                                                             <div>
-                                                                <Label className="text-xs text-muted-foreground">Status</Label>
+                                                                <Label className="text-xs text-muted-foreground">{t("jobs.form.status")}</Label>
                                                                 <Select
                                                                     value={interview.status}
                                                                     onValueChange={(value) => updateInterviewStatus(interview.id, value)}
@@ -853,17 +854,17 @@ export default function CandidateProfilePage() {
                                                                         <SelectValue />
                                                                     </SelectTrigger>
                                                                     <SelectContent>
-                                                                        <SelectItem value="scheduled">Scheduled</SelectItem>
-                                                                        <SelectItem value="completed">Completed</SelectItem>
-                                                                        <SelectItem value="cancelled">Cancelled</SelectItem>
-                                                                        <SelectItem value="rescheduled">Rescheduled</SelectItem>
+                                                                        <SelectItem value="scheduled">{t("status.interview.scheduled")}</SelectItem>
+                                                                        <SelectItem value="completed">{t("status.interview.completed")}</SelectItem>
+                                                                        <SelectItem value="cancelled">{t("status.interview.cancelled")}</SelectItem>
+                                                                        <SelectItem value="rescheduled">{t("status.interview.rescheduled")}</SelectItem>
                                                                     </SelectContent>
                                                                 </Select>
                                                             </div>
 
                                                             {interview.notes && (
                                                                 <div>
-                                                                    <Label className="text-xs text-muted-foreground">Notes</Label>
+                                                                    <Label className="text-xs text-muted-foreground">{t("candidate.profile.notes")}</Label>
                                                                     <p className="text-sm text-muted-foreground whitespace-pre-wrap">{interview.notes}</p>
                                                                 </div>
                                                             )}
@@ -878,10 +879,10 @@ export default function CandidateProfilePage() {
                                 <Card>
                                     <CardContent className="py-12 text-center">
                                         <Calendar className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                                        <h3 className="text-lg font-semibold mb-2">No Interviews</h3>
-                                        <p className="text-muted-foreground mb-4">No interviews scheduled for this candidate.</p>
+                                        <h3 className="text-lg font-semibold mb-2">{t("candidate.profile.noInterviews")}</h3>
+                                        <p className="text-muted-foreground mb-4">{t("candidate.profile.noInterviewsDesc")}</p>
                                         <Button asChild>
-                                            <Link href={`/dashboard/interviews/new?candidateId=${candidateId}`}>Schedule Interview</Link>
+                                            <Link href={`/dashboard/interviews/new?candidateId=${candidateId}`}>{t("candidate.profile.scheduleInterview")}</Link>
                                         </Button>
                                     </CardContent>
                                 </Card>
@@ -892,12 +893,12 @@ export default function CandidateProfilePage() {
                     {activeTab === 'notes' && (
                         <Card>
                             <CardHeader>
-                                <CardTitle>Notes</CardTitle>
+                                <CardTitle>{t("candidate.profile.notes")}</CardTitle>
                             </CardHeader>
                             <CardContent>
                                 <textarea
                                     className="w-full min-h-[200px] p-3 border rounded-md"
-                                    placeholder="Add notes about this candidate..."
+                                    placeholder={t("candidate.profile.notesPlaceholder")}
                                     value={notes}
                                     onChange={(e) => setNotes(e.target.value)}
                                     onBlur={saveNotes}
@@ -905,7 +906,7 @@ export default function CandidateProfilePage() {
                                 />
                                 <div className="flex justify-end mt-3">
                                     <Button onClick={saveNotes} disabled={savingNotes}>
-                                        {savingNotes ? 'Saving...' : 'Save Notes'}
+                                        {savingNotes ? t("candidate.profile.saving") : t("candidate.profile.saveNotes")}
                                     </Button>
                                 </div>
                             </CardContent>
@@ -925,7 +926,7 @@ export default function CandidateProfilePage() {
                     {/* Quick Contact */}
                     <Card>
                         <CardHeader>
-                            <CardTitle>Quick Contact</CardTitle>
+                            <CardTitle>{t("candidate.profile.quickContact")}</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-3">
                             <Button
@@ -938,7 +939,7 @@ export default function CandidateProfilePage() {
                                 }}
                             >
                                 <Mail className="mr-2 h-4 w-4" />
-                                Send Email
+                                {t("candidate.profile.sendEmail")}
                             </Button>
 
                             {candidate.phone && (
@@ -952,7 +953,7 @@ export default function CandidateProfilePage() {
                                     }}
                                 >
                                     <Phone className="mr-2 h-4 w-4" />
-                                    Call Candidate
+                                    {t("candidate.profile.callCandidate")}
                                 </Button>
                             )}
 
@@ -967,7 +968,7 @@ export default function CandidateProfilePage() {
                                     }}
                                 >
                                     <Linkedin className="mr-2 h-4 w-4" />
-                                    View LinkedIn
+                                    {t("candidate.profile.viewLinkedin")}
                                 </Button>
                             )}
                         </CardContent>
@@ -976,22 +977,22 @@ export default function CandidateProfilePage() {
                     {/* Activity Stats */}
                     <Card>
                         <CardHeader>
-                            <CardTitle>Activity</CardTitle>
+                            <CardTitle>{t("candidate.profile.activity")}</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="space-y-3">
                                 <div className="flex items-center justify-between">
-                                    <span className="text-sm text-muted-foreground">Applications</span>
+                                    <span className="text-sm text-muted-foreground">{t("tabs.applications")}</span>
                                     <span className="font-semibold">{candidate.applications?.length || 0}</span>
                                 </div>
                                 <Separator />
                                 <div className="flex items-center justify-between">
-                                    <span className="text-sm text-muted-foreground">Interviews</span>
+                                    <span className="text-sm text-muted-foreground">{t("tabs.interviews")}</span>
                                     <span className="font-semibold">{candidate.interviews?.length || 0}</span>
                                 </div>
                                 <Separator />
                                 <div className="flex items-center justify-between">
-                                    <span className="text-sm text-muted-foreground">Active Applications</span>
+                                    <span className="text-sm text-muted-foreground">{t("candidate.profile.activeApplications")}</span>
                                     <span className="font-semibold">
                                         {candidate.applications?.filter((app: { status: string }) =>
                                             app.status === 'applied' || app.status === 'screening' || app.status === 'interview' || app.status === 'offer'
@@ -1000,7 +1001,7 @@ export default function CandidateProfilePage() {
                                 </div>
                                 <Separator />
                                 <div className="flex items-center justify-between">
-                                    <span className="text-sm text-muted-foreground">Match Score Avg</span>
+                                    <span className="text-sm text-muted-foreground">{t("candidate.profile.matchScoreAvg")}</span>
                                     <span className="font-semibold">
                                         {candidate.applications?.length > 0
                                             ? Math.round(candidate.applications.reduce((acc: number, app: any) => acc + (app.match_score || 0), 0) / candidate.applications.length)
@@ -1014,7 +1015,7 @@ export default function CandidateProfilePage() {
                     {/* Timeline */}
                     <Card>
                         <CardHeader>
-                            <CardTitle>Recent Timeline</CardTitle>
+                            <CardTitle>{t("candidate.profile.recentTimeline")}</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             {candidate.applications && candidate.applications.length > 0 ? (
@@ -1026,17 +1027,17 @@ export default function CandidateProfilePage() {
                                             </div>
                                             <div className="flex-1">
                                                 <p className="text-sm">
-                                                    Applied for <span className="font-medium">{app.jobs?.title || 'a job'}</span>
+                                                    {t("candidate.profile.appliedFor")} <span className="font-medium">{app.jobs?.title || t("candidate.profile.aJob")}</span>
                                                 </p>
                                                 <p className="text-xs text-muted-foreground">
-                                                    {formatDistanceToNow(new Date(app.applied_at), { addSuffix: true })}
+                                                    {formatDistanceToNow(new Date(app.applied_at), { addSuffix: true, locale: locale === 'ar' ? ar : enUS })}
                                                 </p>
                                             </div>
                                         </div>
                                     ))}
                                 </div>
                             ) : (
-                                <p className="text-sm text-muted-foreground">No recent activity</p>
+                                <p className="text-sm text-muted-foreground">{t("candidate.profile.noRecentActivity")}</p>
                             )}
                         </CardContent>
                     </Card>
@@ -1046,7 +1047,7 @@ export default function CandidateProfilePage() {
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 <Tag className="w-4 h-4" />
-                                Tags
+                                {t("candidate.profile.tags")}
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
@@ -1060,10 +1061,10 @@ export default function CandidateProfilePage() {
                                 </div>
                             ) : (
                                 <div className="text-center py-4">
-                                    <p className="text-sm text-muted-foreground mb-3">No tags added</p>
+                                    <p className="text-sm text-muted-foreground mb-3">{t("candidate.profile.noTags")}</p>
                                     <Button size="sm" variant="outline" asChild>
                                         <Link href={`/dashboard/candidates/${candidateId}/edit`}>
-                                            Add Tags
+                                            {t("candidate.profile.addTags")}
                                         </Link>
                                     </Button>
                                 </div>
@@ -1075,14 +1076,14 @@ export default function CandidateProfilePage() {
                     {(candidate.resume_url || candidate.cover_letter_url) && (
                         <Card>
                             <CardHeader>
-                                <CardTitle>Attachments</CardTitle>
+                                <CardTitle>{t("candidate.profile.attachments")}</CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-2">
                                 {candidate.resume_url && (
                                     <div className="flex items-center justify-between p-2 border rounded-md hover:bg-accent transition-colors">
                                         <div className="flex items-center gap-2">
                                             <FileText className="w-4 h-4" />
-                                            <span className="text-sm">Resume</span>
+                                            <span className="text-sm">{t("candidate.profile.resume")}</span>
                                         </div>
                                         <Button size="sm" variant="ghost" asChild>
                                             <a href={candidate.resume_url} download target="_blank" rel="noopener noreferrer">
@@ -1095,7 +1096,7 @@ export default function CandidateProfilePage() {
                                     <div className="flex items-center justify-between p-2 border rounded-md hover:bg-accent transition-colors">
                                         <div className="flex items-center gap-2">
                                             <FileText className="w-4 h-4" />
-                                            <span className="text-sm">Cover Letter</span>
+                                            <span className="text-sm">{t("candidate.profile.coverLetter")}</span>
                                         </div>
                                         <Button size="sm" variant="ghost" asChild>
                                             <a href={candidate.cover_letter_url} download target="_blank" rel="noopener noreferrer">

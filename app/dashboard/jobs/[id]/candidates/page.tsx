@@ -30,6 +30,8 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import { format } from "date-fns"
+import { ar, enUS } from "date-fns/locale"
+import { useI18n } from "@/lib/i18n-context"
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu"
 
 interface Job {
@@ -73,6 +75,7 @@ export default function JobCandidatesPage() {
     const [statusFilter, setStatusFilter] = useState("all")
     const [sortBy, setSortBy] = useState("match")
 
+    const { t, locale } = useI18n()
     const params = useParams()
     const router = useRouter()
     const supabase = useSupabase()
@@ -174,17 +177,17 @@ export default function JobCandidatesPage() {
     const getStatusBadge = (status: string) => {
         switch (status) {
             case "applied":
-                return <Badge className="bg-blue-500/10 text-blue-500 border-blue-500/20">Applied</Badge>
+                return <Badge className="bg-blue-500/10 text-blue-500 border-blue-500/20">{t("status.application.applied")}</Badge>
             case "screening":
-                return <Badge className="bg-yellow-500/10 text-yellow-500 border-yellow-500/20">Screening</Badge>
+                return <Badge className="bg-yellow-500/10 text-yellow-500 border-yellow-500/20">{t("status.application.screening")}</Badge>
             case "interview":
-                return <Badge className="bg-purple-500/10 text-purple-500 border-purple-500/20">Interview</Badge>
+                return <Badge className="bg-purple-500/10 text-purple-500 border-purple-500/20">{t("status.application.interview")}</Badge>
             case "offer":
-                return <Badge className="bg-green-500/10 text-green-500 border-green-500/20">Offer</Badge>
+                return <Badge className="bg-green-500/10 text-green-500 border-green-500/20">{t("status.application.offer")}</Badge>
             case "hired":
-                return <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20">Hired</Badge>
+                return <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20">{t("status.application.hired")}</Badge>
             case "rejected":
-                return <Badge className="bg-red-500/10 text-red-500 border-red-500/20">Rejected</Badge>
+                return <Badge className="bg-red-500/10 text-red-500 border-red-500/20">{t("status.application.rejected")}</Badge>
             default:
                 return <Badge variant="outline">{status}</Badge>
         }
@@ -194,19 +197,19 @@ export default function JobCandidatesPage() {
         switch (status) {
             case 'active':
                 return <Badge className="bg-green-500/10 text-green-500 border-green-500/20 text-xs">
-                    <UserCheck className="w-3 h-3 mr-1" /> Active
+                    <UserCheck className="w-3 h-3 mr-1" /> {t("status.active")}
                 </Badge>
             case 'inactive':
                 return <Badge className="bg-gray-500/10 text-gray-500 border-gray-500/20 text-xs">
-                    Active
+                    {t("status.active")}
                 </Badge>
             case 'placed':
                 return <Badge className="bg-blue-500/10 text-blue-500 border-blue-500/20 text-xs">
-                    Placed
+                    {t("status.placed")}
                 </Badge>
             case 'withdrawn':
                 return <Badge className="bg-red-500/10 text-red-500 border-red-500/20 text-xs">
-                    <XCircle className="w-3 h-3 mr-1" /> Withdrawn
+                    <XCircle className="w-3 h-3 mr-1" /> {t("status.withdrawn")}
                 </Badge>
             default:
                 return null
@@ -219,7 +222,7 @@ export default function JobCandidatesPage() {
                 <div className="p-6 lg:p-8 max-w-7xl mx-auto">
                     <div className="text-center py-12">
                         <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                        <p className="text-muted-foreground mt-4">Loading candidates...</p>
+                        <p className="text-muted-foreground mt-4">{t("candidates.loading")}</p>
                     </div>
                 </div>
             </DashboardLayout>
@@ -232,12 +235,12 @@ export default function JobCandidatesPage() {
                 <div className="p-6 lg:p-8 max-w-7xl mx-auto">
                     <div className="text-center py-12">
                         <Briefcase className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                        <h3 className="text-lg font-semibold mb-2">Job not found</h3>
-                        <p className="text-muted-foreground mb-4">The job you're looking for doesn't exist.</p>
+                        <h3 className="text-lg font-semibold mb-2">{t("jobs.details.notFound")}</h3>
+                        <p className="text-muted-foreground mb-4">{t("jobs.details.notFoundDesc")}</p>
                         <Button asChild>
                             <Link href="/dashboard/jobs">
                                 <ArrowLeft className="mr-2 h-4 w-4" />
-                                Back to Jobs
+                                {t("jobs.details.backToJobs")}
                             </Link>
                         </Button>
                     </div>
@@ -254,7 +257,7 @@ export default function JobCandidatesPage() {
                     <Button variant="ghost" asChild className="mb-4">
                         <Link href={`/dashboard/jobs/${jobId}`}>
                             <ArrowLeft className="mr-2 h-4 w-4" />
-                            Back to Job Details
+                            {t("jobs.backToDetails")}
                         </Link>
                     </Button>
 
@@ -281,7 +284,7 @@ export default function JobCandidatesPage() {
                                                 ? 'bg-green-500/10 text-green-500'
                                                 : 'bg-red-500/10 text-red-500'
                                         }>
-                                            {job.status === 'open' ? 'Open' : 'Closed'}
+                                            {job.status === 'open' ? t("jobs.status.open") : t("jobs.status.closed")}
                                         </Badge>
                                     </div>
                                 </div>
@@ -291,26 +294,26 @@ export default function JobCandidatesPage() {
                         <div className="flex gap-2">
                             <Button variant="outline" className="bg-transparent">
                                 <Download className="mr-2 h-4 w-4" />
-                                Export
+                                {t("candidates.export")}
                             </Button>
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                     <Button>
                                         <Users className="mr-2 h-4 w-4" />
-                                        Add Candidate
+                                        {t("candidates.addCandidate")}
                                     </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent>
                                     <DropdownMenuItem asChild>
                                         <Link href={`/dashboard/candidates/new?jobId=${jobId}`}>
                                             <UserPlus className="mr-2 h-4 w-4" />
-                                            Add New Candidate
+                                            {t("candidates.addNew")}
                                         </Link>
                                     </DropdownMenuItem>
                                     <DropdownMenuItem asChild>
                                         <Link href={`/dashboard/jobs/${jobId}/select-candidate`}>
                                             <Users className="mr-2 h-4 w-4" />
-                                            Select Existing Candidate
+                                            {t("candidates.selectExisting")}
                                         </Link>
                                     </DropdownMenuItem>
                                 </DropdownMenuContent>
@@ -325,7 +328,7 @@ export default function JobCandidatesPage() {
                         <CardContent className="pt-6">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm text-muted-foreground">Total Candidates</p>
+                                    <p className="text-sm text-muted-foreground">{t("reports.totalCandidates")}</p>
                                     <p className="text-2xl font-bold">{applications.length}</p>
                                 </div>
                                 <Users className="w-8 h-8 text-primary/30" />
@@ -337,7 +340,7 @@ export default function JobCandidatesPage() {
                         <CardContent className="pt-6">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm text-muted-foreground">New Applications</p>
+                                    <p className="text-sm text-muted-foreground">{t("dashboard.stats.newApplications")}</p>
                                     <p className="text-2xl font-bold">
                                         {applications.filter(app => app.status === 'applied').length}
                                     </p>
@@ -351,7 +354,7 @@ export default function JobCandidatesPage() {
                         <CardContent className="pt-6">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm text-muted-foreground">In Interview</p>
+                                    <p className="text-sm text-muted-foreground">{t("dashboard.stats.inInterview")}</p>
                                     <p className="text-2xl font-bold">
                                         {applications.filter(app => app.status === 'interview').length}
                                     </p>
@@ -365,7 +368,7 @@ export default function JobCandidatesPage() {
                         <CardContent className="pt-6">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm text-muted-foreground">Hired</p>
+                                    <p className="text-sm text-muted-foreground">{t("status.hired")}</p>
                                     <p className="text-2xl font-bold">
                                         {applications.filter(app => app.status === 'hired').length}
                                     </p>
@@ -384,7 +387,7 @@ export default function JobCandidatesPage() {
                                 <div className="relative">
                                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                                     <Input
-                                        placeholder="Search candidates by name, email, or skills..."
+                                        placeholder={t("candidates.searchPlaceholder")}
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
                                         className="pl-10"
@@ -394,27 +397,27 @@ export default function JobCandidatesPage() {
 
                             <Select value={statusFilter} onValueChange={setStatusFilter}>
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Filter by status" />
+                                    <SelectValue placeholder={t("candidates.filterStatus")} />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="all">All Status</SelectItem>
-                                    <SelectItem value="applied">Applied</SelectItem>
-                                    <SelectItem value="screening">Screening</SelectItem>
-                                    <SelectItem value="interview">Interview</SelectItem>
-                                    <SelectItem value="offer">Offer</SelectItem>
-                                    <SelectItem value="hired">Hired</SelectItem>
-                                    <SelectItem value="rejected">Rejected</SelectItem>
+                                    <SelectItem value="all">{t("status.all")}</SelectItem>
+                                    <SelectItem value="applied">{t("status.application.applied")}</SelectItem>
+                                    <SelectItem value="screening">{t("status.application.screening")}</SelectItem>
+                                    <SelectItem value="interview">{t("status.application.interview")}</SelectItem>
+                                    <SelectItem value="offer">{t("status.application.offer")}</SelectItem>
+                                    <SelectItem value="hired">{t("status.application.hired")}</SelectItem>
+                                    <SelectItem value="rejected">{t("status.application.rejected")}</SelectItem>
                                 </SelectContent>
                             </Select>
 
                             <Select value={sortBy} onValueChange={setSortBy}>
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Sort by" />
+                                    <SelectValue placeholder={t("sort.by")} />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="match">Match Score</SelectItem>
-                                    <SelectItem value="date">Application Date</SelectItem>
-                                    <SelectItem value="name">Name</SelectItem>
+                                    <SelectItem value="match">{t("candidate.match")}</SelectItem>
+                                    <SelectItem value="date">{t("sort.applicationDate")}</SelectItem>
+                                    <SelectItem value="name">{t("sort.name")}</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
@@ -422,10 +425,10 @@ export default function JobCandidatesPage() {
                         {/* Active Filters */}
                         {(searchQuery || statusFilter !== "all") && (
                             <div className="flex flex-wrap gap-2 mt-4">
-                                <span className="text-sm text-muted-foreground">Active filters:</span>
+                                <span className="text-sm text-muted-foreground">{t("candidates.activeFilters")}</span>
                                 {searchQuery && (
                                     <Badge variant="secondary" className="gap-1">
-                                        Search: {searchQuery}
+                                        {t("nav.search")}: {searchQuery}
                                         <button onClick={() => setSearchQuery("")} className="ml-1 hover:text-destructive">
                                             ×
                                         </button>
@@ -433,7 +436,7 @@ export default function JobCandidatesPage() {
                                 )}
                                 {statusFilter !== "all" && (
                                     <Badge variant="secondary" className="gap-1">
-                                        Status: {statusFilter}
+                                        {t("jobs.form.status")}: {statusFilter}
                                         <button onClick={() => setStatusFilter("all")} className="ml-1 hover:text-destructive">
                                             ×
                                         </button>
@@ -448,7 +451,7 @@ export default function JobCandidatesPage() {
                                     }}
                                     className="h-6 text-xs"
                                 >
-                                    Clear all
+                                    {t("candidates.clearAll")}
                                 </Button>
                             </div>
                         )}
@@ -462,17 +465,17 @@ export default function JobCandidatesPage() {
                         <CardContent className="py-12 text-center">
                             <Users className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
                             <h3 className="text-lg font-semibold mb-2">
-                                {applications.length === 0 ? "No candidates yet" : "No candidates found"}
+                                {applications.length === 0 ? t("candidates.noCandidates") : t("candidates.noResults")}
                             </h3>
                             <p className="text-muted-foreground mb-4">
                                 {applications.length === 0
-                                    ? "Start by adding candidates to this job position."
-                                    : "Try adjusting your search filters"}
+                                    ? t("candidates.startAdding")
+                                    : t("candidates.noResults.subtitle")}
                             </p>
                             <div className="flex gap-2 justify-center">
                                 <Button asChild>
                                     <Link href={`/dashboard/candidates/new?jobId=${jobId}`}>
-                                        Add Candidate
+                                        {t("candidates.addCandidate")}
                                     </Link>
                                 </Button>
                                 {applications.length > 0 && (
@@ -480,7 +483,7 @@ export default function JobCandidatesPage() {
                                         setSearchQuery("")
                                         setStatusFilter("all")
                                     }}>
-                                        Clear Filters
+                                        {t("candidates.clearFilters")}
                                     </Button>
                                 )}
                             </div>
@@ -492,16 +495,16 @@ export default function JobCandidatesPage() {
                         <div className="flex items-center justify-between mb-6">
                             <div>
                                 <h2 className="text-xl font-semibold">
-                                    {filteredApplications.length} candidate{filteredApplications.length !== 1 ? 's' : ''} found
+                                    {t("candidates.resultsCount").replace("{count}", filteredApplications.length.toString())}
                                 </h2>
                                 <p className="text-sm text-muted-foreground mt-1">
-                                    Showing candidates for this job position
+                                    {t("candidates.showingForJob")}
                                 </p>
                             </div>
                             <div className="text-sm text-muted-foreground">
-                                {sortBy === 'match' && 'Sorted by match score'}
-                                {sortBy === 'date' && 'Sorted by application date'}
-                                {sortBy === 'name' && 'Sorted by name'}
+                                {sortBy === 'match' && t("candidates.sortedByScore")}
+                                {sortBy === 'date' && t("sort.sortedByDate")}
+                                {sortBy === 'name' && t("sorted.by.name")}
                             </div>
                         </div>
 
@@ -536,7 +539,7 @@ export default function JobCandidatesPage() {
                                                                     {application.match_score}
                                                                 </span>
                                                             </div>
-                                                            <span className="text-xs text-muted-foreground">Match Score</span>
+                                                            <span className="text-xs text-muted-foreground">{t("candidate.match")}</span>
                                                         </div>
                                                     )}
                                                 </div>
@@ -561,7 +564,7 @@ export default function JobCandidatesPage() {
                                                     {application.candidate.experience_years && (
                                                         <div className="flex items-center gap-1.5 text-muted-foreground">
                                                             <Briefcase className="w-4 h-4" />
-                                                            <span>{application.candidate.experience_years} years</span>
+                                                            <span>{application.candidate.experience_years} {t("candidates.years")}</span>
                                                         </div>
                                                     )}
                                                 </div>
@@ -577,7 +580,7 @@ export default function JobCandidatesPage() {
                                                             ))}
                                                             {application.candidate.skills.length > 5 && (
                                                                 <Badge variant="outline" className="text-xs">
-                                                                    +{application.candidate.skills.length - 5} more
+                                                                    +{application.candidate.skills.length - 5} {t("candidate.moreSkills")}
                                                                 </Badge>
                                                             )}
                                                         </div>
@@ -589,11 +592,11 @@ export default function JobCandidatesPage() {
                                             <div className="lg:w-64 space-y-4">
                                                 <div className="space-y-2">
                                                     <div className="flex items-center justify-between">
-                                                        <span className="text-sm text-muted-foreground">Application Status</span>
+                                                        <span className="text-sm text-muted-foreground">{t("application.status")}</span>
                                                         {getStatusBadge(application.status)}
                                                     </div>
                                                     <div className="text-xs text-muted-foreground">
-                                                        Applied on {format(new Date(application.applied_at), 'MMM d, yyyy')}
+                                                        {t("candidate.profile.appliedOn")} {format(new Date(application.applied_at), 'MMM d, yyyy', { locale: locale === 'ar' ? ar : enUS })}
                                                     </div>
                                                 </div>
 
@@ -603,15 +606,15 @@ export default function JobCandidatesPage() {
                                                     onValueChange={(value) => updateApplicationStatus(application.id, value)}
                                                 >
                                                     <SelectTrigger>
-                                                        <SelectValue placeholder="Update status" />
+                                                        <SelectValue placeholder={t("bulk.update.status")} />
                                                     </SelectTrigger>
                                                     <SelectContent>
-                                                        <SelectItem value="applied">Applied</SelectItem>
-                                                        <SelectItem value="screening">Screening</SelectItem>
-                                                        <SelectItem value="interview">Interview</SelectItem>
-                                                        <SelectItem value="offer">Offer</SelectItem>
-                                                        <SelectItem value="hired">Hired</SelectItem>
-                                                        <SelectItem value="rejected">Rejected</SelectItem>
+                                                        <SelectItem value="applied">{t("status.application.applied")}</SelectItem>
+                                                        <SelectItem value="screening">{t("status.application.screening")}</SelectItem>
+                                                        <SelectItem value="interview">{t("status.application.interview")}</SelectItem>
+                                                        <SelectItem value="offer">{t("status.application.offer")}</SelectItem>
+                                                        <SelectItem value="hired">{t("status.application.hired")}</SelectItem>
+                                                        <SelectItem value="rejected">{t("status.application.rejected")}</SelectItem>
                                                     </SelectContent>
                                                 </Select>
 
@@ -619,16 +622,16 @@ export default function JobCandidatesPage() {
                                                 <div className="flex gap-2">
                                                     <Button asChild className="flex-1" size="sm">
                                                         <Link href={`/dashboard/candidates/${application.candidate.id}`}>
-                                                            View Profile
+                                                            {t("candidate.view")}
                                                         </Link>
                                                     </Button>
                                                     <Button
                                                         variant="outline"
                                                         size="sm"
                                                         className="bg-transparent"
-                                                        onClick={() => window.location.href = `mailto:${application.candidate.email}?subject=Regarding your application for ${job.title}`}
+                                                        onClick={() => window.location.href = `mailto:${application.candidate.email}?subject=${t("candidate.emailSubject")}`}
                                                     >
-                                                        Contact
+                                                        {t("candidate.contact")}
                                                     </Button>
                                                 </div>
 
@@ -638,7 +641,7 @@ export default function JobCandidatesPage() {
                                                         <Button variant="ghost" size="sm" asChild className="flex-1">
                                                             <a href={application.candidate.resume_url} target="_blank" rel="noopener noreferrer">
                                                                 <FileText className="mr-1 h-3 w-3" />
-                                                                Resume
+                                                                {t("candidate.profile.resume")}
                                                             </a>
                                                         </Button>
                                                     )}

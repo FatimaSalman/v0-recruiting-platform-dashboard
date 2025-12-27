@@ -15,72 +15,72 @@ export interface PricingPlan {
 export const PRICING_PLANS: PricingPlan[] = [
   {
     id: "free-trial",
-    name: "Free Trial",
-    description: "Try our platform free for 14 days",
+    name: "pricing.free.trial",
+    description: "pricing.free.trial.desc",
     priceInCents: 0, // Free
     currency: "usd",
     billingPeriod: "monthly",
     features: [
-      "Up to 5 active job postings",
-      "10 candidate profiles",
-      "Basic candidate search",
-      "Email support",
-      "1 team member",
-      "14-day free trial period",
+      "pricing.free.features1",
+      "pricing.free.features2",
+      "pricing.free.features3",
+      "pricing.free.features4",
+      "pricing.free.features5",
+      "pricing.free.features6",
     ],
-  },{
+  }, {
     id: "starter-monthly",
-    name: "Starter",
-    description: "Perfect for small teams getting started",
+    name: "pricing.starter",
+    description: "pricing.starter.desc",
     priceInCents: 4900, // $49/month
     currency: "usd",
     billingPeriod: "monthly",
     features: [
-      "Up to 10 active job postings",
-      "50 candidate profiles",
-      "Basic candidate search",
-      "Email support",
-      "2 team members",
+      "pricing.starter.feature1",
+      "pricing.starter.feature2",
+      "pricing.starter.feature3",
+      "pricing.starter.feature4",
+      "pricing.starter.feature5",
     ],
   },
   {
     id: "professional-monthly",
-    name: "Professional",
-    description: "For growing teams with more hiring needs",
+    name: "pricing.professional",
+    description: "pricing.professional.desc",
     priceInCents: 12900, // $129/month
     currency: "usd",
     billingPeriod: "monthly",
     popular: true,
     features: [
-      "Up to 50 active job postings",
-      "Unlimited candidate profiles",
-      "Advanced AI-powered search",
-      "Interview scheduling",
-      "Priority email support",
-      "10 team members",
-      "Analytics dashboard",
-      "Custom branding",
+      "pricing.professional.feature1",
+      "pricing.professional.feature2",
+      "pricing.professional.feature3",
+      "pricing.professional.feature4",
+      "pricing.professional.feature5",
+      "pricing.professional.feature6",
+      "pricing.professional.feature7",
+      "pricing.professional.feature8",
     ],
   },
   {
     id: "enterprise-monthly",
-    name: "Enterprise",
-    description: "For large organizations with custom needs",
+    name: "pricing.enterprise",
+    description: "pricing.enterprise.desc",
     priceInCents: 29900, // $299/month
     currency: "usd",
     billingPeriod: "monthly",
     features: [
-      "Unlimited job postings",
-      "Unlimited candidate profiles",
-      "AI-powered matching & search",
-      "Interview scheduling",
-      "24/7 priority support",
-      "Unlimited team members",
-      "Advanced analytics",
-      "Custom branding",
-      "API access",
-      "Dedicated account manager",
-      "Custom integrations",
+      "pricing.enterprise.feature1",
+      "pricing.enterprise.feature2",
+      "pricing.enterprise.feature3",
+      "pricing.enterprise.feature4",
+      "pricing.enterprise.feature5",
+      "pricing.enterprise.feature6",
+      "pricing.enterprise.feature7",
+      "pricing.enterprise.feature8",
+      "pricing.enterprise.feature9",
+      "pricing.enterprise.feature10",
+      "pricing.enterprise.feature11",
     ],
   },
 ]
@@ -91,4 +91,19 @@ export function formatPrice(priceInCents: number, currency = "usd"): string {
     currency: currency.toUpperCase(),
     minimumFractionDigits: 0,
   }).format(priceInCents / 100)
+}
+
+// Helper function to get translated plan (used in components)
+export function getTranslatedPlan(plan: PricingPlan, t: (key: string) => string) {
+  return {
+    ...plan,
+    name: t(plan.name),
+    description: t(plan.description),
+    features: plan.features.map(featureKey => t(featureKey))
+  }
+}
+
+// Helper to get all translated plans
+export function getTranslatedPlans(t: (key: string) => string) {
+  return PRICING_PLANS.map(plan => getTranslatedPlan(plan, t))
 }

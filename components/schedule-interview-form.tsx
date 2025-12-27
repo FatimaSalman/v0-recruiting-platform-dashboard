@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useI18n } from "@/lib/i18n-context"
 
 interface Candidate {
   id: string
@@ -43,6 +44,8 @@ export function ScheduleInterviewForm() {
     interviewer_email: "",
     notes: "",
   })
+
+  const { t } = useI18n()
 
   useEffect(() => {
     fetchCandidatesAndJobs()
@@ -101,7 +104,7 @@ export function ScheduleInterviewForm() {
       router.push("/dashboard/interviews")
     } catch (err) {
       console.error("Error scheduling interview:", err)
-      setError(err instanceof Error ? err.message : "An error occurred")
+      setError(err instanceof Error ? err.message : t("auth.error"))
     } finally {
       setLoading(false)
     }
@@ -110,28 +113,28 @@ export function ScheduleInterviewForm() {
   return (
     <div className="p-6 lg:p-8 max-w-4xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight mb-2">Schedule Interview</h1>
-        <p className="text-muted-foreground">Schedule a new interview with a candidate</p>
+        <h1 className="text-3xl font-bold tracking-tight mb-2">{t("scheduleInterview.title")}</h1>
+        <p className="text-muted-foreground">{t("scheduleInterview.subtitle")}</p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Interview Details</CardTitle>
-          <CardDescription>Enter the interview information below</CardDescription>
+          <CardTitle>{t("scheduleInterview.detailsTitle")}</CardTitle>
+          <CardDescription>{t("scheduleInterview.detailsDesc")}</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Candidate and Job Selection */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="candidate">Candidate *</Label>
+                <Label htmlFor="candidate">{t("scheduleInterview.candidate")}</Label>
                 <Select
                   required
                   value={formData.candidate_id}
                   onValueChange={(value) => setFormData({ ...formData, candidate_id: value })}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a candidate" />
+                    <SelectValue placeholder={t("scheduleInterview.selectCandidate")} />
                   </SelectTrigger>
                   <SelectContent>
                     {candidates.map((candidate) => (
@@ -144,10 +147,10 @@ export function ScheduleInterviewForm() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="job">Job Position (Optional)</Label>
+                <Label htmlFor="job">{t("scheduleInterview.job")}</Label>
                 <Select value={formData.job_id} onValueChange={(value) => setFormData({ ...formData, job_id: value })}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a job" />
+                    <SelectValue placeholder={t("scheduleInterview.selectJob")} />
                   </SelectTrigger>
                   <SelectContent>
                     {jobs.map((job) => (
@@ -162,31 +165,31 @@ export function ScheduleInterviewForm() {
 
             {/* Interview Details */}
             <div className="space-y-2">
-              <Label htmlFor="title">Interview Title *</Label>
+              <Label htmlFor="title">{t("scheduleInterview.interviewTitle")}</Label>
               <Input
                 id="title"
                 required
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                placeholder="e.g., Technical Interview - Round 1"
+                placeholder={t("scheduleInterview.titlePlaceholder")}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
+              <Label htmlFor="description">{t("scheduleInterview.description")}</Label>
               <Textarea
                 id="description"
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 rows={3}
-                placeholder="Brief description of the interview..."
+                placeholder={t("scheduleInterview.descriptionPlaceholder")}
               />
             </div>
 
             {/* Interview Type and Duration */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="type">Interview Type *</Label>
+                <Label htmlFor="type">{t("scheduleInterview.type")}</Label>
                 <Select
                   value={formData.interview_type}
                   onValueChange={(value) => setFormData({ ...formData, interview_type: value })}
@@ -195,16 +198,16 @@ export function ScheduleInterviewForm() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="video">Video Call</SelectItem>
-                    <SelectItem value="phone">Phone Call</SelectItem>
-                    <SelectItem value="in-person">In-Person</SelectItem>
-                    <SelectItem value="technical">Technical Assessment</SelectItem>
+                    <SelectItem value="video">{t("scheduleInterview.type.video")}</SelectItem>
+                    <SelectItem value="phone">{t("scheduleInterview.type.phone")}</SelectItem>
+                    <SelectItem value="in-person">{t("scheduleInterview.type.inPerson")}</SelectItem>
+                    <SelectItem value="technical">{t("scheduleInterview.type.technical")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="duration">Duration (minutes) *</Label>
+                <Label htmlFor="duration">{t("scheduleInterview.duration")}</Label>
                 <Select
                   value={formData.duration_minutes}
                   onValueChange={(value) => setFormData({ ...formData, duration_minutes: value })}
@@ -213,11 +216,11 @@ export function ScheduleInterviewForm() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="30">30 minutes</SelectItem>
-                    <SelectItem value="45">45 minutes</SelectItem>
-                    <SelectItem value="60">1 hour</SelectItem>
-                    <SelectItem value="90">1.5 hours</SelectItem>
-                    <SelectItem value="120">2 hours</SelectItem>
+                    <SelectItem value="30">{t("scheduleInterview.duration.30")}</SelectItem>
+                    <SelectItem value="45">{t("scheduleInterview.duration.45")}</SelectItem>
+                    <SelectItem value="60">{t("scheduleInterview.duration.60")}</SelectItem>
+                    <SelectItem value="90">{t("scheduleInterview.duration.90")}</SelectItem>
+                    <SelectItem value="120">{t("scheduleInterview.duration.120")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -226,7 +229,7 @@ export function ScheduleInterviewForm() {
             {/* Date and Time */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="date">Date *</Label>
+                <Label htmlFor="date">{t("scheduleInterview.date")}</Label>
                 <Input
                   id="date"
                   type="date"
@@ -237,7 +240,7 @@ export function ScheduleInterviewForm() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="time">Time *</Label>
+                <Label htmlFor="time">{t("scheduleInterview.time")}</Label>
                 <Input
                   id="time"
                   type="time"
@@ -250,19 +253,19 @@ export function ScheduleInterviewForm() {
 
             {/* Location/Link */}
             <div className="space-y-2">
-              <Label htmlFor="location">Location / Meeting Link</Label>
+              <Label htmlFor="location">{t("scheduleInterview.location")}</Label>
               <Input
                 id="location"
                 value={formData.location}
                 onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                placeholder="e.g., Zoom link, Google Meet, or office address"
+                placeholder={t("scheduleInterview.locationPlaceholder")}
               />
             </div>
 
             {/* Interviewer Information */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="interviewer_name">Interviewer Name</Label>
+                <Label htmlFor="interviewer_name">{t("scheduleInterview.interviewerName")}</Label>
                 <Input
                   id="interviewer_name"
                   value={formData.interviewer_name}
@@ -271,7 +274,7 @@ export function ScheduleInterviewForm() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="interviewer_email">Interviewer Email</Label>
+                <Label htmlFor="interviewer_email">{t("scheduleInterview.interviewerEmail")}</Label>
                 <Input
                   id="interviewer_email"
                   type="email"
@@ -283,13 +286,13 @@ export function ScheduleInterviewForm() {
 
             {/* Notes */}
             <div className="space-y-2">
-              <Label htmlFor="notes">Notes</Label>
+              <Label htmlFor="notes">{t("scheduleInterview.notes")}</Label>
               <Textarea
                 id="notes"
                 value={formData.notes}
                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                 rows={3}
-                placeholder="Additional notes or preparation instructions..."
+                placeholder={t("scheduleInterview.notesPlaceholder")}
               />
             </div>
 
@@ -298,10 +301,10 @@ export function ScheduleInterviewForm() {
             {/* Actions */}
             <div className="flex gap-2">
               <Button type="submit" disabled={loading}>
-                {loading ? "Scheduling..." : "Schedule Interview"}
+                {loading ? t("scheduleInterview.scheduling") : t("scheduleInterview.submit")}
               </Button>
               <Button type="button" variant="outline" onClick={() => router.back()} className="bg-transparent">
-                Cancel
+                {t("scheduleInterview.cancel")}
               </Button>
             </div>
           </form>

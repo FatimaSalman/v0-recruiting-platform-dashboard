@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { X } from "lucide-react"
+import { useI18n } from "@/lib/i18n-context"
 
 interface AddCandidateFormProps {
   initialJobId?: string
@@ -35,6 +36,8 @@ export function AddCandidateForm({ initialJobId }: AddCandidateFormProps) {
     notes: "",
   })
 
+  const { t } = useI18n()
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
@@ -47,7 +50,7 @@ export function AddCandidateForm({ initialJobId }: AddCandidateFormProps) {
         data: { user },
       } = await supabase.auth.getUser()
 
-      if (!user) throw new Error("Not authenticated")
+      if (!user) throw new Error(t("auth.error"))
 
       const candidateData = {
         user_id: user.id,
@@ -90,7 +93,7 @@ export function AddCandidateForm({ initialJobId }: AddCandidateFormProps) {
       // router.push("/dashboard/candidates")
     } catch (err) {
       console.error("Error adding candidate:", err)
-      setError(err instanceof Error ? err.message : "An error occurred")
+      setError(err instanceof Error ? err.message : t("auth.error"))
     } finally {
       setLoading(false)
     }
@@ -116,21 +119,21 @@ export function AddCandidateForm({ initialJobId }: AddCandidateFormProps) {
   return (
     <div className="p-6 lg:p-8 max-w-4xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight mb-2">Add New Candidate</h1>
-        <p className="text-muted-foreground">Add a candidate to your recruitment pipeline</p>
+        <h1 className="text-3xl font-bold tracking-tight mb-2">{t("candidates.addNew")}</h1>
+        <p className="text-muted-foreground">{t("candidates.form.subtitle")}</p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Candidate Information</CardTitle>
-          <CardDescription>Enter the candidate's details below</CardDescription>
+          <CardTitle>{t("candidates.form.infoTitle")}</CardTitle>
+          <CardDescription>{t("candidates.form.infoDesc")}</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Basic Information */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Full Name *</Label>
+                <Label htmlFor="name">{t("candidates.form.fullName")} *</Label>
                 <Input
                   id="name"
                   required
@@ -140,7 +143,7 @@ export function AddCandidateForm({ initialJobId }: AddCandidateFormProps) {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="email">Email *</Label>
+                <Label htmlFor="email">{t("candidates.form.email")} *</Label>
                 <Input
                   id="email"
                   type="email"
@@ -151,7 +154,7 @@ export function AddCandidateForm({ initialJobId }: AddCandidateFormProps) {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="phone">Phone</Label>
+                <Label htmlFor="phone">{t("candidates.form.phone")}</Label>
                 <Input
                   id="phone"
                   type="tel"
@@ -161,7 +164,7 @@ export function AddCandidateForm({ initialJobId }: AddCandidateFormProps) {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="title">Job Title</Label>
+                <Label htmlFor="title">{t("candidates.form.jobTitle")}</Label>
                 <Input
                   id="title"
                   value={formData.title}
@@ -170,7 +173,7 @@ export function AddCandidateForm({ initialJobId }: AddCandidateFormProps) {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="experience">Years of Experience</Label>
+                <Label htmlFor="experience">{t("candidates.form.experience")}</Label>
                 <Input
                   id="experience"
                   type="number"
@@ -181,7 +184,7 @@ export function AddCandidateForm({ initialJobId }: AddCandidateFormProps) {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="location">Location</Label>
+                <Label htmlFor="location">{t("candidates.form.location")}</Label>
                 <Input
                   id="location"
                   value={formData.location}
@@ -192,7 +195,7 @@ export function AddCandidateForm({ initialJobId }: AddCandidateFormProps) {
 
             {/* Skills */}
             <div className="space-y-2">
-              <Label htmlFor="skills">Skills</Label>
+              <Label htmlFor="skills">{t("candidates.form.skills")}</Label>
               <div className="flex gap-2">
                 <Input
                   id="skills"
@@ -204,10 +207,10 @@ export function AddCandidateForm({ initialJobId }: AddCandidateFormProps) {
                       addSkill()
                     }
                   }}
-                  placeholder="Type a skill and press Enter"
+                  placeholder={t("candidates.form.skillPlaceholder")}
                 />
                 <Button type="button" onClick={addSkill} variant="outline" className="bg-transparent">
-                  Add
+                  {t("candidates.form.add")}
                 </Button>
               </div>
               {formData.skills.length > 0 && (
@@ -227,7 +230,7 @@ export function AddCandidateForm({ initialJobId }: AddCandidateFormProps) {
             {/* Links */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="linkedin">LinkedIn URL</Label>
+                <Label htmlFor="linkedin">{t("candidates.form.linkedin")}</Label>
                 <Input
                   id="linkedin"
                   type="url"
@@ -238,7 +241,7 @@ export function AddCandidateForm({ initialJobId }: AddCandidateFormProps) {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="portfolio">Portfolio URL</Label>
+                <Label htmlFor="portfolio">{t("candidates.form.portfolio")}</Label>
                 <Input
                   id="portfolio"
                   type="url"
@@ -251,13 +254,13 @@ export function AddCandidateForm({ initialJobId }: AddCandidateFormProps) {
 
             {/* Notes */}
             <div className="space-y-2">
-              <Label htmlFor="notes">Notes</Label>
+              <Label htmlFor="notes">{t("candidates.form.notes")}</Label>
               <Textarea
                 id="notes"
                 value={formData.notes}
                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                 rows={4}
-                placeholder="Additional information about the candidate..."
+                placeholder={t("candidates.form.notesPlaceholder")}
               />
             </div>
 
@@ -266,10 +269,10 @@ export function AddCandidateForm({ initialJobId }: AddCandidateFormProps) {
             {/* Actions */}
             <div className="flex gap-2">
               <Button type="submit" disabled={loading}>
-                {loading ? "Adding..." : "Add Candidate"}
+                {loading ? t("candidates.form.adding") : t("candidates.form.addBtn")}
               </Button>
               <Button type="button" variant="outline" onClick={() => router.back()} className="bg-transparent">
-                Cancel
+                {t("candidates.form.cancel")}
               </Button>
             </div>
           </form>

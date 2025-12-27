@@ -6,7 +6,7 @@ import { Check } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { PRICING_PLANS, formatPrice } from "@/lib/products"
+import { PRICING_PLANS, formatPrice, getTranslatedPlans } from "@/lib/products"
 import { cn } from "@/lib/utils"
 import { useState } from "react"
 import { CheckoutDialog } from "./checkout-dialog"
@@ -21,6 +21,8 @@ export function PricingPlans() {
   const { t } = useI18n()
   const supabase = useSupabase()
   const router = useRouter()
+
+  const plans = getTranslatedPlans(t)
 
   // Update your handleFreeTrialStart function to better log the error
   const handleFreeTrialStart = async () => {
@@ -54,7 +56,7 @@ export function PricingPlans() {
       if (existingSub) {
         // User already has a subscription
         console.log("User already has subscription:", existingSub)
-        alert("You already have an active subscription!")
+        alert(t("pricing.alert.existing"))
         router.push("/dashboard")
         return
       }
@@ -94,13 +96,13 @@ export function PricingPlans() {
       console.log("Subscription created successfully:", newSub)
 
       // Optional: Show success message
-      alert("Free trial started successfully! You now have 14 days of full access.")
+      alert(t("pricing.alert.success"))
 
       router.push("/dashboard")
 
     } catch (error) {
       console.error("Error starting free trial:", error)
-      alert(`Failed to start free trial: ${(error as any)?.message || "Please try again."}`)
+      alert(`${t("pricing.alert.error")} ${(error as any)?.message || t("reports.tryAgain")}`)
     }
   }
 
@@ -109,14 +111,14 @@ export function PricingPlans() {
       <Button asChild>
         <Link href="/dashboard">
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Dashboard
+          {t("pricing.backToDashboard")}
         </Link>
       </Button>
       {/* Header */}
       <div className="text-center mb-12">
         <h1 className="text-4xl font-bold tracking-tight mb-4">{t("pricing.title")}</h1>
         <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-          Start with a 14-day free trial, no credit card required
+          {t("pricing.trial.subtitle")}
         </p>
       </div>
 
@@ -124,13 +126,13 @@ export function PricingPlans() {
       <div className="mb-12 bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 rounded-lg p-6">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <div>
-            <h3 className="text-2xl font-bold mb-2">Start Your Free Trial</h3>
+            <h3 className="text-2xl font-bold mb-2">{t("pricing.trial.bannerTitle")}</h3>
             <p className="text-muted-foreground">
-              Get 5 job posts, 10 candidate profiles, and full platform access for 14 days
+              {t("pricing.trial.bannerDesc")}
             </p>
           </div>
           <Button size="lg" onClick={handleFreeTrialStart}>
-            Start Free Trial
+            {t("pricing.trial.startBtn")}
           </Button>
         </div>
       </div>
@@ -138,39 +140,41 @@ export function PricingPlans() {
       {/* Pricing cards */}
       <div className="grid md:grid-cols-4 gap-8 mb-12">
         {/* Free Trial Card */}
-        <Card className="p-8 relative border-2 border-primary">
-          <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary">Free Trial</Badge>
-          <div className="mb-6">
-            <h3 className="text-2xl font-bold mb-2">Free Trial</h3>
-            <p className="text-muted-foreground text-sm mb-4">Try our platform free for 14 days</p>
-            <div className="flex items-baseline gap-2">
-              <span className="text-4xl font-bold">$0</span>
-              <span className="text-muted-foreground">/14 days</span>
-            </div>
-          </div>
-
-          <Button
-            className="w-full mb-6"
-            variant="outline"
-            onClick={handleFreeTrialStart}
-          >
-            Start Free Trial
-          </Button>
-
-          <div className="space-y-3">
-            {PRICING_PLANS.find(p => p.id === "free-trial")?.features.map((feature, index) => (
-              <div key={index} className="flex items-start gap-3">
-                <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <Check className="w-3 h-3 text-primary" />
-                </div>
-                <span className="text-sm">{feature}</span>
+        {plans.filter(p => p.id == "free-trial").map((plan) =>
+          <Card key={plan.id} className="p-8 relative border-2 border-primary">
+            <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary">{plan.name}</Badge>
+            <div className="mb-6">
+              <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
+              <p className="text-muted-foreground text-sm mb-4">{plan.description}</p>
+              <div className="flex items-baseline gap-2">
+                <span className="text-4xl font-bold">$0</span>
+                <span className="text-muted-foreground">{t("pricing.trial.duration")}</span>
               </div>
-            ))}
-          </div>
-        </Card>
+            </div>
+
+            <Button
+              className="w-full mb-6"
+              variant="outline"
+              onClick={handleFreeTrialStart}
+            >
+              {t("pricing.trial.startBtn")}
+            </Button>
+
+            <div className="space-y-3">
+              {plan?.features.map((feature, index) => (
+                <div key={index} className="flex items-start gap-3">
+                  <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <Check className="w-3 h-3 text-primary" />
+                  </div>
+                  <span className="text-sm">{feature}</span>
+                </div>
+              ))}
+            </div>
+          </Card>
+        )}
 
         {/* Other plans */}
-        {PRICING_PLANS.filter(p => p.id !== "free-trial").map((plan) => (
+        {plans.filter(p => p.id !== "free-trial").map((plan) => (
           <Card key={plan.id} className={cn("p-8 relative", plan.popular && "border-primary shadow-lg scale-105")}>
             {plan.popular && (
               <Badge className="absolute -top-3 left-1/2 -translate-x-1/2">{t("pricing.popular")}</Badge>
@@ -190,7 +194,7 @@ export function PricingPlans() {
               variant={plan.popular ? "default" : "outline"}
               onClick={() => setSelectedPlan(plan.id)}
             >
-              {plan.id.includes("free") ? "Get Started" : `Subscribe for ${formatPrice(plan.priceInCents, plan.currency)}/month`}
+              {plan.id.includes("free") ? "Get Started" : `${(t("pricing.subscribePrefix"))} ${formatPrice(plan.priceInCents, plan.currency)}/ ${(t("pricing.month"))}`}
             </Button>
 
             <div className="space-y-3">

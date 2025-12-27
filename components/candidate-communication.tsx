@@ -10,6 +10,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Mail, Phone, MessageSquare, Calendar, User, Save, X } from "lucide-react"
 import { format } from "date-fns"
+import { ar, enUS } from "date-fns/locale"
+import { useI18n } from "@/lib/i18n-context"
 
 interface Communication {
     id: string
@@ -40,6 +42,8 @@ export function CandidateCommunication({ candidateId, candidateName }: Candidate
     })
 
     const supabase = useSupabase()
+    const { t, locale } = useI18n()
+    const dateLocale = locale === 'ar' ? ar : enUS
 
     useEffect(() => {
         fetchCommunications()
@@ -116,13 +120,13 @@ export function CandidateCommunication({ candidateId, candidateName }: Candidate
     const getTypeLabel = (type: string) => {
         switch (type) {
             case "email":
-                return "Email"
+                return t("communication.type.email")
             case "phone":
-                return "Phone Call"
+                return t("communication.type.phone")
             case "meeting":
-                return "Meeting"
+                return t("communication.type.meeting")
             case "note":
-                return "Note"
+                return t("communication.type.note")
             default:
                 return type
         }
@@ -134,11 +138,11 @@ export function CandidateCommunication({ candidateId, candidateName }: Candidate
                 <div className="flex items-center justify-between">
                     <CardTitle className="flex items-center gap-2">
                         <MessageSquare className="w-5 h-5" />
-                        Communication History
+                        {t("communication.history")}
                     </CardTitle>
                     <Button size="sm" onClick={() => setShowForm(true)}>
                         <MessageSquare className="mr-2 h-4 w-4" />
-                        Log Communication
+                        {t("communication.log")}
                     </Button>
                 </div>
             </CardHeader>
@@ -146,7 +150,7 @@ export function CandidateCommunication({ candidateId, candidateName }: Candidate
                 {showForm && (
                     <div className="mb-6 p-4 border rounded-lg">
                         <div className="flex items-center justify-between mb-4">
-                            <h3 className="font-semibold">Log New Communication</h3>
+                            <h3 className="font-semibold">{t("communication.logNew")}</h3>
                             <Button variant="ghost" size="sm" onClick={() => setShowForm(false)}>
                                 <X className="h-4 w-4" />
                             </Button>
@@ -154,7 +158,7 @@ export function CandidateCommunication({ candidateId, candidateName }: Candidate
 
                         <div className="space-y-4">
                             <div className="space-y-2">
-                                <Label>Type</Label>
+                                <Label>{t("communication.type")}</Label>
                                 <Select
                                     value={formData.type}
                                     onValueChange={(value) => setFormData({ ...formData, type: value as any })}
@@ -163,36 +167,36 @@ export function CandidateCommunication({ candidateId, candidateName }: Candidate
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="email">Email</SelectItem>
-                                        <SelectItem value="phone">Phone Call</SelectItem>
-                                        <SelectItem value="meeting">Meeting</SelectItem>
-                                        <SelectItem value="note">Internal Note</SelectItem>
+                                        <SelectItem value="email">{t("communication.type.email")}</SelectItem>
+                                        <SelectItem value="phone">{t("communication.type.phone")}</SelectItem>
+                                        <SelectItem value="meeting">{t("communication.type.meeting")}</SelectItem>
+                                        <SelectItem value="note">{t("communication.type.note")}</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
 
                             <div className="space-y-2">
-                                <Label>Subject</Label>
+                                <Label>{t("communication.subject")}</Label>
                                 <Input
                                     value={formData.subject}
                                     onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                                    placeholder="Enter subject..."
+                                    placeholder={t("communication.subjectPlaceholder")}
                                 />
                             </div>
 
                             <div className="space-y-2">
-                                <Label>Content</Label>
+                                <Label>{t("communication.content")}</Label>
                                 <Textarea
                                     value={formData.content}
                                     onChange={(e) => setFormData({ ...formData, content: e.target.value })}
                                     rows={4}
-                                    placeholder="Enter communication details..."
+                                    placeholder={t("communication.contentPlaceholder")}
                                 />
                             </div>
 
                             {formData.type === "meeting" && (
                                 <div className="space-y-2">
-                                    <Label>Scheduled For</Label>
+                                    <Label>{t("communication.scheduledFor")}</Label>
                                     <Input
                                         type="datetime-local"
                                         value={formData.scheduled_for}
@@ -203,11 +207,11 @@ export function CandidateCommunication({ candidateId, candidateName }: Candidate
 
                             <div className="flex justify-end gap-2">
                                 <Button variant="outline" onClick={() => setShowForm(false)}>
-                                    Cancel
+                                    {t("communication.cancel")}
                                 </Button>
                                 <Button onClick={saveCommunication}>
                                     <Save className="mr-2 h-4 w-4" />
-                                    Save
+                                    {t("communication.save")}
                                 </Button>
                             </div>
                         </div>
@@ -216,12 +220,12 @@ export function CandidateCommunication({ candidateId, candidateName }: Candidate
 
                 {loading ? (
                     <div className="text-center py-4">
-                        <p className="text-muted-foreground">Loading communications...</p>
+                        <p className="text-muted-foreground">{t("communication.loading")}</p>
                     </div>
                 ) : communications.length === 0 ? (
                     <div className="text-center py-8">
                         <MessageSquare className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                        <p className="text-muted-foreground">No communications logged yet</p>
+                        <p className="text-muted-foreground">{t("communication.noLogs")}</p>
                     </div>
                 ) : (
                     <div className="space-y-4">
@@ -233,12 +237,12 @@ export function CandidateCommunication({ candidateId, candidateName }: Candidate
                                         <span className="font-medium">{getTypeLabel(comm.type)}</span>
                                         {comm.status === "scheduled" && (
                                             <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
-                                                Scheduled
+                                                {t("communication.scheduled")}
                                             </span>
                                         )}
                                     </div>
                                     <span className="text-sm text-muted-foreground">
-                                        {format(new Date(comm.created_at), "MMM d, yyyy h:mm a")}
+                                        {format(new Date(comm.created_at), "MMM d, yyyy h:mm a", { locale: dateLocale })}
                                     </span>
                                 </div>
 
@@ -253,7 +257,7 @@ export function CandidateCommunication({ candidateId, candidateName }: Candidate
                                 {comm.scheduled_for && (
                                     <div className="text-sm text-muted-foreground">
                                         <Calendar className="inline w-3 h-3 mr-1" />
-                                        Scheduled: {format(new Date(comm.scheduled_for), "MMM d, yyyy h:mm a")}
+                                        {t("communication.scheduledAt")} {format(new Date(comm.scheduled_for), "MMM d, yyyy h:mm a", { locale: dateLocale })}
                                     </div>
                                 )}
                             </div>

@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { useSupabase } from "@/lib/supabase/supabase-provider"
 import { Check, Tag, Mail, Trash2, UserCheck, UserMinus } from "lucide-react"
-
+import { useI18n } from "@/lib/i18n-context"
 interface CandidateBulkActionsProps {
     selectedIds: string[]
     onComplete: () => void
@@ -33,7 +33,7 @@ export function CandidateBulkActions({ selectedIds, onComplete }: CandidateBulkA
     const [tag, setTag] = useState("")
     const [showConfirm, setShowConfirm] = useState(false)
     const [loading, setLoading] = useState(false)
-
+    const { t } = useI18n()
     const supabase = useSupabase()
 
     const handleBulkAction = async () => {
@@ -94,18 +94,18 @@ export function CandidateBulkActions({ selectedIds, onComplete }: CandidateBulkA
         <>
             <div className="flex items-center gap-2 p-4 border-t bg-muted/50">
                 <div className="text-sm text-muted-foreground mr-2">
-                    {selectedIds.length} selected
+                    {selectedIds.length} {t("bulk.actions.selected")}
                 </div>
 
                 <Select value={action} onValueChange={setAction}>
                     <SelectTrigger className="w-40">
-                        <SelectValue placeholder="Bulk actions" />
+                        <SelectValue placeholder={t("bulk.action.placeholder")} />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="update_status">Update Status</SelectItem>
-                        <SelectItem value="add_tag">Add Tag</SelectItem>
-                        <SelectItem value="send_email">Send Email</SelectItem>
-                        <SelectItem value="delete">Delete</SelectItem>
+                        <SelectItem value="update_status">{t("bulk.update.status")}</SelectItem>
+                        <SelectItem value="add_tag">{t("bulk.add.tag")}</SelectItem>
+                        <SelectItem value="send_email">{t("candidates.send.email")}</SelectItem>
+                        <SelectItem value="delete">{t("jobs.delete")}</SelectItem>
                     </SelectContent>
                 </Select>
 
@@ -115,10 +115,10 @@ export function CandidateBulkActions({ selectedIds, onComplete }: CandidateBulkA
                             <SelectValue placeholder="Select status" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="active">Active</SelectItem>
-                            <SelectItem value="inactive">Inactive</SelectItem>
-                            <SelectItem value="placed">Placed</SelectItem>
-                            <SelectItem value="withdrawn">Withdrawn</SelectItem>
+                            <SelectItem value="active">{t("status.active")}</SelectItem>
+                            <SelectItem value="inactive">{t("status.inactive")}</SelectItem>
+                            <SelectItem value="placed">{t("status.placed")}</SelectItem>
+                            <SelectItem value="withdrawn">{t("status.withdrawn")}</SelectItem>
                         </SelectContent>
                     </Select>
                 )}
@@ -129,7 +129,7 @@ export function CandidateBulkActions({ selectedIds, onComplete }: CandidateBulkA
                             type="text"
                             value={tag}
                             onChange={(e) => setTag(e.target.value)}
-                            placeholder="Enter tag"
+                            placeholder={t("bluk.enter.tag")}
                             className="px-3 py-2 border rounded-md text-sm"
                         />
                     </div>
@@ -142,7 +142,7 @@ export function CandidateBulkActions({ selectedIds, onComplete }: CandidateBulkA
                         disabled={loading}
                     >
                         <Check className="mr-2 h-4 w-4" />
-                        Apply
+                        {t("apply")}
                     </Button>
                 )}
             </div>
@@ -150,12 +150,15 @@ export function CandidateBulkActions({ selectedIds, onComplete }: CandidateBulkA
             <AlertDialog open={showConfirm} onOpenChange={setShowConfirm}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
-                        <AlertDialogTitle>Confirm Bulk Action</AlertDialogTitle>
+                        <AlertDialogTitle>{t("confirm.bulk.action")}</AlertDialogTitle>
                         <AlertDialogDescription>
                             {action === "delete" ? (
-                                `Are you sure you want to delete ${selectedIds.length} candidate(s)? This action cannot be undone.`
+                                `${t("delete.message")} ${selectedIds.length} 
+                                ${selectedIds.length === 1 ? t("candidates.singular") : t("candidates.small.letter")} ? 
+                                ${t("delete.action.undone")}`
                             ) : (
-                                `Apply ${action.replace("_", " ")} to ${selectedIds.length} candidate(s)?`
+                                `${t("apply")} ${action.replace("_", " ")} ${t("to")} ${selectedIds.length}
+                                 ${selectedIds.length === 1 ? t("candidates.singular") : t("candidates.small.letter")}?`
                             )}
                         </AlertDialogDescription>
                     </AlertDialogHeader>
@@ -170,7 +173,7 @@ export function CandidateBulkActions({ selectedIds, onComplete }: CandidateBulkA
                             }
                             disabled={loading}
                         >
-                            {loading ? "Processing..." : "Confirm"}
+                            {loading ? t("pricing.processing") : t("confirm")}
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>

@@ -365,38 +365,6 @@ export function CandidateSearchInterface() {
     }
   }
 
-  function getStatusIcon(status: string) {
-    switch (status) {
-      case 'active':
-        return <UserCheck className="w-4 h-4 text-green-500" />
-      case 'inactive':
-        return <UserMinus className="w-4 h-4 text-gray-500" />
-      case 'placed':
-        return <Award className="w-4 h-4 text-blue-500" />
-      case 'withdrawn':
-        return <UserX className="w-4 h-4 text-red-500" />
-      default:
-        return <Users className="w-4 h-4" />
-    }
-  }
-
-  function getAvailabilityIcon(availability: string) {
-    switch (availability) {
-      case 'immediate':
-        return <Clock className="w-4 h-4 text-green-500" />
-      case '2-weeks':
-        return <Calendar className="w-4 h-4 text-blue-500" />
-      case '1-month':
-        return <Calendar className="w-4 h-4 text-yellow-500" />
-      case '3-months':
-        return <Calendar className="w-4 h-4 text-orange-500" />
-      case 'not-available':
-        return <Clock className="w-4 h-4 text-red-500" />
-      default:
-        return <Calendar className="w-4 h-4" />
-    }
-  }
-
   function clearAllFilters() {
     setSearchQuery("")
     setExperienceFilter("all")
@@ -451,25 +419,25 @@ export function CandidateSearchInterface() {
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Export Candidates</DialogTitle>
+                <DialogTitle>{t("candidates.export.title")}</DialogTitle>
                 <DialogDescription>
-                  Export your candidates to CSV format for external use.
+                  {t("candidates.export.desc")}
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-4">
                 <div className="bg-muted p-4 rounded-lg">
                   <p className="text-sm text-muted-foreground">
-                    This will export all {candidates.length} candidates to a CSV file.
-                    The export includes all candidate information except sensitive data.
+                    {t("candidates.exprot.all")} {candidates.length} {t("candidates.export.csv.file")}
+                    {t("candidates.export.info")}
                   </p>
                 </div>
                 <div className="flex justify-end gap-2">
                   <Button variant="outline" onClick={() => setShowExportDialog(false)}>
-                    Cancel
+                    {t("jobs.form.cancel")}
                   </Button>
                   <Button onClick={handleExportCandidates}>
                     <Download className="mr-2 h-4 w-4" />
-                    Export CSV
+                    {t("candidates.export.csv")}
                   </Button>
                 </div>
               </div>
@@ -491,7 +459,7 @@ export function CandidateSearchInterface() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Total Candidates</p>
+                <p className="text-sm text-muted-foreground">{t("reports.totalCandidates")}</p>
                 <p className="text-2xl font-bold">{candidates.length}</p>
               </div>
               <Users className="w-8 h-8 text-primary/30" />
@@ -503,7 +471,7 @@ export function CandidateSearchInterface() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Active</p>
+                <p className="text-sm text-muted-foreground">{t("status.active")}</p>
                 <p className="text-2xl font-bold">
                   {candidates.filter(c => c.status === 'active').length}
                 </p>
@@ -517,7 +485,7 @@ export function CandidateSearchInterface() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Available Now</p>
+                <p className="text-sm text-muted-foreground">{t("status.available.now")}</p>
                 <p className="text-2xl font-bold">
                   {candidates.filter(c => c.availability === 'immediate').length}
                 </p>
@@ -531,11 +499,11 @@ export function CandidateSearchInterface() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Avg Experience</p>
+                <p className="text-sm text-muted-foreground">{t("candidates.avg.experience")}</p>
                 <p className="text-2xl font-bold">
                   {candidates.length > 0
                     ? Math.round(candidates.reduce((sum, c) => sum + (c.experience_years || 0), 0) / candidates.length)
-                    : 0} yrs
+                    : 0} {t("candidates.years")}
                 </p>
               </div>
               <Briefcase className="w-8 h-8 text-yellow-500/30" />
@@ -574,32 +542,32 @@ export function CandidateSearchInterface() {
           </div>
 
           {/* Filter Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
             {/* Experience Filter */}
             <div className="space-y-2">
-              <Label className="text-xs">Experience</Label>
+              <Label className="text-xs">{t("candidate.experience")}</Label>
               <Select value={experienceFilter} onValueChange={setExperienceFilter}>
                 <SelectTrigger>
-                  <SelectValue placeholder="All Experience" />
+                  <SelectValue placeholder={`${t("candidates.allExperience")}`} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Experience</SelectItem>
-                  <SelectItem value="0-5">0-5 years</SelectItem>
-                  <SelectItem value="5-10">5-10 years</SelectItem>
-                  <SelectItem value="10+">10+ years</SelectItem>
+                  <SelectItem value="all">{t("candidates.allExperience")}</SelectItem>
+                  <SelectItem value="0-5">{t("candidates.experience.0-5")}</SelectItem>
+                  <SelectItem value="5-10">{t("candidates.experience.5-10")}</SelectItem>
+                  <SelectItem value="10+">{t("candidates.experience.10+")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             {/* Skill Filter */}
             <div className="space-y-2">
-              <Label className="text-xs">Skill</Label>
+              <Label className="text-xs">{t("candidates.skills")}</Label>
               <Select value={skillFilter} onValueChange={setSkillFilter}>
                 <SelectTrigger>
-                  <SelectValue placeholder="All Skills" />
+                  <SelectValue placeholder={`${t("candidates.allSkills")}`} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Skills</SelectItem>
+                  <SelectItem value="all">{t("candidates.allSkills")}</SelectItem>
                   {allSkills.map((skill) => (
                     <SelectItem key={skill} value={skill}>
                       {skill}
@@ -611,80 +579,95 @@ export function CandidateSearchInterface() {
 
             {/* Status Filter */}
             <div className="space-y-2">
-              <Label className="text-xs">Status</Label>
+              <Label className="text-xs">{t("reports.status")}</Label>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger>
-                  <SelectValue placeholder="All Status" />
+                  <SelectValue placeholder={`${t("status.all")}`} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="inactive">Inactive</SelectItem>
-                  <SelectItem value="placed">Placed</SelectItem>
-                  <SelectItem value="withdrawn">Withdrawn</SelectItem>
+                  <SelectItem value="all">{t("status.all")}</SelectItem>
+                  <SelectItem value="active">{t("status.active")}</SelectItem>
+                  <SelectItem value="inactive">{t("status.inactive")}</SelectItem>
+                  <SelectItem value="placed">{t("status.placed")}</SelectItem>
+                  <SelectItem value="withdrawn">{t("status.withdrawn")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             {/* Availability Filter */}
             <div className="space-y-2">
-              <Label className="text-xs">Availability</Label>
+              <Label className="text-xs">{t("availability")}</Label>
               <Select value={availabilityFilter} onValueChange={setAvailabilityFilter}>
                 <SelectTrigger>
-                  <SelectValue placeholder="All Availability" />
+                  <SelectValue placeholder={`${t("availability.all")}`} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Availability</SelectItem>
-                  <SelectItem value="immediate">Immediate</SelectItem>
-                  <SelectItem value="2-weeks">2 Weeks</SelectItem>
-                  <SelectItem value="1-month">1 Month</SelectItem>
-                  <SelectItem value="3-months">3 Months</SelectItem>
-                  <SelectItem value="not-available">Not Available</SelectItem>
+                  <SelectItem value="all">{t("availability.all")}</SelectItem>
+                  <SelectItem value="immediate">{t("availability.immediate")}</SelectItem>
+                  <SelectItem value="2-weeks">{t("availability.2-weeks")}</SelectItem>
+                  <SelectItem value="1-month">{t("availability.1-month")}</SelectItem>
+                  <SelectItem value="3-months">{t("availability.3-month")}</SelectItem>
+                  <SelectItem value="not-available">{t("availability.not-available")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             {/* Salary Filter */}
             <div className="space-y-2">
-              <Label className="text-xs">Salary Range</Label>
+              <Label className="text-xs">{t("salary.range")}</Label>
               <Select value={salaryRangeFilter} onValueChange={setSalaryRangeFilter}>
                 <SelectTrigger>
-                  <SelectValue placeholder="All Salaries" />
+                  <SelectValue placeholder={t("salary.range.all")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Salaries</SelectItem>
-                  <SelectItem value="0-50000">$0 - $50,000</SelectItem>
-                  <SelectItem value="50000-100000">$50,000 - $100,000</SelectItem>
-                  <SelectItem value="100000-150000">$100,000 - $150,000</SelectItem>
-                  <SelectItem value="150000+">$150,000+</SelectItem>
+                  <SelectItem value="all">{t("salary.range.all")}</SelectItem>
+                  <SelectItem value="0-50000">{t("salary.range.0-50k")}</SelectItem>
+                  <SelectItem value="50000-100000">{t("salary.range.50k-100k")}</SelectItem>
+                  <SelectItem value="100000-150000">{t("salary.range.100k-150k")}</SelectItem>
+                  <SelectItem value="150000+">{t("salary.range.150k+")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             {/* Sort Options */}
             <div className="space-y-2">
-              <Label className="text-xs">Sort By</Label>
-              <div className="flex gap-2">
+              <Label className="text-xs">{t("sort.by")}</Label>
+              <div className="flex gap-1">
                 <Select value={sortBy} onValueChange={(value: any) => setSortBy(value)}>
                   <SelectTrigger className="flex-1">
-                    <SelectValue placeholder="Sort by" />
+                    <SelectValue placeholder={t("sort.by")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="match">Match Score</SelectItem>
-                    <SelectItem value="date">Date Added</SelectItem>
-                    <SelectItem value="name">Name</SelectItem>
-                    <SelectItem value="salary">Expected Salary</SelectItem>
+                    <SelectItem value="match">{t("candidate.match")}</SelectItem>
+                    <SelectItem value="date">{t("sort.date.added")}</SelectItem>
+                    <SelectItem value="name">{t("sort.name")}</SelectItem>
+                    <SelectItem value="salary">{t("sort.expected.salary")}</SelectItem>
                   </SelectContent>
                 </Select>
                 <Button
                   variant="outline"
                   size="icon"
                   onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
-                  title={sortOrder === "asc" ? "Ascending" : "Descending"}
+                  title={sortOrder === "asc" ? t("sort.ascending") : t("sort.descending")}
                 >
                   {sortOrder === "asc" ? "↑" : "↓"}
                 </Button>
               </div>
+            </div>
+
+            {/* Hired Options */}
+            <div className="space-y-2">
+              <Label className="text-xs">{t("hired.status")}</Label>
+              <Select value={hiredFilter} onValueChange={setHiredFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="All" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">{t("candidates.all")}</SelectItem>
+                  <SelectItem value="hired">{t("candidates.hired")}</SelectItem>
+                  <SelectItem value="not-hired">{t("candidates.not.hired")}</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
@@ -696,7 +679,7 @@ export function CandidateSearchInterface() {
                 <div className="flex flex-wrap gap-2">
                   {searchQuery && (
                     <Badge variant="secondary" className="gap-1">
-                      Search: {searchQuery}
+                      {t("nav.search")}: {searchQuery}
                       <button onClick={() => setSearchQuery("")} className="ml-1 hover:text-destructive">
                         <X className="h-3 w-3" />
                       </button>
@@ -704,7 +687,7 @@ export function CandidateSearchInterface() {
                   )}
                   {experienceFilter !== "all" && (
                     <Badge variant="secondary" className="gap-1">
-                      Exp: {experienceFilter}
+                      {t("candidate.experience")}: {experienceFilter}
                       <button onClick={() => setExperienceFilter("all")} className="ml-1 hover:text-destructive">
                         <X className="h-3 w-3" />
                       </button>
@@ -712,7 +695,7 @@ export function CandidateSearchInterface() {
                   )}
                   {skillFilter !== "all" && (
                     <Badge variant="secondary" className="gap-1">
-                      Skill: {skillFilter}
+                      {t("candidates.skills")}: {skillFilter}
                       <button onClick={() => setSkillFilter("all")} className="ml-1 hover:text-destructive">
                         <X className="h-3 w-3" />
                       </button>
@@ -720,7 +703,7 @@ export function CandidateSearchInterface() {
                   )}
                   {statusFilter !== "all" && (
                     <Badge variant="secondary" className="gap-1">
-                      Status: {statusFilter}
+                      {t("jobs.form.status")}: {statusFilter}
                       <button onClick={() => setStatusFilter("all")} className="ml-1 hover:text-destructive">
                         <X className="h-3 w-3" />
                       </button>
@@ -728,7 +711,7 @@ export function CandidateSearchInterface() {
                   )}
                   {availabilityFilter !== "all" && (
                     <Badge variant="secondary" className="gap-1">
-                      Availability: {availabilityFilter}
+                      {t("avialability")}: {availabilityFilter}
                       <button onClick={() => setAvailabilityFilter("all")} className="ml-1 hover:text-destructive">
                         <X className="h-3 w-3" />
                       </button>
@@ -736,7 +719,7 @@ export function CandidateSearchInterface() {
                   )}
                   {salaryRangeFilter !== "all" && (
                     <Badge variant="secondary" className="gap-1">
-                      Salary: {salaryRangeFilter}
+                      {t("salary")}: {salaryRangeFilter}
                       <button onClick={() => setSalaryRangeFilter("all")} className="ml-1 hover:text-destructive">
                         <X className="h-3 w-3" />
                       </button>
@@ -749,25 +732,11 @@ export function CandidateSearchInterface() {
                   onClick={clearAllFilters}
                   className="h-7 text-xs"
                 >
-                  Clear all
+                  {t("clear.all")}
                 </Button>
               </div>
             </div>
           )}
-
-          <div className="space-y-2">
-            <Label className="text-xs">Hired Status</Label>
-            <Select value={hiredFilter} onValueChange={setHiredFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder="All" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Candidates</SelectItem>
-                <SelectItem value="hired">Hired Only</SelectItem>
-                <SelectItem value="not-hired">Not Hired</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
         </CardContent>
       </Card>
 
@@ -780,8 +749,8 @@ export function CandidateSearchInterface() {
                 <Users className="w-4 h-4 text-primary" />
               </div>
               <div>
-                <h3 className="font-semibold">{selectedCandidates.length} candidates selected</h3>
-                <p className="text-sm text-muted-foreground">Perform actions on selected candidates</p>
+                <h3 className="font-semibold">{selectedCandidates.length} {t("candidates.selected")}</h3>
+                <p className="text-sm text-muted-foreground">{t("candidates.perform")}</p>
               </div>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -791,7 +760,7 @@ export function CandidateSearchInterface() {
                 onClick={() => setShowBulkEmailDialog(true)}
               >
                 <Mail className="mr-2 h-4 w-4" />
-                Send Email
+                {t("candidates.send.email")}
               </Button>
               <CandidateBulkActions
                 selectedIds={selectedCandidates}
@@ -806,7 +775,7 @@ export function CandidateSearchInterface() {
                 onClick={() => setSelectedCandidates([])}
               >
                 <X className="mr-2 h-4 w-4" />
-                Clear Selection
+                {t("candidates.clear.selection")}
               </Button>
             </div>
           </div>
@@ -817,19 +786,19 @@ export function CandidateSearchInterface() {
       <Dialog open={showBulkEmailDialog} onOpenChange={setShowBulkEmailDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Send Email to Selected Candidates</DialogTitle>
+            <DialogTitle>{t("candidates.send.email.selected")}</DialogTitle>
             <DialogDescription>
-              Send an email to {selectedCandidates.length} selected candidates
+              {t("candidates.send.email.to")} {selectedCandidates.length} {t("selected.candidates")}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="subject">Subject</Label>
+              <Label htmlFor="subject">{t("candidates.subject")}</Label>
               <Input
                 id="subject"
                 value={bulkEmailContent.subject}
                 onChange={(e) => setBulkEmailContent({ ...bulkEmailContent, subject: e.target.value })}
-                placeholder="Email subject..."
+                placeholder={t("email.placeholder")}
               />
             </div>
             <div className="space-y-2">
@@ -839,16 +808,16 @@ export function CandidateSearchInterface() {
                 value={bulkEmailContent.message}
                 onChange={(e) => setBulkEmailContent({ ...bulkEmailContent, message: e.target.value })}
                 rows={6}
-                placeholder="Write your message here..."
+                placeholder={t("email.message.placeholder")}
               />
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowBulkEmailDialog(false)}>
-                Cancel
+                {t("jobs.form.cancel")}
               </Button>
               <Button onClick={handleBulkEmail}>
                 <Mail className="mr-2 h-4 w-4" />
-                Open Email Client
+                {t("open.email.client")}
               </Button>
             </div>
           </div>
@@ -892,16 +861,16 @@ export function CandidateSearchInterface() {
                 {filteredCandidates.length} {t("candidates.found")}
               </h2>
               <p className="text-sm text-muted-foreground mt-1">
-                {sortBy === "match" && "Sorted by match score"}
-                {sortBy === "date" && "Sorted by date added"}
-                {sortBy === "name" && "Sorted by name"}
-                {sortBy === "salary" && "Sorted by expected salary"}
-                {sortOrder === "asc" ? " (ascending)" : " (descending)"}
+                {sortBy === "match" && `${t("sorted.by.match.score")}`}
+                {sortBy === "date" && `${t("sorted.by.date.added")}`}
+                {sortBy === "name" && `${t("sorted.by.name")}`}
+                {sortBy === "salary" && `${t("sorted.by.expected.salary")}`}
+                {sortOrder === "asc" ? ` (${t("sort.ascending")})` : ` (${t("sort.descending")})`}
               </p>
             </div>
             <div className="flex items-center gap-3">
               <div className="text-sm text-muted-foreground">
-                Showing {filteredCandidates.length} of {candidates.length} candidates
+                {t("showing")} {filteredCandidates.length} {t("of")} {candidates.length} {t("candidates.small.letter")}
               </div>
               <Button
                 variant="outline"
@@ -912,12 +881,12 @@ export function CandidateSearchInterface() {
                 {selectedCandidates.length === filteredCandidates.length ? (
                   <>
                     <X className="h-4 w-4" />
-                    Deselect All
+                    {t("deselect.all")}
                   </>
                 ) : (
                   <>
                     <Check className="h-4 w-4" />
-                    Select All
+                    {t("select.all")}
                   </>
                 )}
               </Button>
@@ -957,7 +926,7 @@ export function CandidateSearchInterface() {
           {filteredCandidates.length > 10 && (
             <div className="flex justify-center items-center gap-2 mt-8">
               <Button variant="outline" size="sm" disabled>
-                Previous
+                {t("previous")}
               </Button>
               <div className="flex items-center gap-1">
                 <Button variant="outline" size="sm" className="w-8 h-8 p-0">1</Button>
@@ -966,7 +935,7 @@ export function CandidateSearchInterface() {
                 <span className="text-muted-foreground">...</span>
               </div>
               <Button variant="outline" size="sm">
-                Next
+                {t("next")}
               </Button>
             </div>
           )}

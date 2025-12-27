@@ -237,9 +237,9 @@ export function DashboardOverview({ user }: { user: User }) {
         <div className=" mb-6 z-50 top-0 bg-primary text-primary-foreground py-2 p-4 d-lg rounded z-50">
           <div className="container mx-auto flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="font-medium">✨ Free Trial Active</span>
+              <span className="font-medium">✨ {t("dashboard.banner.title")}</span>
               <span className="text-sm opacity-90">
-                You have 14 days to try our platform with 5 jobs and 10 candidates
+                {t("dashboard.banner.message")}
               </span>
             </div>
             <div className="flex items-center gap-2">
@@ -249,7 +249,7 @@ export function DashboardOverview({ user }: { user: User }) {
                 className="bg-white text-primary hover:bg-white/90"
                 onClick={() => router.push("/dashboard/pricing")}
               >
-                Upgrade Now
+                {t("dashboard.upgrade.now")}
               </Button>
               <button
                 onClick={() => setShowTrialBanner(false)}
@@ -281,33 +281,33 @@ export function DashboardOverview({ user }: { user: User }) {
                     <Clock className="w-5 h-5 text-primary" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold">Start Your Free Trial</h3>
+                    <h3 className="text-xl font-bold">{t("pricing.trial.bannerTitle")}</h3>
                     <p className="text-muted-foreground">
-                      Get 14 days free with 5 job posts and 10 candidate profiles
+                      {t("pricing.trial.bannerDesc")}
                     </p>
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4 mt-4 max-w-md">
                   <div className="flex items-center gap-2">
                     <CheckCircle className="w-4 h-4 text-green-500" />
-                    <span className="text-sm">5 active job postings</span>
+                    <span className="text-sm">{t("pricing.starter.feature1")}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <CheckCircle className="w-4 h-4 text-green-500" />
-                    <span className="text-sm">10 candidate profiles</span>
+                    <span className="text-sm">{t("pricing.starter.feature2")}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <CheckCircle className="w-4 h-4 text-green-500" />
-                    <span className="text-sm">Basic candidate search</span>
+                    <span className="text-sm">{t("pricing.starter.feature3")}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <CheckCircle className="w-4 h-4 text-green-500" />
-                    <span className="text-sm">Email support</span>
+                    <span className="text-sm">{t("pricing.starter.feature4")}</span>
                   </div>
                 </div>
               </div>
               <Button size="lg" onClick={handleStartFreeTrial} className="whitespace-nowrap">
-                Start Free Trial
+                {t("pricing.trial.startBtn")}
               </Button>
             </div>
           </CardContent>
@@ -319,29 +319,29 @@ export function DashboardOverview({ user }: { user: User }) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <CreditCard className="w-5 h-5" />
-            Subscription Status
+            {t("dashboard.subscriptonStatus.desc")}
           </CardTitle>
           <CardDescription>
             {subscription ?
               subscription.plan_id === "free-trial"
-                ? "Your free trial is active"
-                : "Your current subscription plan"
-              : 'No active subscription'}
+                ? t("dashboard.free.trial.active")
+                : t("dashboard.your.current.plan")
+              : t("dashboard.noActiveSubscription")}
           </CardDescription>
         </CardHeader>
         <CardContent>
           {loading ? (
-            <p className="text-muted-foreground">Loading subscription...</p>
+            <p className="text-muted-foreground">{t("dashboard.loading.subscription")}</p>
           ) : subscription ? (
             subscription.plan_id === "free-trial" ? (
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-lg font-semibold">Free Trial</h3>
-                    <p className="text-sm text-muted-foreground">14 days free access</p>
+                    <h3 className="text-lg font-semibold">{t("pricing.free.trial")}</h3>
+                    <p className="text-sm text-muted-foreground">{t("dashboard.days.free.access")}</p>
                   </div>
                   <Badge className="bg-primary/10 text-primary">
-                    Active Trial
+                    {t("dashboard.active.trial")}
                   </Badge>
                 </div>
 
@@ -349,9 +349,9 @@ export function DashboardOverview({ user }: { user: User }) {
                 <div className="space-y-4">
                   <div>
                     <div className="flex justify-between text-sm mb-1">
-                      <span className="text-muted-foreground">Time Remaining</span>
+                      <span className="text-muted-foreground">{t("dashboard.time.remaining")}</span>
                       <span className="font-medium">
-                        {trialDaysRemaining} day{trialDaysRemaining !== 1 ? 's' : ''}
+                        {trialDaysRemaining} {trialDaysRemaining !== 1 ? `${t("reports.days")}` : `${t("dashboard.day")}`}
                       </span>
                     </div>
                     <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
@@ -366,7 +366,7 @@ export function DashboardOverview({ user }: { user: User }) {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Jobs Used</span>
+                        <span className="text-muted-foreground">{t("dashboard.jobs.used")}</span>
                         <span className="font-medium">
                           {trialUsage.jobs.current}/{trialUsage.jobs.limit}
                         </span>
@@ -380,7 +380,7 @@ export function DashboardOverview({ user }: { user: User }) {
                     </div>
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Candidates Used</span>
+                        <span className="text-muted-foreground">{t("dashboard.candidatesUsed")}</span>
                         <span className="font-medium">
                           {trialUsage.candidates.current}/{trialUsage.candidates.limit}
                         </span>
@@ -398,7 +398,7 @@ export function DashboardOverview({ user }: { user: User }) {
                 {subscription.current_period_end && (
                   <div className="text-sm bg-muted p-3 rounded-lg">
                     <p className="text-muted-foreground">
-                      Trial ends: <span className="font-medium">{new Date(subscription.current_period_end).toLocaleDateString()}</span>
+                      {t("dashboard.trial.ends")} <span className="font-medium">{new Date(subscription.current_period_end).toLocaleDateString()}</span>
                     </p>
                   </div>
                 )}
@@ -407,12 +407,12 @@ export function DashboardOverview({ user }: { user: User }) {
                   <Button asChild className="flex-1">
                     <Link href="/dashboard/pricing">
                       <CreditCard className="mr-2 w-4 h-4" />
-                      Upgrade to Paid Plan
+                      {t("dashboard.upgrade.plan")}
                     </Link>
                   </Button>
                   <Button variant="outline" asChild>
                     <Link href="/dashboard/pricing">
-                      View Plans
+                      {t("dashboard.viewPlans")}
                     </Link>
                   </Button>
                 </div>

@@ -93,7 +93,7 @@ export function EditCandidateForm({ candidateId }: EditCandidateFormProps) {
             }
         } catch (err: any) {
             console.error("Error fetching candidate:", err)
-            setError(err.message || "Failed to load candidate data")
+            setError(err.message || t("editCandidate.error.load"))
         } finally {
             setLoading(false)
         }
@@ -194,7 +194,7 @@ export function EditCandidateForm({ candidateId }: EditCandidateFormProps) {
 
             if (updateError) throw updateError
 
-            setSuccess("Candidate profile updated successfully!")
+            setSuccess(t("editCandidate.success"))
 
             // Redirect after 2 seconds
             setTimeout(() => {
@@ -203,7 +203,7 @@ export function EditCandidateForm({ candidateId }: EditCandidateFormProps) {
 
         } catch (err: any) {
             console.error("Error updating candidate:", err)
-            setError(err.message || "Failed to update candidate profile")
+            setError(err.message || t("editCandidate.error.update"))
         } finally {
             setSaving(false)
         }
@@ -214,7 +214,7 @@ export function EditCandidateForm({ candidateId }: EditCandidateFormProps) {
             <div className="p-6 lg:p-8 max-w-4xl mx-auto">
                 <div className="text-center py-12">
                     <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
-                    <p className="text-muted-foreground">Loading candidate data...</p>
+                    <p className="text-muted-foreground">{t("editCandidate.loading")}</p>
                 </div>
             </div>
         )
@@ -227,7 +227,7 @@ export function EditCandidateForm({ candidateId }: EditCandidateFormProps) {
                 <Button variant="ghost" asChild className="mb-4">
                     <Link href={`/dashboard/candidates/${candidateId}`}>
                         <ArrowLeft className="mr-2 h-4 w-4" />
-                        Back to Profile
+                        {t("editCandidate.backToProfile")}
                     </Link>
                 </Button>
                 <div className="flex items-center gap-3 mb-2">
@@ -235,8 +235,8 @@ export function EditCandidateForm({ candidateId }: EditCandidateFormProps) {
                         <User className="w-6 h-6 text-primary" />
                     </div>
                     <div>
-                        <h1 className="text-3xl font-bold tracking-tight">Edit Candidate Profile</h1>
-                        <p className="text-muted-foreground">Update candidate information and details</p>
+                        <h1 className="text-3xl font-bold tracking-tight">{t("editCandidate.title")}</h1>
+                        <p className="text-muted-foreground">{t("editCandidate.subtitle")}</p>
                     </div>
                 </div>
             </div>
@@ -261,15 +261,15 @@ export function EditCandidateForm({ candidateId }: EditCandidateFormProps) {
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 <User className="w-5 h-5" />
-                                Personal Information
+                                {t("editCandidate.personalInfo")}
                             </CardTitle>
-                            <CardDescription>Basic candidate details</CardDescription>
+                            <CardDescription>{t("editCandidate.personalInfoDesc")}</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <Label htmlFor="name">
-                                        Full Name <span className="text-destructive">*</span>
+                                        {t("candidates.form.fullName")} <span className="text-destructive">*</span>
                                     </Label>
                                     <Input
                                         id="name"
@@ -282,7 +282,7 @@ export function EditCandidateForm({ candidateId }: EditCandidateFormProps) {
 
                                 <div className="space-y-2">
                                     <Label htmlFor="email">
-                                        Email <span className="text-destructive">*</span>
+                                        {t("candidates.form.email")} <span className="text-destructive">*</span>
                                     </Label>
                                     <div className="flex items-center gap-2">
                                         <Mail className="w-4 h-4 text-muted-foreground" />
@@ -300,7 +300,7 @@ export function EditCandidateForm({ candidateId }: EditCandidateFormProps) {
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor="phone">Phone Number</Label>
+                                    <Label htmlFor="phone">{t("editCandidate.phone")}</Label>
                                     <div className="flex items-center gap-2">
                                         <Phone className="w-4 h-4 text-muted-foreground" />
                                         <Input
@@ -314,7 +314,7 @@ export function EditCandidateForm({ candidateId }: EditCandidateFormProps) {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label htmlFor="location">Location</Label>
+                                    <Label htmlFor="location">{t("candidates.form.location")}</Label>
                                     <div className="flex items-center gap-2">
                                         <MapPin className="w-4 h-4 text-muted-foreground" />
                                         <Input
@@ -334,14 +334,14 @@ export function EditCandidateForm({ candidateId }: EditCandidateFormProps) {
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 <Briefcase className="w-5 h-5" />
-                                Professional Information
+                                {t("editCandidate.professionalInfo")}
                             </CardTitle>
-                            <CardDescription>Work experience and career details</CardDescription>
+                            <CardDescription>{t("editCandidate.professionalInfoDesc")}</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor="title">Job Title</Label>
+                                    <Label htmlFor="title">{t("candidates.form.jobTitle")}</Label>
                                     <Input
                                         id="title"
                                         value={formData.title}
@@ -351,7 +351,7 @@ export function EditCandidateForm({ candidateId }: EditCandidateFormProps) {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label htmlFor="experience_years">Years of Experience</Label>
+                                    <Label htmlFor="experience_years">{t("candidates.form.experience")}</Label>
                                     <div className="flex items-center gap-2">
                                         <Calendar className="w-4 h-4 text-muted-foreground" />
                                         <Input
@@ -369,7 +369,7 @@ export function EditCandidateForm({ candidateId }: EditCandidateFormProps) {
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor="current_salary">Current Salary (Annual)</Label>
+                                    <Label htmlFor="current_salary">{t("editCandidate.currentSalary")}</Label>
                                     <div className="flex items-center gap-2">
                                         <DollarSign className="w-4 h-4 text-muted-foreground" />
                                         <Input
@@ -384,7 +384,7 @@ export function EditCandidateForm({ candidateId }: EditCandidateFormProps) {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label htmlFor="expected_salary">Expected Salary (Annual)</Label>
+                                    <Label htmlFor="expected_salary">{t("editCandidate.expectedSalary")}</Label>
                                     <div className="flex items-center gap-2">
                                         <DollarSign className="w-4 h-4 text-muted-foreground" />
                                         <Input
@@ -406,14 +406,14 @@ export function EditCandidateForm({ candidateId }: EditCandidateFormProps) {
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 <Shield className="w-5 h-5" />
-                                Status & Availability
+                                {t("editCandidate.statusAvailability")}
                             </CardTitle>
-                            <CardDescription>Current candidate status and availability</CardDescription>
+                            <CardDescription>{t("editCandidate.statusAvailabilityDesc")}</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor="status">Candidate Status</Label>
+                                    <Label htmlFor="status">{t("editCandidate.candidateStatus")}</Label>
                                     <Select
                                         value={formData.status}
                                         onValueChange={(value) => setFormData({ ...formData, status: value })}
@@ -422,16 +422,16 @@ export function EditCandidateForm({ candidateId }: EditCandidateFormProps) {
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="active">Active</SelectItem>
-                                            <SelectItem value="inactive">Inactive</SelectItem>
-                                            <SelectItem value="placed">Placed</SelectItem>
-                                            <SelectItem value="withdrawn">Withdrawn</SelectItem>
+                                            <SelectItem value="active">{t("status.active")}</SelectItem>
+                                            <SelectItem value="inactive">{t("status.inactive")}</SelectItem>
+                                            <SelectItem value="placed">{t("status.placed")}</SelectItem>
+                                            <SelectItem value="withdrawn">{t("status.withdrawn")}</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label htmlFor="availability">Availability</Label>
+                                    <Label htmlFor="availability">{t("availability")}</Label>
                                     <Select
                                         value={formData.availability}
                                         onValueChange={(value) => setFormData({ ...formData, availability: value })}
@@ -440,18 +440,18 @@ export function EditCandidateForm({ candidateId }: EditCandidateFormProps) {
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="immediate">Immediate</SelectItem>
-                                            <SelectItem value="2-weeks">2 Weeks</SelectItem>
-                                            <SelectItem value="1-month">1 Month</SelectItem>
-                                            <SelectItem value="3-months">3 Months</SelectItem>
-                                            <SelectItem value="not-available">Not Available</SelectItem>
+                                            <SelectItem value="immediate">{t("availability.immediate")}</SelectItem>
+                                            <SelectItem value="2-weeks">{t("availability.2-weeks")}</SelectItem>
+                                            <SelectItem value="1-month">{t("availability.1-month")}</SelectItem>
+                                            <SelectItem value="3-months">{t("availability.3-month")}</SelectItem>
+                                            <SelectItem value="not-available">{t("availability.not-available")}</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="notice_period">Notice Period (Days)</Label>
+                                <Label htmlFor="notice_period">{t("editCandidate.noticePeriod")}</Label>
                                 <div className="flex items-center gap-2">
                                     <Clock className="w-4 h-4 text-muted-foreground" />
                                     <Input
@@ -471,12 +471,12 @@ export function EditCandidateForm({ candidateId }: EditCandidateFormProps) {
                     {/* Skills */}
                     <Card>
                         <CardHeader>
-                            <CardTitle>Skills & Expertise</CardTitle>
-                            <CardDescription>Add or remove candidate skills</CardDescription>
+                            <CardTitle>{t("editCandidate.skillsExpertise")}</CardTitle>
+                            <CardDescription>{t("editCandidate.skillsExpertiseDesc")}</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="space-y-2">
-                                <Label htmlFor="skills">Add Skills</Label>
+                                <Label htmlFor="skills">{t("editCandidate.addSkills")}</Label>
                                 <div className="flex gap-2">
                                     <Input
                                         id="skills"
@@ -488,17 +488,17 @@ export function EditCandidateForm({ candidateId }: EditCandidateFormProps) {
                                                 handleAddSkill()
                                             }
                                         }}
-                                        placeholder="Type a skill and press Enter"
+                                        placeholder={t("candidates.form.skillPlaceholder")}
                                     />
                                     <Button type="button" onClick={handleAddSkill} variant="secondary">
-                                        Add
+                                        {t("candidates.form.add")}
                                     </Button>
                                 </div>
                             </div>
 
                             {formData.skills.length > 0 && (
                                 <div className="space-y-2">
-                                    <Label>Current Skills</Label>
+                                    <Label>{t("editCandidate.currentSkills")}</Label>
                                     <div className="flex flex-wrap gap-2">
                                         {formData.skills.map((skill, index) => (
                                             <Badge key={index} variant="secondary" className="text-sm gap-1">
@@ -523,14 +523,14 @@ export function EditCandidateForm({ candidateId }: EditCandidateFormProps) {
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 <Globe className="w-5 h-5" />
-                                Links & Attachments
+                                {t("editCandidate.linksAttachments")}
                             </CardTitle>
-                            <CardDescription>External links and documents</CardDescription>
+                            <CardDescription>{t("editCandidate.linksAttachmentsDesc")}</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor="linkedin_url">LinkedIn Profile URL</Label>
+                                    <Label htmlFor="linkedin_url">{t("editCandidate.linkedin")}</Label>
                                     <div className="flex items-center gap-2">
                                         <Linkedin className="w-4 h-4 text-muted-foreground" />
                                         <Input
@@ -544,7 +544,7 @@ export function EditCandidateForm({ candidateId }: EditCandidateFormProps) {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label htmlFor="portfolio_url">Portfolio/Website URL</Label>
+                                    <Label htmlFor="portfolio_url">{t("editCandidate.portfolio")}</Label>
                                     <div className="flex items-center gap-2">
                                         <Globe className="w-4 h-4 text-muted-foreground" />
                                         <Input
@@ -559,7 +559,7 @@ export function EditCandidateForm({ candidateId }: EditCandidateFormProps) {
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="resume">Resume/CV</Label>
+                                <Label htmlFor="resume">{t("editCandidate.resume")}</Label>
                                 <div className="flex items-center gap-4">
                                     <div className="flex-1">
                                         <Input
@@ -570,7 +570,7 @@ export function EditCandidateForm({ candidateId }: EditCandidateFormProps) {
                                             className="cursor-pointer"
                                         />
                                         <p className="text-xs text-muted-foreground mt-1">
-                                            Upload PDF, DOC, DOCX, or TXT files (Max 10MB)
+                                            {t("editCandidate.resumeDesc")}
                                         </p>
                                     </div>
                                     {formData.resume_url && (
@@ -582,7 +582,7 @@ export function EditCandidateForm({ candidateId }: EditCandidateFormProps) {
                                         >
                                             <a href={formData.resume_url} target="_blank" rel="noopener noreferrer">
                                                 <FileText className="mr-2 h-4 w-4" />
-                                                View Current Resume
+                                                {t("editCandidate.viewResume")}
                                             </a>
                                         </Button>
                                     )}
@@ -594,15 +594,15 @@ export function EditCandidateForm({ candidateId }: EditCandidateFormProps) {
                     {/* Notes */}
                     <Card>
                         <CardHeader>
-                            <CardTitle>Additional Notes</CardTitle>
-                            <CardDescription>Internal notes about the candidate</CardDescription>
+                            <CardTitle>{t("editCandidate.additionalNotes")}</CardTitle>
+                            <CardDescription>{t("editCandidate.additionalNotesDesc")}</CardDescription>
                         </CardHeader>
                         <CardContent>
                             <Textarea
                                 value={formData.notes}
                                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                                 rows={6}
-                                placeholder="Add any additional notes, observations, or interview feedback..."
+                                placeholder={t("editCandidate.notesPlaceholder")}
                                 className="resize-none"
                             />
                         </CardContent>
@@ -616,18 +616,18 @@ export function EditCandidateForm({ candidateId }: EditCandidateFormProps) {
                             onClick={() => router.push(`/dashboard/candidates/${candidateId}`)}
                             disabled={saving}
                         >
-                            Cancel
+                            {t("candidates.form.cancel")}
                         </Button>
                         <Button type="submit" disabled={saving}>
                             {saving ? (
                                 <>
                                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    Saving...
+                                    {t("settings.saving")}
                                 </>
                             ) : (
                                 <>
                                     <Save className="mr-2 h-4 w-4" />
-                                    Save Changes
+                                    {t("settings.save")}
                                 </>
                             )}
                         </Button>

@@ -32,6 +32,7 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import { format, formatDistanceToNow } from "date-fns"
+import { ar, enUS } from "date-fns/locale"
 import { useI18n } from "@/lib/i18n-context"
 import {
     DropdownMenu,
@@ -63,7 +64,8 @@ export default function InterviewDetailPage() {
     const params = useParams()
     const router = useRouter()
     const supabase = useSupabase()
-    const { t } = useI18n()
+    const { t, locale } = useI18n()
+    const dateLocale = locale === 'ar' ? ar : enUS
     const interviewId = params.id as string
 
     useEffect(() => {
@@ -170,13 +172,13 @@ export default function InterviewDetailPage() {
     const getStatusBadge = (status: string) => {
         switch (status) {
             case "scheduled":
-                return <Badge className="bg-blue-500/10 text-blue-500 border-blue-500/20">Scheduled</Badge>
+                return <Badge className="bg-blue-500/10 text-blue-500 border-blue-500/20">{t("status.interview.scheduled")}</Badge>
             case "completed":
-                return <Badge className="bg-green-500/10 text-green-500 border-green-500/20">Completed</Badge>
+                return <Badge className="bg-green-500/10 text-green-500 border-green-500/20">{t("status.interview.completed")}</Badge>
             case "cancelled":
-                return <Badge className="bg-red-500/10 text-red-500 border-red-500/20">Cancelled</Badge>
+                return <Badge className="bg-red-500/10 text-red-500 border-red-500/20">{t("status.interview.cancelled")}</Badge>
             case "rescheduled":
-                return <Badge className="bg-yellow-500/10 text-yellow-500 border-yellow-500/20">Rescheduled</Badge>
+                return <Badge className="bg-yellow-500/10 text-yellow-500 border-yellow-500/20">{t("status.interview.rescheduled")}</Badge>
             default:
                 return <Badge variant="outline">{status}</Badge>
         }
@@ -188,25 +190,25 @@ export default function InterviewDetailPage() {
         switch (interview.status) {
             case "scheduled":
                 return [
-                    { label: "Mark as Completed", value: "completed", variant: "default" },
-                    { label: "Mark as Cancelled", value: "cancelled", variant: "destructive" },
-                    { label: "Mark as Rescheduled", value: "rescheduled", variant: "outline" }
+                    { label: t("interview.details.markCompleted"), value: "completed", variant: "default" },
+                    { label: t("interview.details.markCancelled"), value: "cancelled", variant: "destructive" },
+                    { label: t("interview.details.markRescheduled"), value: "rescheduled", variant: "outline" }
                 ]
             case "completed":
                 return [
-                    { label: "Reopen as Scheduled", value: "scheduled", variant: "outline" },
-                    { label: "Mark as Cancelled", value: "cancelled", variant: "destructive" }
+                    { label: t("interview.details.reopenScheduled"), value: "scheduled", variant: "outline" },
+                    { label: t("interview.details.markCancelled"), value: "cancelled", variant: "destructive" }
                 ]
             case "cancelled":
                 return [
-                    { label: "Re-schedule", value: "scheduled", variant: "default" },
-                    { label: "Mark as Completed", value: "completed", variant: "outline" }
+                    { label: t("interview.details.reschedule"), value: "scheduled", variant: "default" },
+                    { label: t("interview.details.markCompleted"), value: "completed", variant: "outline" }
                 ]
             case "rescheduled":
                 return [
-                    { label: "Mark as Scheduled", value: "scheduled", variant: "default" },
-                    { label: "Mark as Completed", value: "completed", variant: "outline" },
-                    { label: "Mark as Cancelled", value: "cancelled", variant: "destructive" }
+                    { label: t("interview.details.markScheduled"), value: "scheduled", variant: "default" },
+                    { label: t("interview.details.markCompleted"), value: "completed", variant: "outline" },
+                    { label: t("interview.details.markCancelled"), value: "cancelled", variant: "destructive" }
                 ]
             default:
                 return []
@@ -224,7 +226,7 @@ export default function InterviewDetailPage() {
                 <div className="p-6 lg:p-8 max-w-7xl mx-auto">
                     <div className="text-center py-12">
                         <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                        <p className="text-muted-foreground mt-4">Loading interview details...</p>
+                        <p className="text-muted-foreground mt-4">{t("editInterview.loading")}</p>
                     </div>
                 </div>
             </DashboardLayout>
@@ -237,12 +239,12 @@ export default function InterviewDetailPage() {
                 <div className="p-6 lg:p-8 max-w-7xl mx-auto">
                     <div className="text-center py-12">
                         <Calendar className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                        <h3 className="text-lg font-semibold mb-2">Interview not found</h3>
-                        <p className="text-muted-foreground mb-4">The interview you're looking for doesn't exist.</p>
+                        <h3 className="text-lg font-semibold mb-2">{t("interview.details.notFound")}</h3>
+                        <p className="text-muted-foreground mb-4">{t("interview.details.notFoundDesc")}</p>
                         <Button asChild>
                             <Link href="/dashboard/interviews">
                                 <ArrowLeft className="mr-2 h-4 w-4" />
-                                Back to Interviews
+                                {t("interview.details.back")}
                             </Link>
                         </Button>
                     </div>
@@ -259,7 +261,7 @@ export default function InterviewDetailPage() {
                     <Button variant="ghost" asChild className="mb-4">
                         <Link href="/dashboard/interviews">
                             <ArrowLeft className="mr-2 h-4 w-4" />
-                            Back to Interviews
+                            {t("interview.details.back")}
                         </Link>
                     </Button>
 
@@ -277,11 +279,11 @@ export default function InterviewDetailPage() {
                                     <div className="flex flex-wrap items-center gap-3 mt-1 text-muted-foreground">
                                         <div className="flex items-center gap-1">
                                             <Calendar className="w-4 h-4" />
-                                            <span>{format(new Date(interview.scheduled_at), "PPP 'at' h:mm a")}</span>
+                                            <span>{format(new Date(interview.scheduled_at), "PPP", { locale: dateLocale })} {t("interview.details.at")} {format(new Date(interview.scheduled_at), "h:mm a", { locale: dateLocale })}</span>
                                         </div>
                                         <div className="flex items-center gap-1">
                                             <Clock className="w-4 h-4" />
-                                            <span>{interview.duration_minutes || 60} minutes</span>
+                                            <span>{interview.duration_minutes || 60} {t("candidate.profile.minutes")}</span>
                                         </div>
                                         {interview.location && (
                                             <div className="flex items-center gap-1">
@@ -306,7 +308,7 @@ export default function InterviewDetailPage() {
                                     <DropdownMenuItem asChild>
                                         <Link href={`/dashboard/interviews/${interviewId}/edit`}>
                                             <Edit className="mr-2 h-4 w-4" />
-                                            Edit Interview
+                                            {t("interview.details.edit")}
                                         </Link>
                                     </DropdownMenuItem>
 
@@ -328,7 +330,7 @@ export default function InterviewDetailPage() {
                                         className="text-red-600"
                                     >
                                         <Trash2 className="mr-2 h-4 w-4" />
-                                        Delete Interview
+                                        {t("interview.details.delete")}
                                     </DropdownMenuItem>
                                 </DropdownMenuContent>
                             </DropdownMenu>
@@ -336,7 +338,7 @@ export default function InterviewDetailPage() {
                             <Button asChild>
                                 <Link href={`/dashboard/interviews/${interviewId}/edit`}>
                                     <Edit className="mr-2 h-4 w-4" />
-                                    Edit
+                                    {t("common.edit")}
                                 </Link>
                             </Button>
                         </div>
@@ -349,36 +351,36 @@ export default function InterviewDetailPage() {
                         {/* Interview Details */}
                         <Card>
                             <CardHeader>
-                                <CardTitle>Interview Details</CardTitle>
+                                <CardTitle>{t("editInterview.detailsTitle")}</CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
-                                        <Label>Interview Type</Label>
+                                        <Label>{t("editInterview.type")}</Label>
                                         <div className="flex items-center gap-2 mt-1">
                                             {getInterviewIcon(interview.interview_type)}
-                                            <span className="capitalize">{interview.interview_type?.replace("_", " ")}</span>
+                                            <span className="capitalize">{t(`editInterview.type.${interview.interview_type === 'in_person' ? 'inPerson' : interview.interview_type}`)}</span>
                                         </div>
                                     </div>
 
                                     <div>
-                                        <Label>Duration</Label>
+                                        <Label>{t("editInterview.duration")}</Label>
                                         <div className="flex items-center gap-2 mt-1">
                                             <Clock className="w-4 h-4 text-muted-foreground" />
-                                            <span>{interview.duration_minutes || 60} minutes</span>
+                                            <span>{interview.duration_minutes || 60} {t("candidate.profile.minutes")}</span>
                                         </div>
                                     </div>
 
                                     <div>
-                                        <Label>Scheduled Date & Time</Label>
+                                        <Label>{t("editInterview.dateTime")}</Label>
                                         <div className="flex items-center gap-2 mt-1">
                                             <Calendar className="w-4 h-4 text-muted-foreground" />
-                                            <span>{format(new Date(interview.scheduled_at), "PPP 'at' h:mm a")}</span>
+                                            <span>{format(new Date(interview.scheduled_at), "PPP", { locale: dateLocale })} {t("interview.details.at")} {format(new Date(interview.scheduled_at), "h:mm a", { locale: dateLocale })}</span>
                                         </div>
                                     </div>
 
                                     <div>
-                                        <Label>Status</Label>
+                                        <Label>{t("editInterview.status")}</Label>
                                         <div className="mt-1">
                                             {getStatusBadge(interview.status)}
                                         </div>
@@ -389,7 +391,7 @@ export default function InterviewDetailPage() {
                                     <>
                                         <Separator />
                                         <div>
-                                            <Label>Location / Meeting Link</Label>
+                                            <Label>{t("editInterview.location")}</Label>
                                             <div className="flex items-center justify-between mt-1">
                                                 <div className="flex items-center gap-2">
                                                     <MapPin className="w-4 h-4 text-muted-foreground" />
@@ -407,7 +409,7 @@ export default function InterviewDetailPage() {
                                                 <Button className="mt-2" asChild>
                                                     <a href={interview.location} target="_blank" rel="noopener noreferrer">
                                                         <ExternalLink className="mr-2 h-4 w-4" />
-                                                        Join Meeting
+                                                        {t("interview.details.joinMeeting")}
                                                     </a>
                                                 </Button>
                                             )}
@@ -419,7 +421,7 @@ export default function InterviewDetailPage() {
                                     <>
                                         <Separator />
                                         <div>
-                                            <Label>Notes</Label>
+                                            <Label>{t("editInterview.notes")}</Label>
                                             <p className="mt-2 text-muted-foreground whitespace-pre-wrap">
                                                 {interview.notes}
                                             </p>
@@ -433,7 +435,7 @@ export default function InterviewDetailPage() {
                         {(interview.interviewer_name || interview.interviewer_email) && (
                             <Card>
                                 <CardHeader>
-                                    <CardTitle>Interviewer Information</CardTitle>
+                                    <CardTitle>{t("editInterview.interviewerInfo")}</CardTitle>
                                 </CardHeader>
                                 <CardContent>
                                     <div className="space-y-4">
@@ -474,20 +476,20 @@ export default function InterviewDetailPage() {
                                                     onClick={() => window.location.href = `mailto:${interview.interviewer_email}`}
                                                 >
                                                     <Mail className="mr-2 h-4 w-4" />
-                                                    Send Email
+                                                    {t("interview.details.sendEmail")}
                                                 </Button>
                                             )}
                                             <Button
                                                 variant="outline"
                                                 size="sm"
                                                 onClick={() => {
-                                                    const subject = `Interview: ${interview.title}`
-                                                    const body = `Hi ${interview.interviewer_name},\n\nRegarding our interview scheduled for ${format(new Date(interview.scheduled_at), "PPP 'at' h:mm a")}...`
+                                                    const subject = t("interview.reminder.subject").replace("{title}", interview.title)
+                                                    const body = t("interview.reminder.body").replace("{name}", interview.interviewer_name || "").replace("{date}", format(new Date(interview.scheduled_at), "PPP 'at' h:mm a", { locale: dateLocale }))
                                                     window.location.href = `mailto:${interview.interviewer_email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
                                                 }}
                                             >
                                                 <MessageSquare className="mr-2 h-4 w-4" />
-                                                Send Reminder
+                                                {t("interview.details.sendReminder")}
                                             </Button>
                                         </div>
                                     </div>
@@ -498,7 +500,7 @@ export default function InterviewDetailPage() {
                         {/* Timeline / Activity Log */}
                         <Card>
                             <CardHeader>
-                                <CardTitle>Timeline</CardTitle>
+                                <CardTitle>{t("interview.details.timeline")}</CardTitle>
                             </CardHeader>
                             <CardContent>
                                 <div className="space-y-4">
@@ -507,9 +509,9 @@ export default function InterviewDetailPage() {
                                             <Calendar className="w-4 h-4 text-primary" />
                                         </div>
                                         <div className="flex-1">
-                                            <p className="font-medium">Interview Created</p>
+                                            <p className="font-medium">{t("interview.details.created")}</p>
                                             <p className="text-sm text-muted-foreground">
-                                                {format(new Date(interview.created_at), "PPP 'at' h:mm a")}
+                                                {format(new Date(interview.created_at), "PPP", { locale: dateLocale })} {t("interview.details.at")} {format(new Date(interview.created_at), "h:mm a", { locale: dateLocale })}
                                             </p>
                                         </div>
                                     </div>
@@ -520,9 +522,9 @@ export default function InterviewDetailPage() {
                                                 <Edit className="w-4 h-4 text-primary" />
                                             </div>
                                             <div className="flex-1">
-                                                <p className="font-medium">Last Updated</p>
+                                                <p className="font-medium">{t("interview.details.updated")}</p>
                                                 <p className="text-sm text-muted-foreground">
-                                                    {formatDistanceToNow(new Date(interview.updated_at), { addSuffix: true })}
+                                                    {formatDistanceToNow(new Date(interview.updated_at), { addSuffix: true, locale: dateLocale })}
                                                 </p>
                                             </div>
                                         </div>
@@ -540,7 +542,7 @@ export default function InterviewDetailPage() {
                                 <CardHeader>
                                     <CardTitle className="flex items-center gap-2">
                                         <User className="w-5 h-5" />
-                                        Candidate
+                                        {t("common.candidate")}
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent>
@@ -596,13 +598,13 @@ export default function InterviewDetailPage() {
                                         <div className="space-y-2">
                                             <Button asChild className="w-full">
                                                 <Link href={`/dashboard/candidates/${candidate.id}`}>
-                                                    View Full Profile
+                                                    {t("interview.details.viewProfile")}
                                                 </Link>
                                             </Button>
                                             <Button variant="outline" className="w-full" asChild>
                                                 <Link href={`mailto:${candidate.email}?subject=Interview: ${interview.title}`}>
                                                     <Mail className="mr-2 h-4 w-4" />
-                                                    Email Candidate
+                                                    {t("interview.details.emailCandidate")}
                                                 </Link>
                                             </Button>
                                         </div>
@@ -617,7 +619,7 @@ export default function InterviewDetailPage() {
                                 <CardHeader>
                                     <CardTitle className="flex items-center gap-2">
                                         <Briefcase className="w-5 h-5" />
-                                        Job Position
+                                        {t("interview.details.jobPosition")}
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent>
@@ -645,19 +647,19 @@ export default function InterviewDetailPage() {
                                         <div className="space-y-2">
                                             {job.employment_type && (
                                                 <div className="flex items-center justify-between text-sm">
-                                                    <span className="text-muted-foreground">Type</span>
-                                                    <span className="font-medium capitalize">{job.employment_type.replace("_", " ")}</span>
+                                                    <span className="text-muted-foreground">{t("interview.details.type")}</span>
+                                                    <span className="font-medium capitalize">{t(`jobs.form.type.${job.employment_type === 'full_time' ? 'fullTime' : job.employment_type === 'part_time' ? 'partTime' : job.employment_type}`)}</span>
                                                 </div>
                                             )}
                                             {job.experience_level && (
                                                 <div className="flex items-center justify-between text-sm">
-                                                    <span className="text-muted-foreground">Experience</span>
-                                                    <span className="font-medium capitalize">{job.experience_level}</span>
+                                                    <span className="text-muted-foreground">{t("interview.details.experience")}</span>
+                                                    <span className="font-medium capitalize">{t(`jobs.form.level.${job.experience_level}`)}</span>
                                                 </div>
                                             )}
                                             {job.salary_min && job.salary_max && (
                                                 <div className="flex items-center justify-between text-sm">
-                                                    <span className="text-muted-foreground">Salary Range</span>
+                                                    <span className="text-muted-foreground">{t("interview.details.salary")}</span>
                                                     <span className="font-medium">
                                                         ${job.salary_min.toLocaleString()} - ${job.salary_max.toLocaleString()}
                                                     </span>
@@ -669,7 +671,7 @@ export default function InterviewDetailPage() {
 
                                         <Button asChild className="w-full">
                                             <Link href={`/dashboard/jobs/${job.id}`}>
-                                                View Job Details
+                                                {t("interview.details.viewJob")}
                                             </Link>
                                         </Button>
                                     </div>
@@ -680,38 +682,38 @@ export default function InterviewDetailPage() {
                         {/* Quick Actions */}
                         <Card>
                             <CardHeader>
-                                <CardTitle>Quick Actions</CardTitle>
+                                <CardTitle>{t("interview.details.quickActions")}</CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-3">
                                 <Button
                                     variant="outline"
                                     className="w-full justify-start"
                                     onClick={() => {
-                                        const subject = `Interview Details: ${interview.title}`
-                                        const body = `Interview Details:\n\nTitle: ${interview.title}\nDate: ${format(new Date(interview.scheduled_at), "PPP 'at' h:mm a")}\nDuration: ${interview.duration_minutes} minutes\nType: ${interview.interview_type}\nLocation: ${interview.location}\n\nCandidate: ${candidate?.name}\nJob: ${job?.title}\n\nNotes: ${interview.notes}`
+                                        const subject = t("interview.email.subject").replace("{title}", interview.title)
+                                        const body = `${t("interview.email.body.title")}\n\n${t("editInterview.interviewTitle")}: ${interview.title}\n${t("interview.email.body.date")} ${format(new Date(interview.scheduled_at), "PPP 'at' h:mm a", { locale: dateLocale })}\n${t("interview.email.body.duration")} ${interview.duration_minutes} ${t("candidate.profile.minutes")}\n${t("interview.email.body.type")} ${t(`editInterview.type.${interview.interview_type === 'in_person' ? 'inPerson' : interview.interview_type}`)}\n${t("interview.email.body.location")} ${interview.location}\n\n${t("interview.email.body.candidate")} ${candidate?.name}\n${t("interview.email.body.job")} ${job?.title}\n\n${t("interview.email.body.notes")} ${interview.notes || ''}`
                                         window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
                                     }}
                                 >
                                     <Mail className="mr-2 h-4 w-4" />
-                                    Share Details
+                                    {t("interview.details.share")}
                                 </Button>
 
                                 <Button
                                     variant="outline"
                                     className="w-full justify-start"
                                     onClick={() => copyToClipboard(
-                                        `Interview: ${interview.title}\nDate: ${format(new Date(interview.scheduled_at), "PPP 'at' h:mm a")}\nCandidate: ${candidate?.name}\nJob: ${job?.title}`
+                                        `${t("editInterview.interviewTitle")}: ${interview.title}\n${t("interview.email.body.date")} ${format(new Date(interview.scheduled_at), "PPP 'at' h:mm a", { locale: dateLocale })}\n${t("interview.email.body.candidate")} ${candidate?.name}\n${t("interview.email.body.job")} ${job?.title}`
                                     )}
                                 >
                                     <Copy className="mr-2 h-4 w-4" />
-                                    Copy Details
+                                    {t("interview.details.copy")}
                                 </Button>
 
                                 {interview.interview_type === "video" && interview.location && (
                                     <Button asChild className="w-full justify-start">
                                         <a href={interview.location} target="_blank" rel="noopener noreferrer">
                                             <Video className="mr-2 h-4 w-4" />
-                                            Join Meeting
+                                            {t("interview.details.joinMeeting")}
                                         </a>
                                     </Button>
                                 )}
@@ -724,7 +726,7 @@ export default function InterviewDetailPage() {
                                     >
                                         <a href={candidate.resume_url} target="_blank" rel="noopener noreferrer">
                                             <FileText className="mr-2 h-4 w-4" />
-                                            View Resume
+                                            {t("interview.details.viewResume")}
                                         </a>
                                     </Button>
                                 )}
@@ -737,16 +739,16 @@ export default function InterviewDetailPage() {
                                 <CardHeader>
                                     <CardTitle className="flex items-center gap-2">
                                         <Award className="w-5 h-5" />
-                                        Feedback
+                                        {t("interview.details.feedback")}
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent>
                                     <p className="text-sm text-muted-foreground mb-4">
-                                        Interview has been completed. Add feedback for this candidate.
+                                        {t("interview.details.feedbackDesc")}
                                     </p>
                                     <Button asChild className="w-full">
                                         <Link href={`/dashboard/interviews/${interviewId}/feedback`}>
-                                            Add Feedback
+                                            {t("interview.details.addFeedback")}
                                         </Link>
                                     </Button>
                                 </CardContent>
@@ -759,20 +761,19 @@ export default function InterviewDetailPage() {
                 <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
                     <AlertDialogContent>
                         <AlertDialogHeader>
-                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                            <AlertDialogTitle>{t("interview.details.deleteTitle")}</AlertDialogTitle>
                             <AlertDialogDescription>
-                                This action cannot be undone. This will permanently delete the interview
-                                "{interview.title}" scheduled for {format(new Date(interview.scheduled_at), "PPP")}.
+                                {t("interview.details.deleteDesc")} "{interview.title}"...
                             </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogCancel>{t("scheduleInterview.cancel")}</AlertDialogCancel>
                             <AlertDialogAction
                                 onClick={deleteInterview}
                                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                 disabled={deleting}
                             >
-                                {deleting ? "Deleting..." : "Delete Interview"}
+                                {deleting ? t("interview.details.deleting") : t("interview.details.delete")}
                             </AlertDialogAction>
                         </AlertDialogFooter>
                     </AlertDialogContent>

@@ -10,7 +10,7 @@
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
+  --primary: lab(68 -41 18.56);
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
@@ -119,7 +119,37 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Calendar view styling */
+.calendar-day {
+  @apply border rounded-lg p-4 hover:shadow-md transition-shadow;
+}
+
+.calendar-day-today {
+  @apply border-primary/30 bg-primary/5;
+}
+
+.calendar-day-header {
+  @apply flex items-center justify-between mb-3 pb-3 border-b;
+}
+
+.calendar-event {
+  @apply p-3 border-s-4 rounded-e-lg mb-2 hover:shadow-sm transition-shadow;
+}
+
+.calendar-event-scheduled {
+  @apply border-s-blue-500 bg-blue-50/50 dark:bg-blue-950/20;
+}
+
+.calendar-event-completed {
+  @apply border-s-green-500 bg-green-50/50 dark:bg-green-950/20;
+}
+
+.calendar-event-cancelled {
+  @apply border-s-red-500 bg-red-50/50 dark:bg-red-950/20;
 }

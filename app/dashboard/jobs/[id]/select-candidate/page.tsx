@@ -169,7 +169,7 @@ export default function SelectCandidatePage() {
                 <div className="mb-8">
                     <Button variant="ghost" asChild className="mb-4">
                         <Link href={`/dashboard/jobs/${jobId}/candidates`}>
-                            <ArrowLeft className="mr-2 h-4 w-4" />
+                            <ArrowLeft className="me-2 h-4 w-4 rtl:rotate-180" />
                             {t("jobs.backToCandidates")}
                         </Link>
                     </Button>
@@ -189,7 +189,7 @@ export default function SelectCandidatePage() {
                                 className="bg-transparent"
                             >
                                 <Link href={`/dashboard/candidates/new?jobId=${jobId}`}>
-                                    <UserPlus className="mr-2 h-4 w-4" />
+                                    <UserPlus className="me-2 h-4 w-4" />
                                     {t("candidates.addNew")}
                                 </Link>
                             </Button>
@@ -197,7 +197,7 @@ export default function SelectCandidatePage() {
                                 onClick={addSelectedCandidates}
                                 disabled={selectedCandidates.length === 0 || adding}
                             >
-                                <Check className="mr-2 h-4 w-4" />
+                                <Check className="me-2 h-4 w-4" />
                                 {adding ? t("candidates.form.adding") : t("candidates.addCount").replace("{count}", selectedCandidates.length.toString())}
                             </Button>
                         </div>
@@ -208,12 +208,12 @@ export default function SelectCandidatePage() {
                 <Card className="mb-6">
                     <CardContent className="pt-6">
                         <div className="relative">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                            <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                             <Input
                                 placeholder={t("candidates.searchPlaceholder")}
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="pl-10"
+                                className="ps-10"
                             />
                         </div>
                     </CardContent>
@@ -239,7 +239,7 @@ export default function SelectCandidatePage() {
                             </p>
                             <Button asChild>
                                 <Link href={`/dashboard/candidates/new?jobId=${jobId}`}>
-                                    <UserPlus className="mr-2 h-4 w-4" />
+                                    <UserPlus className="me-2 h-4 w-4" />
                                     {t("candidates.addNew")}
                                 </Link>
                             </Button>

@@ -199,26 +199,26 @@ export default function CandidateProfilePage() {
         if (candidate.applications?.some((app: any) => app.status === 'hired')) {
             return (
                 <Badge className="bg-blue-500/10 text-blue-500 border-blue-500/20">
-                    <Award className="w-3 h-3 mr-1" /> {t("status.placed")}
+                    <Award className="w-3 h-3 me-1" /> {t("status.placed")}
                 </Badge>
             )
         } else
             switch (status) {
                 case 'active':
                     return <Badge className="bg-green-500/10 text-green-500 border-green-500/20">
-                        <CheckCircle className="w-3 h-3 mr-1" /> {t("status.active")}
+                        <CheckCircle className="w-3 h-3 me-1" /> {t("status.active")}
                     </Badge>
                 case 'inactive':
                     return <Badge className="bg-gray-500/10 text-gray-500 border-gray-500/20">
-                        <Clock className="w-3 h-3 mr-1" /> {t("status.inactive")}
+                        <Clock className="w-3 h-3 me-1" /> {t("status.inactive")}
                     </Badge>
                 case 'placed':
                     return <Badge className="bg-blue-500/10 text-blue-500 border-blue-500/20">
-                        <Award className="w-3 h-3 mr-1" /> {t("status.placed")}
+                        <Award className="w-3 h-3 me-1" /> {t("status.placed")}
                     </Badge>
                 case 'withdrawn':
                     return <Badge className="bg-red-500/10 text-red-500 border-red-500/20">
-                        <XCircle className="w-3 h-3 mr-1" /> {t("status.withdrawn")}
+                        <XCircle className="w-3 h-3 me-1" /> {t("status.withdrawn")}
                     </Badge>
                 default:
                     return <Badge variant="outline">{status}</Badge>
@@ -330,7 +330,7 @@ export default function CandidateProfilePage() {
                     <p className="text-muted-foreground mb-4">{t("candidate.not.exist")}</p>
                     <Button asChild>
                         <Link href="/dashboard/candidates">
-                            <ArrowLeft className="mr-2 h-4 w-4" />
+                            <ArrowLeft className="me-2 h-4 w-4 rtl:rotate-180" />
                             {t("back.to.candidates")}
                         </Link>
                     </Button>
@@ -345,7 +345,7 @@ export default function CandidateProfilePage() {
             <div className="mb-6">
                 <Button variant="ghost" asChild className="mb-4">
                     <Link href="/dashboard/candidates">
-                        <ArrowLeft className="mr-2 h-4 w-4" />
+                        <ArrowLeft className="me-2 h-4 w-4 rtl:rotate-180" />
                         {t("back.to.candidates")}
                     </Link>
                 </Button>
@@ -359,7 +359,7 @@ export default function CandidateProfilePage() {
                                         {candidate.name.charAt(0).toUpperCase()}
                                     </span>
                                 </div>
-                                <div className="absolute -bottom-1 -right-1">
+                                <div className="absolute -bottom-1 -end-1">
                                     {getStatusBadge(candidate.status)}
                                 </div>
                             </div>
@@ -369,7 +369,7 @@ export default function CandidateProfilePage() {
                                     <h1 className="text-3xl font-bold tracking-tight">{candidate.name}</h1>
                                     {candidate.applications?.some((app: any) => app.status === 'hired') && (
                                         <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 px-3 py-1">
-                                            <Award className="w-4 h-4 mr-1" />
+                                            <Award className="w-4 h-4 me-1" />
                                             {t("status.hired")}
                                         </Badge>
                                     )}
@@ -434,29 +434,29 @@ export default function CandidateProfilePage() {
                             <DropdownMenuContent align="end">
                                 <DropdownMenuItem onClick={() => updateCandidateStatus('active')}
                                     disabled={candidate.status === 'active'}>
-                                    <UserCheck className="mr-2 h-4 w-4" />
+                                    <UserCheck className="me-2 h-4 w-4" />
                                     {t("candidate.profile.markActive")}
                                 </DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => updateCandidateStatus('inactive')}
                                     disabled={candidate.status === "inactive"}>
-                                    <UserMinus className="mr-2 h-4 w-4" />
+                                    <UserMinus className="me-2 h-4 w-4" />
                                     {t("candidate.profile.markInactive")}
                                 </DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => updateCandidateStatus('placed')}
                                     disabled={candidate.status === "placed" || candidate.applications?.some((app: any) => app.status === 'hired')}>
-                                    <Award className="mr-2 h-4 w-4" />
+                                    <Award className="me-2 h-4 w-4" />
                                     {t("candidate.profile.markPlaced")}
                                 </DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => updateCandidateStatus('withdrawn')}
                                     disabled={candidate.status === "withdrawn"}
                                     className="text-red-600">
-                                    <XCircle className="mr-2 h-4 w-4" />
+                                    <XCircle className="me-2 h-4 w-4" />
                                     {t("candidate.profile.markWithdrawn")}
                                 </DropdownMenuItem>
                                 <Separator />
                                 <DropdownMenuItem asChild>
                                     <Link href={`/dashboard/candidates/${candidateId}/edit`}>
-                                        <Edit className="mr-2 h-4 w-4" />
+                                        <Edit className="me-2 h-4 w-4" />
                                         {t("candidate.profile.editProfile")}
                                     </Link>
                                 </DropdownMenuItem>
@@ -468,12 +468,12 @@ export default function CandidateProfilePage() {
                             className="bg-transparent"
                             onClick={() => window.location.href = `mailto:${candidate.email}?subject=${t("candidate.emailSubject")}`}
                         >
-                            <MessageSquare className="mr-2 h-4 w-4" />
+                            <MessageSquare className="me-2 h-4 w-4" />
                             {t("candidate.contact")}
                         </Button>
 
                         <Button>
-                            <Star className="mr-2 h-4 w-4" />
+                            <Star className="me-2 h-4 w-4" />
                             {t("candidate.profile.addToShortlist")}
                         </Button>
                     </div>
@@ -504,7 +504,7 @@ export default function CandidateProfilePage() {
                                             </div>
                                         </div>
                                         <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20">
-                                            <Award className="w-3 h-3 mr-1" />
+                                            <Award className="w-3 h-3 me-1" />
                                             {t("status.hired")}
                                         </Badge>
                                     </div>
@@ -574,7 +574,7 @@ export default function CandidateProfilePage() {
                                             <div className="flex items-center gap-3">
                                                 <Linkedin className="w-5 h-5 text-muted-foreground" />
                                                 <div>
-                                                    <p className="text-sm text-muted-foreground">LinkedIn</p>
+                                                    <p className="text-sm text-muted-foreground">{t("common.linkedin")}</p>
                                                     <a
                                                         href={candidate.linkedin_url}
                                                         target="_blank"
@@ -591,7 +591,7 @@ export default function CandidateProfilePage() {
                                             <div className="flex items-center gap-3">
                                                 <Globe className="w-5 h-5 text-muted-foreground" />
                                                 <div>
-                                                    <p className="text-sm text-muted-foreground">Portfolio</p>
+                                                    <p className="text-sm text-muted-foreground">{t("common.portfolio")}</p>
                                                     <a
                                                         href={candidate.portfolio_url}
                                                         target="_blank"
@@ -614,7 +614,7 @@ export default function CandidateProfilePage() {
                                                     <div className="flex gap-2 mt-1">
                                                         <Button size="sm" variant="outline" asChild>
                                                             <a href={candidate.resume_url} target="_blank" rel="noopener noreferrer">
-                                                                <ExternalLink className="mr-2 h-3 w-3" />
+                                                                <ExternalLink className="me-2 h-3 w-3" />
                                                                 {t("candidate.profile.viewResume")}
                                                             </a>
                                                         </Button>
@@ -623,7 +623,7 @@ export default function CandidateProfilePage() {
                                                                 window.open(candidate.resume_url, '_blank')
                                                             }
                                                         }}>
-                                                            <Download className="mr-2 h-3 w-3" />
+                                                            <Download className="me-2 h-3 w-3" />
                                                             {t("candidate.profile.download")}
                                                         </Button>
                                                     </div>
@@ -810,7 +810,7 @@ export default function CandidateProfilePage() {
                                                                     {getInterviewStatusBadge(interview.status)}
                                                                 </div>
                                                                 <p className="text-sm text-muted-foreground">
-                                                                    {interview.interview_type || t("candidate.profile.noType")} •
+                                                                    {interview.interview_type ? t(`editInterview.type.${interview.interview_type === 'in_person' ? 'inPerson' : interview.interview_type}`) : t("candidate.profile.noType")} •
                                                                     {t("candidate.profile.scheduledFor")} {format(new Date(interview.scheduled_at), 'MMM d, yyyy h:mm a', { locale: locale === 'ar' ? ar : enUS })}
                                                                 </p>
                                                             </div>
@@ -938,7 +938,7 @@ export default function CandidateProfilePage() {
                                     handleContact('email')
                                 }}
                             >
-                                <Mail className="mr-2 h-4 w-4" />
+                                <Mail className="me-2 h-4 w-4" />
                                 {t("candidate.profile.sendEmail")}
                             </Button>
 
@@ -952,7 +952,7 @@ export default function CandidateProfilePage() {
                                         handleContact('phone')
                                     }}
                                 >
-                                    <Phone className="mr-2 h-4 w-4" />
+                                    <Phone className="me-2 h-4 w-4" />
                                     {t("candidate.profile.callCandidate")}
                                 </Button>
                             )}
@@ -967,7 +967,7 @@ export default function CandidateProfilePage() {
                                         handleContact('linkedin')
                                     }}
                                 >
-                                    <Linkedin className="mr-2 h-4 w-4" />
+                                    <Linkedin className="me-2 h-4 w-4" />
                                     {t("candidate.profile.viewLinkedin")}
                                 </Button>
                             )}

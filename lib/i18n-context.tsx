@@ -906,6 +906,8 @@ const translations = {
     "common.system": "System",
     "common.recruiter": "Recruiter",
     "common.error": "Error:",
+    "common.linkedin": "LinkedIn",
+    "common.portfolio": "Portfolio",
 
     "confirm.bulk.action": "Confirm Bulk Action",
     "apply": "Apply",
@@ -915,6 +917,20 @@ const translations = {
     "confirm": "Confirm",
     "common.view": "View",
     "common.edit": "Edit",
+
+    "auth.title": "Authentication Error",
+    "auth.description": "Something went wrong during the authentication process.",
+    "auth.errorDetails": "Error Details:",
+    "auth.unspecified": "An unspecified error occurred.",
+    "auth.commonIssues": "Common issues:",
+    "auth.issues1": "Google OAuth is not enabled in Supabase Dashboard",
+    "auth.issues2": "Invalid OAuth credentials",
+    "auth.issues3": "Redirect URL mismatch",
+    "auth.tryAgain": "Try Again",
+
+    "auth.signUpSuccess.title": "Thank you for signing up!",
+    "auth.signUpSuccess.description": "Check your email to confirm",
+    "auth.signUpSuccess.content": "You've successfully signed up. Please check your email to confirm your account before signing in.",
 
   },
   ar: {
@@ -1810,6 +1826,8 @@ const translations = {
     "common.system": "النظام",
     "common.recruiter": "مسؤول التوظيف",
     "common.error": "خطأ:",
+    "common.linkedin": "لينكد إن",
+    "common.portfolio": "ملف الأعمال",
 
     "confirm.bulk.action": "تأكيد الإجراء الجماعي",
     "apply": "تطبيق",
@@ -1820,8 +1838,21 @@ const translations = {
     "common.view": "عرض",
     "common.edit": "تعديل",
 
-  },
-}
+    "auth.title": "خطأ في المصادقة",
+    "auth.description": "حدث خطأ ما أثناء عملية المصادقة.",
+    "auth.errorDetails": "تفاصيل الخطأ:",
+    "auth.unspecified": "حدث خطأ غير محدد.",
+    "auth.commonIssues": "مشاكل شائعة:",
+    "auth.tryAgain": "حاول مرة أخرى",
+    "auth.issues1": "Google OAuth غير مفعل في لوحة تحكم Supabase",
+    "auth.issues2": "بيانات اعتماد OAuth غير صالحة",
+    "auth.issues3": "عدم تطابق عنوان URL لإعادة التوجيه",
+
+    "auth.signUpSuccess.title": "شكراً لتسجيلك!",
+    "auth.signUpSuccess.description": "تحقق من بريدك الإلكتروني للتأكيد",
+    "auth.signUpSuccess.content": "لقد قمت بالتسجيل بنجاح. يرجى التحقق من بريدك الإلكتروني لتأكيد حسابك قبل تسجيل الدخول.",
+  }
+} 
 
 const I18nContext = createContext<I18nContextType | undefined>(undefined)
 

@@ -21,9 +21,8 @@ import {
   GraduationCap,
 } from "lucide-react"
 import Link from "next/link"
-
-
-
+import { format } from "date-fns"
+import { ar, enUS } from "date-fns/locale"
 
 interface Job {
   id: string
@@ -48,7 +47,7 @@ export default function JobDetailsPage() {
   const supabase = useSupabase()
   const router = useRouter()
   const params = useParams()
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const jobId = params.id as string
 
   useEffect(() => {
@@ -137,7 +136,7 @@ export default function JobDetailsPage() {
           <p className="text-muted-foreground">{t("jobs.details.notFound")}</p>
           <Button asChild className="mt-4">
             <Link href="/dashboard/jobs">
-              <ArrowLeft className="mr-2 h-4 w-4" />
+              <ArrowLeft className="mr-2 h-4 w-4 rtl:rotate-180" />
               {t("jobs.details.backToJobs")}
             </Link>
           </Button>
@@ -152,7 +151,7 @@ export default function JobDetailsPage() {
       <div className="mb-6">
         <Button variant="ghost" asChild className="mb-4">
           <Link href="/dashboard/jobs">
-            <ArrowLeft className="mr-2 h-4 w-4" />
+            <ArrowLeft className="mr-2 h-4 w-4 rtl:rotate-180" />
             {t("jobs.details.backToJobs")}
           </Link>
         </Button>
@@ -181,7 +180,7 @@ export default function JobDetailsPage() {
               <div className="flex items-center gap-1">
                 <Calendar className="h-4 w-4" />
                 <span>
-                  {t("jobs.details.posted")} {new Date(job.created_at).toLocaleDateString()}
+                  {t("jobs.details.posted")} {format(new Date(job.created_at), 'PPP', { locale: locale === 'ar' ? ar : enUS })}
                 </span>
               </div>
             </div>

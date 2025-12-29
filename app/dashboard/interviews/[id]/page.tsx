@@ -243,7 +243,7 @@ export default function InterviewDetailPage() {
                         <p className="text-muted-foreground mb-4">{t("interview.details.notFoundDesc")}</p>
                         <Button asChild>
                             <Link href="/dashboard/interviews">
-                                <ArrowLeft className="mr-2 h-4 w-4" />
+                                <ArrowLeft className="mr-2 h-4 w-4 rtl:rotate-180" />
                                 {t("interview.details.back")}
                             </Link>
                         </Button>
@@ -260,7 +260,7 @@ export default function InterviewDetailPage() {
                 <div className="mb-6">
                     <Button variant="ghost" asChild className="mb-4">
                         <Link href="/dashboard/interviews">
-                            <ArrowLeft className="mr-2 h-4 w-4" />
+                            <ArrowLeft className="mr-2 h-4 w-4 rtl:rotate-180" />
                             {t("interview.details.back")}
                         </Link>
                     </Button>
@@ -484,7 +484,7 @@ export default function InterviewDetailPage() {
                                                 size="sm"
                                                 onClick={() => {
                                                     const subject = t("interview.reminder.subject").replace("{title}", interview.title)
-                                                    const body = t("interview.reminder.body").replace("{name}", interview.interviewer_name || "").replace("{date}", format(new Date(interview.scheduled_at), "PPP 'at' h:mm a", { locale: dateLocale }))
+                                                    const body = t("interview.reminder.body").replace("{name}", interview.interviewer_name || "").replace("{date}", `${format(new Date(interview.scheduled_at), "PPP", { locale: dateLocale })} ${t("interview.details.at")} ${format(new Date(interview.scheduled_at), "h:mm a", { locale: dateLocale })}`)
                                                     window.location.href = `mailto:${interview.interviewer_email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
                                                 }}
                                             >
@@ -690,7 +690,7 @@ export default function InterviewDetailPage() {
                                     className="w-full justify-start"
                                     onClick={() => {
                                         const subject = t("interview.email.subject").replace("{title}", interview.title)
-                                        const body = `${t("interview.email.body.title")}\n\n${t("editInterview.interviewTitle")}: ${interview.title}\n${t("interview.email.body.date")} ${format(new Date(interview.scheduled_at), "PPP 'at' h:mm a", { locale: dateLocale })}\n${t("interview.email.body.duration")} ${interview.duration_minutes} ${t("candidate.profile.minutes")}\n${t("interview.email.body.type")} ${t(`editInterview.type.${interview.interview_type === 'in_person' ? 'inPerson' : interview.interview_type}`)}\n${t("interview.email.body.location")} ${interview.location}\n\n${t("interview.email.body.candidate")} ${candidate?.name}\n${t("interview.email.body.job")} ${job?.title}\n\n${t("interview.email.body.notes")} ${interview.notes || ''}`
+                                        const body = `${t("interview.email.body.title")}\n\n${t("editInterview.interviewTitle")}: ${interview.title}\n${t("interview.email.body.date")} ${format(new Date(interview.scheduled_at), "PPP", { locale: dateLocale })} ${t("interview.details.at")} ${format(new Date(interview.scheduled_at), "h:mm a", { locale: dateLocale })}\n${t("interview.email.body.duration")} ${interview.duration_minutes} ${t("candidate.profile.minutes")}\n${t("interview.email.body.type")} ${t(`editInterview.type.${interview.interview_type === 'in_person' ? 'inPerson' : interview.interview_type}`)}\n${t("interview.email.body.location")} ${interview.location}\n\n${t("interview.email.body.candidate")} ${candidate?.name}\n${t("interview.email.body.job")} ${job?.title}\n\n${t("interview.email.body.notes")} ${interview.notes || ''}`
                                         window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
                                     }}
                                 >
@@ -702,7 +702,7 @@ export default function InterviewDetailPage() {
                                     variant="outline"
                                     className="w-full justify-start"
                                     onClick={() => copyToClipboard(
-                                        `${t("editInterview.interviewTitle")}: ${interview.title}\n${t("interview.email.body.date")} ${format(new Date(interview.scheduled_at), "PPP 'at' h:mm a", { locale: dateLocale })}\n${t("interview.email.body.candidate")} ${candidate?.name}\n${t("interview.email.body.job")} ${job?.title}`
+                                        `${t("editInterview.interviewTitle")}: ${interview.title}\n${t("interview.email.body.date")} ${format(new Date(interview.scheduled_at), "PPP", { locale: dateLocale })} ${t("interview.details.at")} ${format(new Date(interview.scheduled_at), "h:mm a", { locale: dateLocale })}\n${t("interview.email.body.candidate")} ${candidate?.name}\n${t("interview.email.body.job")} ${job?.title}`
                                     )}
                                 >
                                     <Copy className="mr-2 h-4 w-4" />

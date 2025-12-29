@@ -141,17 +141,17 @@
 }
 
 .calendar-event {
-  @apply p-3 border-l-4 rounded-r-lg mb-2 hover:shadow-sm transition-shadow;
+  @apply p-3 border-s-4 rounded-e-lg mb-2 hover:shadow-sm transition-shadow;
 }
 
 .calendar-event-scheduled {
-  @apply border-l-blue-500 bg-blue-50/50 dark:bg-blue-950/20;
+  @apply border-s-blue-500 bg-blue-50/50 dark:bg-blue-950/20;
 }
 
 .calendar-event-completed {
-  @apply border-l-green-500 bg-green-50/50 dark:bg-green-950/20;
+  @apply border-s-green-500 bg-green-50/50 dark:bg-green-950/20;
 }
 
 .calendar-event-cancelled {
-  @apply border-l-red-500 bg-red-50/50 dark:bg-red-950/20;
+  @apply border-s-red-500 bg-red-50/50 dark:bg-red-950/20;
 }

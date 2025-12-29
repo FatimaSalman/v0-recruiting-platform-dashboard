@@ -113,7 +113,7 @@ export function LandingPage({ initialStats }: LandingPageProps) {
               <Button size="lg" className="text-base" asChild>
                 <Link href="/auth/sign-up">
                   {t("pricing.trial.startBtn")}
-                  <ArrowRight className="ms-2 w-5 h-5" />
+                  <ArrowRight className="ms-2 w-5 h-5 rtl:rotate-180" />
                 </Link>
               </Button>
               <Button size="lg" variant="outline" className="text-base bg-transparent" asChild>
@@ -414,7 +414,7 @@ export function LandingPage({ initialStats }: LandingPageProps) {
               <Button size="lg" variant="secondary" className="text-base" asChild>
                 <Link href="/auth/sign-up">
                   {t("landing.cta.primary")}
-                  <ArrowRight className="ms-2 w-5 h-5" />
+                  <ArrowRight className="ms-2 w-5 h-5 rtl:rotate-180" />
                 </Link>
               </Button>
             </CardContent>

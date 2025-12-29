@@ -221,7 +221,7 @@ export function SettingsPageContent() {
                         )}
 
                         <Button onClick={handleSaveProfile} disabled={loading}>
-                            <Save className="mr-2 h-4 w-4" />
+                            <Save className="me-2 h-4 w-4" />
                             {loading ? t("settings.saving") : t("settings.save")}
                         </Button>
                     </CardContent>

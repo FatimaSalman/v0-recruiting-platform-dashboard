@@ -157,7 +157,7 @@ export function EditInterviewForm({ interviewId }: EditInterviewFormProps) {
             <div className="mb-8">
                 <Button variant="ghost" asChild className="mb-4">
                     <Link href="/dashboard/interviews">
-                        <ArrowLeft className="mr-2 h-4 w-4" />
+                        <ArrowLeft className="me-2 h-4 w-4 rtl:rotate-180" />
                         {t("editInterview.back")}
                     </Link>
                 </Button>
@@ -265,7 +265,7 @@ export function EditInterviewForm({ interviewId }: EditInterviewFormProps) {
                                             variant="outline"
                                             className="w-full justify-start text-left font-normal"
                                         >
-                                            <CalendarIcon className="mr-2 h-4 w-4" />
+                                            <CalendarIcon className="me-2 h-4 w-4" />
                                             {formData.scheduled_at ? (
                                                 format(formData.scheduled_at, "PPP", { locale: locale === 'ar' ? ar : enUS })
                                             ) : (

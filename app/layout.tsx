@@ -2,7 +2,7 @@ import type React from "react"
 import { Geist, Geist_Mono, Cairo } from 'next/font/google'
 import { Analytics } from "@vercel/analytics/next"
 import { Providers } from "./providers"
-import "../styles/globals.css"
+import "./globals.css"
 import type { Metadata } from "next"
 
 const geist = Geist({

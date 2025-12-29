@@ -136,7 +136,7 @@ export default function JobDetailsPage() {
           <p className="text-muted-foreground">{t("jobs.details.notFound")}</p>
           <Button asChild className="mt-4">
             <Link href="/dashboard/jobs">
-              <ArrowLeft className="mr-2 h-4 w-4 rtl:rotate-180" />
+              <ArrowLeft className="me-2 h-4 w-4 rtl:rotate-180" />
               {t("jobs.details.backToJobs")}
             </Link>
           </Button>
@@ -151,7 +151,7 @@ export default function JobDetailsPage() {
       <div className="mb-6">
         <Button variant="ghost" asChild className="mb-4">
           <Link href="/dashboard/jobs">
-            <ArrowLeft className="mr-2 h-4 w-4 rtl:rotate-180" />
+            <ArrowLeft className="me-2 h-4 w-4 rtl:rotate-180" />
             {t("jobs.details.backToJobs")}
           </Link>
         </Button>
@@ -189,7 +189,7 @@ export default function JobDetailsPage() {
           <div className="flex gap-2">
             <Button variant="outline" asChild>
               <Link href={`/dashboard/jobs/${job.id}/edit`}>
-                <Pencil className="mr-2 h-4 w-4" />
+                <Pencil className="me-2 h-4 w-4" />
                 {t("jobs.edit")}
               </Link>
             </Button>
@@ -298,13 +298,13 @@ export default function JobDetailsPage() {
             <CardContent className="space-y-2">
               <Button className="w-full" asChild>
                 <Link href={`/dashboard/jobs/${job.id}/candidates`}>
-                  <Users className="mr-2 h-4 w-4" />
+                  <Users className="me-2 h-4 w-4" />
                   {t("jobs.viewCandidates")}
                 </Link>
               </Button>
               <Button variant="outline" className="w-full bg-transparent" asChild>
                 <Link href="/dashboard/candidates/new">
-                  <Briefcase className="mr-2 h-4 w-4" />
+                  <Briefcase className="me-2 h-4 w-4" />
                   {t("jobs.details.addCandidate")}
                 </Link>
               </Button>

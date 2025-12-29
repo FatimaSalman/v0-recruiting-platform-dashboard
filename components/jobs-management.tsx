@@ -112,7 +112,7 @@ export function JobsManagement() {
         </div>
         <Button asChild>
           <Link href="/dashboard/jobs/new">
-            <Plus className="mr-2 h-4 w-4" />
+            <Plus className="me-2 h-4 w-4" />
             {t("jobs.postNew")}
           </Link>
         </Button>
@@ -131,7 +131,7 @@ export function JobsManagement() {
             <p className="text-muted-foreground mb-4">{t("jobs.noJobs.subtitle")}</p>
             <Button asChild>
               <Link href="/dashboard/jobs/new">
-                <Plus className="mr-2 h-4 w-4" />
+                <Plus className="me-2 h-4 w-4" />
                 {t("jobs.postFirst")}
               </Link>
             </Button>
@@ -161,12 +161,12 @@ export function JobsManagement() {
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem asChild>
                         <Link href={`/dashboard/jobs/${job.id}/edit`}>
-                          <Pencil className="mr-2 h-4 w-4" />
+                          <Pencil className="me-2 h-4 w-4" />
                           {t("jobs.edit")}
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => handleDeleteClick(job.id)} className="text-destructive">
-                        <Trash2 className="mr-2 h-4 w-4" />
+                        <Trash2 className="me-2 h-4 w-4" />
                         {t("jobs.delete")}
                       </DropdownMenuItem>
                     </DropdownMenuContent>

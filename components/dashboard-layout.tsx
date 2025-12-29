@@ -64,7 +64,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed lg:static inset-y-0 left-0 z-50 w-64 bg-card border-r border-border transform transition-transform duration-200 ease-in-out lg:translate-x-0",
+          "fixed lg:static inset-y-0 left-0 z-50 w-64 bg-card border-r border-l border-border transform transition-transform duration-200 ease-in-out lg:translate-x-0",
           sidebarOpen ? "translate-x-0" : "-translate-x-full",
         )}
       >
@@ -85,7 +85,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+          <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto ">
             {navItems.map((item) => {
               const Icon = item.icon
               const isActive = pathname === item.href
@@ -110,7 +110,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
           {/* User profile */}
           <div className="p-4 border-t border-border">
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-full bg-gray-500/10 flex items-center justify-center">
                 <span className="text-sm font-semibold text-primary">
                   {user?.user_metadata?.full_name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || "U"}
                 </span>
@@ -121,7 +121,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               </div>
             </div>
             <Button variant="outline" size="sm" className="w-full justify-start bg-transparent" onClick={handleSignOut}>
-              <LogOut className="mr-2 h-4 w-4" />
+              <LogOut className="me-2 h-4 w-4" />
               {t("auth.signout")}
             </Button>
           </div>

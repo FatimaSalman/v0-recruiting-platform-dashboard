@@ -406,7 +406,7 @@ export function DashboardOverview({ user }: { user: User }) {
                 <div className="flex gap-2">
                   <Button asChild className="flex-1">
                     <Link href="/dashboard/pricing">
-                      <CreditCard className="mr-2 w-4 h-4" />
+                      <CreditCard className="me-2 w-4 h-4" />
                       {t("dashboard.upgrade.plan")}
                     </Link>
                   </Button>
@@ -450,7 +450,7 @@ export function DashboardOverview({ user }: { user: User }) {
               </div>
               <Button asChild>
                 <Link href="/dashboard/pricing">
-                  <CreditCard className="mr-2 w-4 h-4" />
+                  <CreditCard className="me-2 w-4 h-4" />
                   Upgrade Plan
                 </Link>
               </Button>
@@ -506,7 +506,7 @@ export function DashboardOverview({ user }: { user: User }) {
               disabled={isOnFreeTrial() && trialUsage.jobs.current >= trialUsage.jobs.limit}
             >
               <Link href="/dashboard/jobs/new">
-                <Briefcase className="mr-2 h-4 w-4" />
+                <Briefcase className="me-2 h-4 w-4" />
                 {t("jobs.postNew")}
                 {isOnFreeTrial() && trialUsage.jobs.current >= trialUsage.jobs.limit && (
                   <Badge variant="destructive" className="ml-2 text-xs">
@@ -522,7 +522,7 @@ export function DashboardOverview({ user }: { user: User }) {
               disabled={isOnFreeTrial() && trialUsage.candidates.current >= trialUsage.candidates.limit}
             >
               <Link href="/dashboard/candidates/new">
-                <Users className="mr-2 h-4 w-4" />
+                <Users className="me-2 h-4 w-4" />
                 {t("candidates.addCandidate")}
                 {isOnFreeTrial() && trialUsage.candidates.current >= trialUsage.candidates.limit && (
                   <Badge variant="destructive" className="ml-2 text-xs">
@@ -533,7 +533,7 @@ export function DashboardOverview({ user }: { user: User }) {
             </Button>
             <Button className="w-full justify-start bg-transparent" variant="outline" asChild>
               <Link href="/dashboard/interviews">
-                <Calendar className="mr-2 h-4 w-4" />
+                <Calendar className="me-2 h-4 w-4" />
                 {t("interviews.schedule")}
               </Link>
             </Button>

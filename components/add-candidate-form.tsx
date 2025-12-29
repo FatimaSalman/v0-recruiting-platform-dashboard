@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { X } from "lucide-react"
+import { X, ArrowLeft } from "lucide-react"
 import { useI18n } from "@/lib/i18n-context"
 
 interface AddCandidateFormProps {
@@ -119,6 +119,10 @@ export function AddCandidateForm({ initialJobId }: AddCandidateFormProps) {
   return (
     <div className="p-6 lg:p-8 max-w-4xl mx-auto">
       <div className="mb-8">
+        <Button variant="ghost" onClick={() => router.back()} className="mb-4">
+          <ArrowLeft className="me-2 h-4 w-4 rtl:rotate-180" />
+          {t("back.to.candidates")}
+        </Button>
         <h1 className="text-3xl font-bold tracking-tight mb-2">{t("candidates.addNew")}</h1>
         <p className="text-muted-foreground">{t("candidates.form.subtitle")}</p>
       </div>

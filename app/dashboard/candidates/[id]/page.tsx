@@ -354,7 +354,7 @@ export default function CandidateProfilePage() {
                     <div className="flex-1">
                         <div className="flex items-center gap-3 mb-2">
                             <div className="relative">
-                                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                                <div className="w-16 h-16 rounded-full bg-gray-500/10 flex items-center justify-center">
                                     <span className="text-2xl font-semibold text-primary">
                                         {candidate.name.charAt(0).toUpperCase()}
                                     </span>

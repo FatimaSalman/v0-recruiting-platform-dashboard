@@ -243,7 +243,7 @@ export default function InterviewDetailPage() {
                         <p className="text-muted-foreground mb-4">{t("interview.details.notFoundDesc")}</p>
                         <Button asChild>
                             <Link href="/dashboard/interviews">
-                                <ArrowLeft className="mr-2 h-4 w-4 rtl:rotate-180" />
+                                <ArrowLeft className="me-2 h-4 w-4 rtl:rotate-180" />
                                 {t("interview.details.back")}
                             </Link>
                         </Button>
@@ -260,7 +260,7 @@ export default function InterviewDetailPage() {
                 <div className="mb-6">
                     <Button variant="ghost" asChild className="mb-4">
                         <Link href="/dashboard/interviews">
-                            <ArrowLeft className="mr-2 h-4 w-4 rtl:rotate-180" />
+                            <ArrowLeft className="me-2 h-4 w-4 rtl:rotate-180" />
                             {t("interview.details.back")}
                         </Link>
                     </Button>
@@ -307,7 +307,7 @@ export default function InterviewDetailPage() {
                                 <DropdownMenuContent align="end">
                                     <DropdownMenuItem asChild>
                                         <Link href={`/dashboard/interviews/${interviewId}/edit`}>
-                                            <Edit className="mr-2 h-4 w-4" />
+                                            <Edit className="me-2 h-4 w-4" />
                                             {t("interview.details.edit")}
                                         </Link>
                                     </DropdownMenuItem>
@@ -329,7 +329,7 @@ export default function InterviewDetailPage() {
                                         onClick={() => setShowDeleteDialog(true)}
                                         className="text-red-600"
                                     >
-                                        <Trash2 className="mr-2 h-4 w-4" />
+                                        <Trash2 className="me-2 h-4 w-4" />
                                         {t("interview.details.delete")}
                                     </DropdownMenuItem>
                                 </DropdownMenuContent>
@@ -337,7 +337,7 @@ export default function InterviewDetailPage() {
 
                             <Button asChild>
                                 <Link href={`/dashboard/interviews/${interviewId}/edit`}>
-                                    <Edit className="mr-2 h-4 w-4" />
+                                    <Edit className="me-2 h-4 w-4" />
                                     {t("common.edit")}
                                 </Link>
                             </Button>
@@ -408,7 +408,7 @@ export default function InterviewDetailPage() {
                                             {interview.interview_type === "video" && (
                                                 <Button className="mt-2" asChild>
                                                     <a href={interview.location} target="_blank" rel="noopener noreferrer">
-                                                        <ExternalLink className="mr-2 h-4 w-4" />
+                                                        <ExternalLink className="me-2 h-4 w-4" />
                                                         {t("interview.details.joinMeeting")}
                                                     </a>
                                                 </Button>
@@ -475,7 +475,7 @@ export default function InterviewDetailPage() {
                                                     size="sm"
                                                     onClick={() => window.location.href = `mailto:${interview.interviewer_email}`}
                                                 >
-                                                    <Mail className="mr-2 h-4 w-4" />
+                                                    <Mail className="me-2 h-4 w-4" />
                                                     {t("interview.details.sendEmail")}
                                                 </Button>
                                             )}
@@ -488,7 +488,7 @@ export default function InterviewDetailPage() {
                                                     window.location.href = `mailto:${interview.interviewer_email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
                                                 }}
                                             >
-                                                <MessageSquare className="mr-2 h-4 w-4" />
+                                                <MessageSquare className="me-2 h-4 w-4" />
                                                 {t("interview.details.sendReminder")}
                                             </Button>
                                         </div>
@@ -603,7 +603,7 @@ export default function InterviewDetailPage() {
                                             </Button>
                                             <Button variant="outline" className="w-full" asChild>
                                                 <Link href={`mailto:${candidate.email}?subject=Interview: ${interview.title}`}>
-                                                    <Mail className="mr-2 h-4 w-4" />
+                                                    <Mail className="me-2 h-4 w-4" />
                                                     {t("interview.details.emailCandidate")}
                                                 </Link>
                                             </Button>
@@ -637,7 +637,7 @@ export default function InterviewDetailPage() {
                                                 )}
                                                 {job.location && (
                                                     <Badge variant="outline">
-                                                        <MapPin className="w-3 h-3 mr-1" />
+                                                        <MapPin className="w-3 h-3 me-1" />
                                                         {job.location}
                                                     </Badge>
                                                 )}
@@ -694,7 +694,7 @@ export default function InterviewDetailPage() {
                                         window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
                                     }}
                                 >
-                                    <Mail className="mr-2 h-4 w-4" />
+                                    <Mail className="me-2 h-4 w-4" />
                                     {t("interview.details.share")}
                                 </Button>
 
@@ -705,14 +705,14 @@ export default function InterviewDetailPage() {
                                         `${t("editInterview.interviewTitle")}: ${interview.title}\n${t("interview.email.body.date")} ${format(new Date(interview.scheduled_at), "PPP", { locale: dateLocale })} ${t("interview.details.at")} ${format(new Date(interview.scheduled_at), "h:mm a", { locale: dateLocale })}\n${t("interview.email.body.candidate")} ${candidate?.name}\n${t("interview.email.body.job")} ${job?.title}`
                                     )}
                                 >
-                                    <Copy className="mr-2 h-4 w-4" />
+                                    <Copy className="me-2 h-4 w-4" />
                                     {t("interview.details.copy")}
                                 </Button>
 
                                 {interview.interview_type === "video" && interview.location && (
                                     <Button asChild className="w-full justify-start">
                                         <a href={interview.location} target="_blank" rel="noopener noreferrer">
-                                            <Video className="mr-2 h-4 w-4" />
+                                            <Video className="me-2 h-4 w-4" />
                                             {t("interview.details.joinMeeting")}
                                         </a>
                                     </Button>
@@ -725,7 +725,7 @@ export default function InterviewDetailPage() {
                                         asChild
                                     >
                                         <a href={candidate.resume_url} target="_blank" rel="noopener noreferrer">
-                                            <FileText className="mr-2 h-4 w-4" />
+                                            <FileText className="me-2 h-4 w-4" />
                                             {t("interview.details.viewResume")}
                                         </a>
                                     </Button>

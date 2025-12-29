@@ -197,7 +197,7 @@ export default function JobCandidatesPage() {
         switch (status) {
             case 'active':
                 return <Badge className="bg-green-500/10 text-green-500 border-green-500/20 text-xs">
-                    <UserCheck className="w-3 h-3 mr-1" /> {t("status.active")}
+                    <UserCheck className="w-3 h-3 me-1" /> {t("status.active")}
                 </Badge>
             case 'inactive':
                 return <Badge className="bg-gray-500/10 text-gray-500 border-gray-500/20 text-xs">
@@ -209,7 +209,7 @@ export default function JobCandidatesPage() {
                 </Badge>
             case 'withdrawn':
                 return <Badge className="bg-red-500/10 text-red-500 border-red-500/20 text-xs">
-                    <XCircle className="w-3 h-3 mr-1" /> {t("status.withdrawn")}
+                    <XCircle className="w-3 h-3 me-1" /> {t("status.withdrawn")}
                 </Badge>
             default:
                 return null
@@ -239,7 +239,7 @@ export default function JobCandidatesPage() {
                         <p className="text-muted-foreground mb-4">{t("jobs.details.notFoundDesc")}</p>
                         <Button asChild>
                             <Link href="/dashboard/jobs">
-                                <ArrowLeft className="mr-2 h-4 w-4" />
+                                <ArrowLeft className="me-2 h-4 w-4 rtl:rotate-180" />
                                 {t("jobs.details.backToJobs")}
                             </Link>
                         </Button>
@@ -256,7 +256,7 @@ export default function JobCandidatesPage() {
                 <div className="mb-8">
                     <Button variant="ghost" asChild className="mb-4">
                         <Link href={`/dashboard/jobs/${jobId}`}>
-                            <ArrowLeft className="mr-2 h-4 w-4" />
+                            <ArrowLeft className="me-2 h-4 w-4 rtl:rotate-180" />
                             {t("jobs.backToDetails")}
                         </Link>
                     </Button>
@@ -293,26 +293,26 @@ export default function JobCandidatesPage() {
 
                         <div className="flex gap-2">
                             <Button variant="outline" className="bg-transparent">
-                                <Download className="mr-2 h-4 w-4" />
+                                <Download className="me-2 h-4 w-4" />
                                 {t("candidates.export")}
                             </Button>
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                     <Button>
-                                        <Users className="mr-2 h-4 w-4" />
+                                        <Users className="me-2 h-4 w-4" />
                                         {t("candidates.addCandidate")}
                                     </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent>
                                     <DropdownMenuItem asChild>
                                         <Link href={`/dashboard/candidates/new?jobId=${jobId}`}>
-                                            <UserPlus className="mr-2 h-4 w-4" />
+                                            <UserPlus className="me-2 h-4 w-4" />
                                             {t("candidates.addNew")}
                                         </Link>
                                     </DropdownMenuItem>
                                     <DropdownMenuItem asChild>
                                         <Link href={`/dashboard/jobs/${jobId}/select-candidate`}>
-                                            <Users className="mr-2 h-4 w-4" />
+                                            <Users className="me-2 h-4 w-4" />
                                             {t("candidates.selectExisting")}
                                         </Link>
                                     </DropdownMenuItem>
@@ -455,7 +455,7 @@ export default function JobCandidatesPage() {
                                 </Button>
                             </div>
                         )}
-                        
+
                     </CardContent>
                 </Card>
 
@@ -640,7 +640,7 @@ export default function JobCandidatesPage() {
                                                     {application.candidate.resume_url && (
                                                         <Button variant="ghost" size="sm" asChild className="flex-1">
                                                             <a href={application.candidate.resume_url} target="_blank" rel="noopener noreferrer">
-                                                                <FileText className="mr-1 h-3 w-3" />
+                                                                <FileText className="me-1 h-3 w-3" />
                                                                 {t("candidate.profile.resume")}
                                                             </a>
                                                         </Button>
@@ -648,7 +648,7 @@ export default function JobCandidatesPage() {
                                                     {application.candidate.linkedin_url && (
                                                         <Button variant="ghost" size="sm" asChild className="flex-1">
                                                             <a href={application.candidate.linkedin_url} target="_blank" rel="noopener noreferrer">
-                                                                <ExternalLink className="mr-1 h-3 w-3" />
+                                                                <ExternalLink className="me-1 h-3 w-3" />
                                                                 LinkedIn
                                                             </a>
                                                         </Button>

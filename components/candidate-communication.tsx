@@ -141,7 +141,7 @@ export function CandidateCommunication({ candidateId, candidateName }: Candidate
                         {t("communication.history")}
                     </CardTitle>
                     <Button size="sm" onClick={() => setShowForm(true)}>
-                        <MessageSquare className="mr-2 h-4 w-4" />
+                        <MessageSquare className="me-2 h-4 w-4" />
                         {t("communication.log")}
                     </Button>
                 </div>
@@ -210,7 +210,7 @@ export function CandidateCommunication({ candidateId, candidateName }: Candidate
                                     {t("communication.cancel")}
                                 </Button>
                                 <Button onClick={saveCommunication}>
-                                    <Save className="mr-2 h-4 w-4" />
+                                    <Save className="me-2 h-4 w-4" />
                                     {t("communication.save")}
                                 </Button>
                             </div>
@@ -256,7 +256,7 @@ export function CandidateCommunication({ candidateId, candidateName }: Candidate
 
                                 {comm.scheduled_for && (
                                     <div className="text-sm text-muted-foreground">
-                                        <Calendar className="inline w-3 h-3 mr-1" />
+                                        <Calendar className="inline w-3 h-3 me-1" />
                                         {t("communication.scheduledAt")} {format(new Date(comm.scheduled_for), "MMM d, yyyy h:mm a", { locale: dateLocale })}
                                     </div>
                                 )}

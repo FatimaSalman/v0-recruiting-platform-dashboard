@@ -413,7 +413,7 @@ export function CandidateSearchInterface() {
           <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
             <DialogTrigger asChild>
               <Button variant="outline" className="bg-transparent">
-                <Download className="mr-2 h-4 w-4" />
+                <Download className="me-2 h-4 w-4" />
                 {t("candidates.export")}
               </Button>
             </DialogTrigger>
@@ -436,7 +436,7 @@ export function CandidateSearchInterface() {
                     {t("jobs.form.cancel")}
                   </Button>
                   <Button onClick={handleExportCandidates}>
-                    <Download className="mr-2 h-4 w-4" />
+                    <Download className="me-2 h-4 w-4" />
                     {t("candidates.export.csv")}
                   </Button>
                 </div>
@@ -446,7 +446,7 @@ export function CandidateSearchInterface() {
 
           <Button asChild>
             <Link href="/dashboard/candidates/new">
-              <Plus className="mr-2 h-4 w-4" />
+              <Plus className="me-2 h-4 w-4" />
               {t("candidates.addCandidate")}
             </Link>
           </Button>
@@ -759,7 +759,7 @@ export function CandidateSearchInterface() {
                 size="sm"
                 onClick={() => setShowBulkEmailDialog(true)}
               >
-                <Mail className="mr-2 h-4 w-4" />
+                <Mail className="me-2 h-4 w-4" />
                 {t("candidates.send.email")}
               </Button>
               <CandidateBulkActions
@@ -774,7 +774,7 @@ export function CandidateSearchInterface() {
                 size="sm"
                 onClick={() => setSelectedCandidates([])}
               >
-                <X className="mr-2 h-4 w-4" />
+                <X className="me-2 h-4 w-4" />
                 {t("candidates.clear.selection")}
               </Button>
             </div>
@@ -816,7 +816,7 @@ export function CandidateSearchInterface() {
                 {t("jobs.form.cancel")}
               </Button>
               <Button onClick={handleBulkEmail}>
-                <Mail className="mr-2 h-4 w-4" />
+                <Mail className="me-2 h-4 w-4" />
                 {t("open.email.client")}
               </Button>
             </div>
@@ -845,7 +845,7 @@ export function CandidateSearchInterface() {
             {candidates.length === 0 && (
               <Button asChild>
                 <Link href="/dashboard/candidates/new">
-                  <Plus className="mr-2 h-4 w-4" />
+                  <Plus className="me-2 h-4 w-4" />
                   {t("candidates.addFirst")}
                 </Link>
               </Button>

@@ -110,7 +110,7 @@ export function PricingPlans() {
     <div className="py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
       <Button asChild>
         <Link href="/dashboard">
-          <ArrowLeft className="mr-2 h-4 w-4" />
+          <ArrowLeft className="me-2 h-4 w-4 rtl:rotate-180" />
           {t("pricing.backToDashboard")}
         </Link>
       </Button>

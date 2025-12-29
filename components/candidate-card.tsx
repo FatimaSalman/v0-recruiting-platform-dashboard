@@ -52,26 +52,26 @@ export function CandidateCard({ candidate }: CandidateCardProps) {
     if (candidate.isHired) {
       return (
         <Badge className="bg-blue-500/10 text-blue-500 border-blue-500/20">
-          <Award className="w-3 h-3 mr-1" /> {t("status.placed")}
+          <Award className="w-3 h-3 me-1" /> {t("status.placed")}
         </Badge>
       )
     } else
       switch (status) {
         case 'active':
           return <Badge className="bg-green-500/10 text-green-500 border-green-500/20">
-            <UserCheck className="w-3 h-3 mr-1" /> {t("status.active")}
+            <UserCheck className="w-3 h-3 me-1" /> {t("status.active")}
           </Badge>
         case 'inactive':
           return <Badge className="bg-gray-500/10 text-gray-500 border-gray-500/20">
-            <Clock className="w-3 h-3 mr-1" /> {t("status.inactive")}
+            <Clock className="w-3 h-3 me-1" /> {t("status.inactive")}
           </Badge>
         case 'placed':
           return <Badge className="bg-blue-500/10 text-blue-500 border-blue-500/20">
-            <Award className="w-3 h-3 mr-1" /> {t("status.placed")}
+            <Award className="w-3 h-3 me-1" /> {t("status.placed")}
           </Badge>
         case 'withdrawn':
           return <Badge className="bg-red-500/10 text-red-500 border-red-500/20">
-            <XCircle className="w-3 h-3 mr-1" /> {t("status.withdrawn")}
+            <XCircle className="w-3 h-3 me-1" /> {t("status.withdrawn")}
           </Badge>
         default:
           return null
@@ -115,7 +115,7 @@ export function CandidateCard({ candidate }: CandidateCardProps) {
                 className="w-20 h-20 rounded-full object-cover"
               />
             ) : ( */}
-              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+              <div className="w-16 h-16 rounded-full bg-gray-500/10 flex items-center justify-center">
                 <span className="text-2xl font-semibold text-primary">
                   {candidate.name.charAt(0).toUpperCase()}
                 </span>
@@ -164,7 +164,7 @@ export function CandidateCard({ candidate }: CandidateCardProps) {
               {getAvailabilityBadge(candidate.availability)}
               {(candidate.status === 'placed' || candidate.isHired) && (
                 <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20">
-                  <Award className="w-3 h-3 mr-1" />
+                  <Award className="w-3 h-3 me-1" />
                   {t("status.hired")}
                 </Badge>
               )}
@@ -194,7 +194,7 @@ export function CandidateCard({ candidate }: CandidateCardProps) {
 
             {candidate.status === 'placed' && (
               <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 ml-2">
-                <Award className="w-3 h-3 mr-1" />
+                <Award className="w-3 h-3 me-1" />
                 {t("status.hired")}
               </Badge>
             )}

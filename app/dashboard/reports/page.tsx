@@ -538,7 +538,7 @@ export default function ReportsPage() {
             <h3 className="text-lg font-semibold mb-2">{t("reports.error")}</h3>
             <p className="text-muted-foreground mb-4">{error}</p>
             <Button onClick={refreshData}>
-              <RefreshCw className="mr-2 h-4 w-4" />
+              <RefreshCw className="me-2 h-4 w-4" />
               {t("reports.tryAgain")}
             </Button>
           </div>
@@ -594,11 +594,11 @@ export default function ReportsPage() {
 
             <div className="flex gap-2">
               <Button variant="outline" onClick={refreshData} className="bg-transparent">
-                <RefreshCw className="mr-2 h-4 w-4" />
+                <RefreshCw className="me-2 h-4 w-4" />
                 {t("reports.refresh")}
               </Button>
               <Button onClick={handleExport} disabled={!analytics}>
-                <Download className="mr-2 h-4 w-4" />
+                <Download className="me-2 h-4 w-4" />
                 {t("reports.export")}
               </Button>
             </div>

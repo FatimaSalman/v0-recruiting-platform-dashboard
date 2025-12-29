@@ -320,12 +320,12 @@ export function RecentActivity({ userId }: { userId: string }) {
                     >
                         {showAll ? (
                             <>
-                                <ChevronUp className="mr-2 h-4 w-4" />
+                                <ChevronUp className="me-2 h-4 w-4" />
                                 {t("activity.showLess")}
                             </>
                         ) : (
                             <>
-                                <ChevronDown className="mr-2 h-4 w-4" />
+                                <ChevronDown className="me-2 h-4 w-4" />
                                 {t("activity.showAll")} ({activities.length - initialCount} {t("activity.more")})
                             </>
                         )}

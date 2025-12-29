@@ -226,7 +226,7 @@ export function EditCandidateForm({ candidateId }: EditCandidateFormProps) {
             <div className="mb-8">
                 <Button variant="ghost" asChild className="mb-4">
                     <Link href={`/dashboard/candidates/${candidateId}`}>
-                        <ArrowLeft className="mr-2 h-4 w-4" />
+                        <ArrowLeft className="me-2 h-4 w-4 rtl:rotate-180" />
                         {t("editCandidate.backToProfile")}
                     </Link>
                 </Button>
@@ -581,7 +581,7 @@ export function EditCandidateForm({ candidateId }: EditCandidateFormProps) {
                                             asChild
                                         >
                                             <a href={formData.resume_url} target="_blank" rel="noopener noreferrer">
-                                                <FileText className="mr-2 h-4 w-4" />
+                                                <FileText className="me-2 h-4 w-4" />
                                                 {t("editCandidate.viewResume")}
                                             </a>
                                         </Button>
@@ -621,12 +621,12 @@ export function EditCandidateForm({ candidateId }: EditCandidateFormProps) {
                         <Button type="submit" disabled={saving}>
                             {saving ? (
                                 <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    <Loader2 className="me-2 h-4 w-4 animate-spin" />
                                     {t("settings.saving")}
                                 </>
                             ) : (
                                 <>
-                                    <Save className="mr-2 h-4 w-4" />
+                                    <Save className="me-2 h-4 w-4" />
                                     {t("settings.save")}
                                 </>
                             )}

@@ -93,7 +93,7 @@ export function CandidateBulkActions({ selectedIds, onComplete }: CandidateBulkA
     return (
         <>
             <div className="flex items-center gap-2 p-4 border-t bg-muted/50">
-                <div className="text-sm text-muted-foreground mr-2">
+                <div className="text-sm text-muted-foreground me-2">
                     {selectedIds.length} {t("bulk.actions.selected")}
                 </div>
 
@@ -141,7 +141,7 @@ export function CandidateBulkActions({ selectedIds, onComplete }: CandidateBulkA
                         onClick={() => setShowConfirm(true)}
                         disabled={loading}
                     >
-                        <Check className="mr-2 h-4 w-4" />
+                        <Check className="me-2 h-4 w-4" />
                         {t("apply")}
                     </Button>
                 )}

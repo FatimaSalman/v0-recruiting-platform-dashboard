@@ -151,7 +151,7 @@ export function InterviewScheduling() {
 
           <Button asChild>
             <Link href="/dashboard/interviews/new">
-              <Plus className="mr-2 h-4 w-4" />
+              <Plus className="me-2 h-4 w-4" />
               {t("interviews.schedule")}
             </Link>
           </Button>
@@ -282,7 +282,7 @@ export function InterviewScheduling() {
                 </p>
                 <Button asChild>
                   <Link href="/dashboard/interviews/new">
-                    <Plus className="mr-2 h-4 w-4" />
+                    <Plus className="me-2 h-4 w-4" />
                     {t("interviews.schedule")}
                   </Link>
                 </Button>

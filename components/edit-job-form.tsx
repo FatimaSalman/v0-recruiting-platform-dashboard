@@ -133,7 +133,7 @@ export function EditJobForm({ jobId }: EditJobFormProps) {
       <div className="mb-8">
         <Button variant="ghost" asChild className="mb-4">
           <Link href="/dashboard/jobs">
-            <ArrowLeft className="mr-2 h-4 w-4" />
+            <ArrowLeft className="me-2 h-4 w-4 rtl:rotate-180" />
             {t("jobs.form.backToJobs")}
           </Link>
         </Button>

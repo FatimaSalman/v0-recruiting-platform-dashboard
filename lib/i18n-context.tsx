@@ -542,6 +542,12 @@ const translations = {
     "subscription.success.title": "Subscription Successful!",
     "subscription.success.message": "Your subscription is now active. Enjoy all premium features.",
     "subscription.success.dismiss": "Dismiss",
+    "subscription.locked": "Locked",
+    "subscription.upgradeRequired": "Upgrade to",
+    "subscription.plan": "Plan",
+    "subscription.includedInPlan": "Included in",
+    "subscription.choosePlan": "Choose Your Plan",
+    "subscription.currentlyOnTrial": "Currently on Free Trial. Upgrade to unlock advanced features.",
 
     // Recent Activity
     "activity.jobCreated": "Job Created",
@@ -623,7 +629,7 @@ const translations = {
     "pricing.starter.feature2": "50 candidate profiles",
     "pricing.starter.feature3": "Basic candidate search",
     "pricing.starter.feature4": "Email support",
-    "pricing.starter.feature5": " 2 team members",
+    "pricing.starter.feature5": "2 team members",
 
     //professional pricing
     "pricing.professional": "Professional",
@@ -679,6 +685,10 @@ const translations = {
     "pricing.free.features4": "Email support",
     "pricing.free.features5": "1 team member",
     "pricing.free.features6": "14-day free trial period",
+    "pricing.free.features7": "❌ Advanced Analytics",
+    "pricing.free.features8": "❌ Custom Reports",
+    "pricing.free.features9": "❌ Export to PDF",
+    "pricing.free.features10": "❌ API Access",
 
     // About
     "about.section.title": "About TalentHub",
@@ -1461,6 +1471,12 @@ const translations = {
     "subscription.success.title": "تم الاشتراك بنجاح!",
     "subscription.success.message": "اشتراكك نشط الآن. استمتع بجميع الميزات المميزة.",
     "subscription.success.dismiss": "تجاهل",
+    "subscription.locked": "مقفل",
+    "subscription.upgradeRequired": "قم بالترقية إلى",
+    "subscription.plan": "الخطة",
+    "subscription.includedInPlan": "متضمن في",
+    "subscription.choosePlan": "اختر خطتك",
+    "subscription.currentlyOnTrial": "أنت حالياً على الإصدار التجريبي المجاني. قم بالترقية لفتح الميزات المتقدمة.",
 
     // Recent Activity
     "activity.jobCreated": "تم إنشاء وظيفة",
@@ -1599,6 +1615,10 @@ const translations = {
     "pricing.free.features4": "دعم عبر البريد الإلكتروني",
     "pricing.free.features5": "1 عضو في الفريق",
     "pricing.free.features6": "فترة تجربة مجانية لمدة 14 يوماً",
+    "pricing.free.features7": "❌ تحليلات البيانات",
+    "pricing.free.features8": "❌ تقارير مخصصة",
+    "pricing.free.features9": "❌ تصدير إلى ملف PDF",
+    "pricing.free.features10": "❌ API الوصول إلى",
 
     // About
     "about.section.title": "حول TalentHub",
@@ -1852,7 +1872,7 @@ const translations = {
     "auth.signUpSuccess.description": "تحقق من بريدك الإلكتروني للتأكيد",
     "auth.signUpSuccess.content": "لقد قمت بالتسجيل بنجاح. يرجى التحقق من بريدك الإلكتروني لتأكيد حسابك قبل تسجيل الدخول.",
   }
-} 
+}
 
 const I18nContext = createContext<I18nContextType | undefined>(undefined)
 

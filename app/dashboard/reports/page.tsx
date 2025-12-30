@@ -2,7 +2,6 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { useSupabase } from "@/lib/supabase/supabase-provider"
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -15,6 +14,10 @@ import {
 } from "lucide-react"
 import { format, subMonths, subDays, startOfMonth, endOfMonth, differenceInDays } from "date-fns"
 import { useI18n } from "@/lib/i18n-context"
+import { createClient } from "@/lib/supabase/server"
+import { redirect } from "next/navigation"
+import { checkAnalyticsAccess } from "@/lib/subscription-utils"
+
 
 interface AnalyticsData {
   overview: {
@@ -66,23 +69,33 @@ interface AnalyticsData {
   }>
 }
 
-export default function ReportsPage() {
+export default async function ReportsPage() {
+
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null)
   const [loading, setLoading] = useState(true)
   const [dateRange, setDateRange] = useState("30")
   const [timeframe, setTimeframe] = useState("month")
   const [error, setError] = useState<string | null>(null)
-
-  const supabase = useSupabase()
   const { t } = useI18n()
+
+  const supabase = await createClient()
+
 
   const fetchAnalytics = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
 
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error("Not authenticated")
+      const { data: { user }, error } = await supabase.auth.getUser()
+
+      if (error || !user) {
+        redirect('/auth/login')
+      }
+
+      const hasAccess = await checkAnalyticsAccess(user.id)
+      if (!hasAccess) {
+        redirect("/dashboard/pricing?upgrade=analytics&feature=reports")
+      }
 
       const now = new Date()
       let startDate: Date

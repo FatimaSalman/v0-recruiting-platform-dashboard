@@ -24,6 +24,7 @@ export function CheckoutDialog({ planId, open, onOpenChange }: CheckoutDialogPro
   const [error, setError] = useState<string | null>(null)
   const plan = getTranslatedPlans(t).find(p => p.id === planId)
   // const plan = PRICING_PLANS.find((p) => p.id === planId)
+  console.log(`selected plan ${planId}`)
 
   const startCheckoutSessionForPlan = useCallback(() => startCheckoutSession(planId), [planId])
 

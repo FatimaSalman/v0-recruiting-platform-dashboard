@@ -9,14 +9,13 @@ export async function startCheckoutSession(planId: string) {
   const supabase = await createServerClient()
 
   // Get the current user
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser()
+  const { data: { user }, error } = await supabase.auth.getUser()
 
   if (error || !user) {
     throw new Error("You must be logged in to start a checkout session")
   }
+
+  console.log('👤 Starting checkout for user:', user.id, user.email)
 
   // Find the plan
   const plan = PRICING_PLANS.find((p) => p.id === planId)
@@ -62,6 +61,10 @@ export async function startCheckoutSession(planId: string) {
     },
   })
 
+  console.log('✅ Checkout session created:', session.id)
+  console.log('Session URL:', session.url)
+  console.log('Session metadata:', session.metadata)
+
   // Return the checkout URL
   if (!session.url) {
     throw new Error("Failed to create checkout session")
@@ -98,6 +101,17 @@ export async function handleSubscriptionUpdate(
   periodStart: Date,
   periodEnd: Date
 ) {
+
+  console.log('🔄 handleSubscriptionUpdate called with:', {
+    userId,
+    subscriptionId,
+    customerId,
+    planId,
+    status,
+    periodStart,
+    periodEnd
+  })
+
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!, // ← Use service role key
@@ -125,8 +139,27 @@ export async function handleSubscriptionUpdate(
       throw new Error('User ID is required')
     }
 
+    // Determine plan type from planId
+    let planType = 'free-trial'
+    if (planId.includes('starter-monthly')) planType = 'starter-monthly'
+    else if (planId.includes('professional-monthly')) planType = 'professional-monthly'
+    else if (planId.includes('enterprise-monthly')) planType = 'enterprise-monthly'
+
+    const { data: userExists, error: userError } = await supabase
+      .from('profile')
+      .select('id')
+      .eq('id', userId)
+      .single()
+
+    if (userError || !userExists) {
+      console.error('❌ User not found:', userError)
+      throw new Error(`User ${userId} not found in profiles table`)
+    }
+
+    console.log('✅ User found:', userExists)
+
     // Insert or update subscription in database
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('subscriptions')
       .upsert({
         user_id: userId,
@@ -138,10 +171,17 @@ export async function handleSubscriptionUpdate(
         current_period_end: periodEnd,
         updated_at: new Date().toISOString()
       }, {
-        onConflict: 'user_id'
-      })
+        onConflict: 'user_id',
+        ignoreDuplicates: false
+      }).select()
 
-    if (error) throw error
+
+    if (error) {
+      console.error('❌ Database error:', error)
+      throw error
+    }
+    console.log('✅ Subscription saved successfully:', data)
+
     return { success: true }
   } catch (error) {
     console.error('Error updating subscription:', error)
@@ -154,6 +194,11 @@ export async function handleStripeWebhook(request: Request) {
   const sig = request.headers.get('stripe-signature')
   const body = await request.text()
 
+  console.log('=== WEBHOOK DEBUG ===')
+  console.log('Body received:', body.substring(0, 500) + '...')
+  console.log('Signature header:', sig?.substring(0, 50) + '...')
+  console.log('STRIPE_WEBHOOK_SECRET configured:', !!process.env.STRIPE_WEBHOOK_SECRET)
+
   try {
     const event = stripe.webhooks.constructEvent(
       body,
@@ -161,47 +206,78 @@ export async function handleStripeWebhook(request: Request) {
       process.env.STRIPE_WEBHOOK_SECRET!
     )
 
-    console.log('Webhook event type:', event.type)
+    console.log('✅ Webhook verified successfully!')
+    console.log('Event type:', event.type)
+    console.log('Event ID:', event.id)
 
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object as any
-      console.log('Checkout session completed:', session.id)
+      console.log('=== CHECKOUT SESSION COMPLETED ===')
+      console.log('Session ID:', session.id)
+      console.log('Customer:', session.customer)
+      console.log('Subscription:', session.subscription)
+      console.log('Metadata:', JSON.stringify(session.metadata, null, 2))
 
-      if (!session.subscription) {
-        console.error('No subscription ID in session')
+      // CRITICAL: Check if metadata has user_id
+      if (!session.metadata?.user_id) {
+        console.error('❌ ERROR: No user_id in metadata!')
+        console.log('Available metadata:', Object.keys(session.metadata || {}))
         return new Response(JSON.stringify({ received: true }), { status: 200 })
       }
 
-      // Get subscription details with type assertion
-      const subscription = await stripe.subscriptions.retrieve(session.subscription) as any
+      if (!session.subscription) {
+        console.error('❌ ERROR: No subscription in session!')
+        return new Response(JSON.stringify({ received: true }), { status: 200 })
+      }
 
-      console.log('Subscription details:', {
-        id: subscription.id,
-        status: subscription.status,
-        currentPeriodStart: subscription.current_period_start,
-        currentPeriodEnd: subscription.current_period_end,
-        customer: subscription.customer
-      })
+      console.log('✅ Metadata contains user_id:', session.metadata.user_id)
 
-      // Handle potential null/undefined dates
-      const periodStart = subscription.current_period_start
-        ? new Date(subscription.current_period_start * 1000)
-        : new Date()
+      try {
+        // Get subscription details with type assertion
+        const subscription = await stripe.subscriptions.retrieve(session.subscription) as any
 
-      const periodEnd = subscription.current_period_end
-        ? new Date(subscription.current_period_end * 1000)
-        : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // Default to 30 days
+        console.log('==== Subscription details:====', {
+          id: subscription.id,
+          status: subscription.status,
+          currentPeriodStart: subscription.current_period_start,
+          currentPeriodEnd: subscription.current_period_end,
+          customer: subscription.customer
+        })
 
-      // Update user subscription in database
-      await handleSubscriptionUpdate(
-        subscription.id,
-        subscription.customer as string,
-        session.metadata?.user_id || '',
-        session.metadata?.plan_id || '',
-        subscription.status,
-        periodStart,
-        periodEnd
-      )
+        // Handle potential null/undefined dates
+        const periodStart = subscription.current_period_start
+          ? new Date(subscription.current_period_start * 1000)
+          : new Date()
+
+        const periodEnd = subscription.current_period_end
+          ? new Date(subscription.current_period_end * 1000)
+          : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // Default to 30 days
+
+        console.log('Period start (converted):', periodStart)
+        console.log('Period end (converted):', periodEnd)
+
+        // Call handleSubscriptionUpdate
+        console.log('=== CALLING handleSubscriptionUpdate ===')
+        const result = await handleSubscriptionUpdate(
+          subscription.id,
+          subscription.customer as string,
+          session.metadata.user_id,
+          session.metadata.plan_id || '',
+          subscription.status,
+          periodStart,
+          periodEnd
+        )
+
+        console.log('handleSubscriptionUpdate result:', result)
+
+        if (result.success) {
+          console.log('✅ Subscription saved to database successfully!')
+        } else {
+          console.error('❌ Failed to save subscription:', result.error)
+        }
+      } catch (subError) {
+        console.error('❌ Error retrieving subscription:', subError)
+      }
     }
 
     if (event.type === 'customer.subscription.updated') {
@@ -236,7 +312,8 @@ export async function handleStripeWebhook(request: Request) {
 
     return new Response(JSON.stringify({ received: true }), { status: 200 })
   } catch (err: any) {
-    console.error('Webhook error:', err)
+    console.error('❌ WEBHOOK ERROR:', err.message)
+    console.error('Full error:', err)
     return new Response(`Webhook Error: ${err.message}`, { status: 400 })
   }
 }

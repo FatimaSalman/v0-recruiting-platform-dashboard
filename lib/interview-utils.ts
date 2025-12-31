@@ -36,12 +36,6 @@ export async function checkInterviewAccess(userId: string): Promise<{
             now.getUTCMonth() + 1,
             1, 0, 0, 0, 0
         ))
-        const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0)
-
-        console.log('📅 Counting interviews for month:')
-        console.log('From:', firstDayOfMonth.toISOString())
-        console.log('To (exclusive):', firstDayNextMonth.toISOString())
-
 
         const { count, error } = await supabase
             .from('interviews')

@@ -5,6 +5,12 @@ import { PRICING_PLANS } from "@/lib/products"
 import { createServerClient } from "@/lib/supabase/server"
 import { createClient } from "@supabase/supabase-js"
 
+const PRICE_IDS: Record<string, string> = {
+  'starter-monthly': process.env.STRIPE_STARTER_MONTHLY_PRICE_ID!,
+  'professional-monthly': process.env.STRIPE_PROFESSIONAL_MONTHLY_PRICE_ID!,
+  'enterprise-monthly': process.env.STRIPE_ENTERPRISE_MONTHLY_PRICE_ID!,
+}
+
 export async function startCheckoutSession(planId: string) {
   const supabase = await createServerClient()
 
@@ -23,9 +29,13 @@ export async function startCheckoutSession(planId: string) {
     throw new Error(`Plan with id "${planId}" not found`)
   }
 
+  const priceId = PRICE_IDS[planId]
+
   //Get the origin (domain)
-  const origin = process.env.NEXT_PUBLIC_APP_URL ||
-    (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000')
+  const origin = process.env.NEXT_PUBLIC_APP_URL
+
+  const tempSessionId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+
 
   // Create Checkout Session
   const session = await stripe.checkout.sessions.create({
@@ -33,21 +43,11 @@ export async function startCheckoutSession(planId: string) {
     customer_email: user.email,
     line_items: [
       {
-        price_data: {
-          currency: plan.currency,
-          product_data: {
-            name: plan.name,
-            description: plan.description,
-          },
-          unit_amount: plan.priceInCents,
-          recurring: {
-            interval: "month",
-          },
-        },
+        price: priceId,
         quantity: 1,
       },
     ],
-    success_url: `${origin}/dashboard?subscription=success&session_id={CHECKOUT_SESSION_ID}`,
+    success_url: `${origin}/dashboard?subscription=success&session_id={CHECKOUT_SESSION_ID}&temp_session_id=${tempSessionId}`,
     cancel_url: `${origin}/dashboard/pricing`,
     metadata: {
       user_id: user.id,
@@ -58,6 +58,7 @@ export async function startCheckoutSession(planId: string) {
       plan_price: plan.priceInCents,
       plan_currency: plan.currency,
       plan_billing_period: plan.billingPeriod,  // Add this line
+      price_id: priceId,
     },
   })
 
@@ -139,14 +140,13 @@ export async function handleSubscriptionUpdate(
       throw new Error('User ID is required')
     }
 
-    // Determine plan type from planId
     let planType = 'free-trial'
     if (planId.includes('starter-monthly')) planType = 'starter-monthly'
     else if (planId.includes('professional-monthly')) planType = 'professional-monthly'
     else if (planId.includes('enterprise-monthly')) planType = 'enterprise-monthly'
 
     const { data: userExists, error: userError } = await supabase
-      .from('profile')
+      .from('profiles')
       .select('id')
       .eq('id', userId)
       .single()
@@ -157,6 +157,15 @@ export async function handleSubscriptionUpdate(
     }
 
     console.log('✅ User found:', userExists)
+
+    const plan = PRICING_PLANS.find(p => p.id === planId) as any
+    const maxTeamMembers = plan?.limits.maxTeamMembers || 1
+    const hasAnalytics = plan?.limits.hasAnalytics || false
+    const hasCustomBranding = plan?.limits.hasCustomBranding || false
+    const hasAPI = plan?.limits.hasAPI || false
+    const schedulerInterview = plan?.limits.schedulerInterview || false
+
+
 
     // Insert or update subscription in database
     const { data, error } = await supabase
@@ -169,6 +178,8 @@ export async function handleSubscriptionUpdate(
         status: status,
         current_period_start: periodStart,
         current_period_end: periodEnd,
+        plan_type: planType,
+        max_team_members: maxTeamMembers,
         updated_at: new Date().toISOString()
       }, {
         onConflict: 'user_id',
@@ -212,11 +223,11 @@ export async function handleStripeWebhook(request: Request) {
 
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object as any
-      console.log('=== CHECKOUT SESSION COMPLETED ===')
-      console.log('Session ID:', session.id)
-      console.log('Customer:', session.customer)
-      console.log('Subscription:', session.subscription)
-      console.log('Metadata:', JSON.stringify(session.metadata, null, 2))
+      console.log('=== CHECKOUT SESSION COMPLETED DEBUG ===')
+      console.log('Full session object:', JSON.stringify(session, null, 2))
+      console.log('Metadata:', session.metadata)
+      console.log('Subscription ID:', session.subscription)
+
 
       // CRITICAL: Check if metadata has user_id
       if (!session.metadata?.user_id) {
@@ -364,5 +375,81 @@ async function markSubscriptionCancelled(subscriptionId: string) {
   } catch (error) {
     console.error('Error marking subscription as cancelled:', error)
     return { success: false, error }
+  }
+}
+
+export async function verifyAndSaveSubscription(sessionId: string, tempSessionId?: string) {
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
+    }
+  )
+
+  try {
+    // First, check if subscription already exists
+    const { data: existingSub } = await supabase
+      .from('subscriptions')
+      .select('*')
+      .eq('stripe_subscription_id', sessionId)
+      .single()
+
+    if (existingSub) {
+      console.log('✅ Subscription already exists in database')
+      return { success: true, subscription: existingSub }
+    }
+
+    // If not, retrieve from Stripe
+    const session = await stripe.checkout.sessions.retrieve(sessionId, {
+      expand: ['subscription']
+    })
+
+    if (!session.subscription) {
+      throw new Error('No subscription found for this session')
+    }
+
+    const subscription = await stripe.subscriptions.retrieve(
+      typeof session.subscription === 'string'
+        ? session.subscription
+        : session.subscription.id
+    ) as any
+
+    const userId = session.metadata?.user_id || session.customer_details?.email
+    if (!userId) {
+      throw new Error('Could not determine user ID from session')
+    }
+
+    // Get plan details
+    const planId = session.metadata?.plan_id || 'starter-monthly'
+    const plan = PRICING_PLANS.find(p => p.id === planId)
+
+    const periodStart = subscription.current_period_start
+      ? new Date(subscription.current_period_start * 1000)
+      : new Date()
+
+    const periodEnd = subscription.current_period_end
+      ? new Date(subscription.current_period_end * 1000)
+      : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+
+    // Handle subscription creation
+    const result = await handleSubscriptionUpdate(
+      subscription.id,
+      subscription.customer as string,
+      userId,
+      planId,
+      subscription.status,
+      periodStart,
+      periodEnd
+    )
+
+    return result
+
+  } catch (error) {
+    console.error('Error verifying subscription:', error)
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
   }
 }

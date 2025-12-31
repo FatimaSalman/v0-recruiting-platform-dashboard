@@ -84,11 +84,30 @@ export default function CandidateProfilePage() {
             if (error) throw error
 
             // Fetch applications with job details
-            const { data: applicationsData } = await supabase
+            const { data: applicationsData, error: applicationsError } = await supabase
                 .from("applications")
-                .select("*")
+                .select(`*,
+                    job: jobs( 
+                    id,
+                    title,
+                    department,
+                    location,
+                    status
+                    )
+                    `)
                 .eq("candidate_id", candidateId)
                 .order("applied_at", { ascending: false })
+
+            if (applicationsError) {
+                console.error("Error fetching applications:", applicationsError)
+            } else {
+                console.log("Applications data structure:", applicationsData)
+                // Check the first application's structure
+                if (applicationsData && applicationsData.length > 0) {
+                    console.log("First application job data:", applicationsData[0].job)
+                    console.log("First application job title:", applicationsData[0].job?.title)
+                }
+            }
 
             // Fetch interviews
             const { data: interviewsData } = await supabase
@@ -706,12 +725,12 @@ export default function CandidateProfilePage() {
                                                             <div>
                                                                 <div className="flex items-center gap-2 mb-2">
                                                                     <h4 className="text-lg font-semibold">
-                                                                        {app.jobs?.title || t("candidate.profile.unknownJob")}
+                                                                        {app.job?.title || t("candidate.profile.unknownJob")}
                                                                     </h4>
                                                                     {getApplicationStatusBadge(app.status)}
                                                                 </div>
                                                                 <p className="text-sm text-muted-foreground">
-                                                                    {app.jobs?.department || t("candidate.profile.noDepartment")} •
+                                                                    {app.job?.department || t("candidate.profile.noDepartment")} •
                                                                     {t("candidate.profile.appliedOn")} {format(new Date(app.applied_at), 'MMM d, yyyy', { locale: locale === 'ar' ? ar : enUS })}
                                                                 </p>
                                                             </div>

@@ -22,6 +22,7 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { TeamManagement } from "./team-management"
 
 export function SettingsPageContent() {
     const { locale, setLocale, t } = useI18n()
@@ -224,6 +225,13 @@ export function SettingsPageContent() {
                             <Save className="me-2 h-4 w-4" />
                             {loading ? t("settings.saving") : t("settings.save")}
                         </Button>
+                    </CardContent>
+                </Card>
+
+                {/* Team Settings */}
+                <Card>
+                    <CardContent className="space-y-4">
+                        <TeamManagement />
                     </CardContent>
                 </Card>
 

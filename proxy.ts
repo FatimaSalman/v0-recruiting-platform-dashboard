@@ -6,16 +6,15 @@ import type { NextRequest } from "next/server"
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
-  
+
   // Define analytics routes that require subscription
   const analyticsRoutes = [
     '/dashboard/reports',
     '/dashboard/analytics',
-    '/dashboard/interviews',
   ]
 
   // Check if current path is an analytics route
-  const isAnalyticsRoute = analyticsRoutes.some(route => 
+  const isAnalyticsRoute = analyticsRoutes.some(route =>
     pathname.startsWith(route)
   )
 
@@ -23,10 +22,10 @@ export async function proxy(request: NextRequest) {
   if (isAnalyticsRoute) {
     try {
       const supabase = await createServerClient()
-      
+
       // Get current user
       const { data: { user }, error: authError } = await supabase.auth.getUser()
-      
+
       if (authError || !user) {
         // Redirect to login if not authenticated
         return NextResponse.redirect(new URL('/auth/login', request.url))
@@ -34,13 +33,13 @@ export async function proxy(request: NextRequest) {
 
       // Check if user has access to analytics
       const hasAccess = await checkAnalyticsAccess(user.id)
-      
+
       if (!hasAccess) {
         // Redirect to pricing page with upgrade prompt
         const redirectUrl = new URL('/dashboard/pricing', request.url)
         redirectUrl.searchParams.set('upgrade', 'analytics')
         redirectUrl.searchParams.set('feature', 'reports')
-        
+
         return NextResponse.redirect(redirectUrl)
       }
     } catch (error) {

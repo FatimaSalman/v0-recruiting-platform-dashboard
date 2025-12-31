@@ -1,3 +1,5 @@
+import { pl } from "date-fns/locale"
+
 export interface PricingPlan {
   id: string
   name: string
@@ -7,6 +9,7 @@ export interface PricingPlan {
   features: string[]
   popular?: boolean
   billingPeriod: "monthly" | "yearly"
+  limits: {}
 }
 
 // This is the source of truth for all pricing plans
@@ -27,7 +30,19 @@ export const PRICING_PLANS: PricingPlan[] = [
       "pricing.free.features4",
       "pricing.free.features5",
       "pricing.free.features6",
+      "pricing.free.features7",
     ],
+    limits: {
+      maxCandidates: 10,
+      maxJobs: 5,
+      maxTeamMembers: 1,
+      hasAnalytics: false,
+      hasCustomBranding: false,
+      hasAPI: false,
+      schedulerInterview: false,
+      maxInterviewsPerMonth: 3, // Add this
+      hasUnlimitedInterviews: false
+    }
   }, {
     id: "starter-monthly",
     name: "pricing.starter",
@@ -41,7 +56,19 @@ export const PRICING_PLANS: PricingPlan[] = [
       "pricing.starter.feature3",
       "pricing.starter.feature4",
       "pricing.starter.feature5",
+      "pricing.starter.feature6",
     ],
+    limits: {
+      maxCandidates: 50,
+      maxJobs: 10,
+      maxTeamMembers: 2,
+      hasAnalytics: false,
+      hasCustomBranding: false,
+      hasAPI: false,
+      schedulerInterview: false,
+      maxInterviewsPerMonth: 10, // Add this
+      hasUnlimitedInterviews: false
+    }
   },
   {
     id: "professional-monthly",
@@ -61,6 +88,17 @@ export const PRICING_PLANS: PricingPlan[] = [
       "pricing.professional.feature7",
       "pricing.professional.feature8",
     ],
+    limits: {
+      maxCandidates: null,
+      maxJobs: 50,
+      maxTeamMembers: 10,
+      hasAnalytics: true,
+      hasCustomBranding: true,
+      hasAPI: false,
+      schedulerInterview: true,
+      maxInterviewsPerMonth: null, // Add this
+      hasUnlimitedInterviews: true
+    }
   },
   {
     id: "enterprise-monthly",
@@ -82,6 +120,17 @@ export const PRICING_PLANS: PricingPlan[] = [
       "pricing.enterprise.feature10",
       "pricing.enterprise.feature11",
     ],
+    limits: {
+      maxCandidates: null,
+      maxJobs: null,
+      maxTeamMembers: null,
+      hasAnalytics: true,
+      hasCustomBranding: true,
+      hasAPI: true,
+      schedulerInterview: true,
+      maxInterviewsPerMonth: null, // Add this
+      hasUnlimitedInterviews: true
+    }
   },
 ]
 
@@ -99,7 +148,10 @@ export function getTranslatedPlan(plan: PricingPlan, t: (key: string) => string)
     ...plan,
     name: t(plan.name),
     description: t(plan.description),
-    features: plan.features.map(featureKey => t(featureKey))
+    features: plan.features.map(featureKey => t(featureKey)),
+    limits: plan.limits,
+    maxInterviewsPerMonth: 3, // Add this
+    hasUnlimitedInterviews: false
   }
 }
 

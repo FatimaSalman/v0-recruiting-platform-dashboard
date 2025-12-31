@@ -78,6 +78,7 @@ const translations = {
     "dashboard.noActiveSubscription": "No Active Subscription",
     "dashboard.free.trial.active": "Your free trial is active",
     "dashboard.your.current.plan": "Your current subscription plan",
+    "dashboard.renews.on": "Renews on:",
     "dashboard.loading.subscription": "Loading subscription...",
     "dashboard.subscriptonStatus.desc": "Subscription Status",
     "dashboard.upgrade.plan": "Upgrade to Paid Plan",
@@ -630,6 +631,7 @@ const translations = {
     "pricing.starter.feature3": "Basic candidate search",
     "pricing.starter.feature4": "Email support",
     "pricing.starter.feature5": "2 team members",
+    "pricing.starter.feature6": "Basic interview scheduling (10 per month)",
 
     //professional pricing
     "pricing.professional": "Professional",
@@ -638,7 +640,7 @@ const translations = {
     "pricing.professional.feature1": "Up to 50 active job postings",
     "pricing.professional.feature2": "Unlimited candidate profiles",
     "pricing.professional.feature3": "Advanced AI-powered search",
-    "pricing.professional.feature4": "Interview scheduling",
+    "pricing.professional.feature4": "Unlimited Interview scheduling",
     "pricing.professional.feature5": "Priority email support",
     "pricing.professional.feature6": "10 team members",
     "pricing.professional.feature7": "Analytics dashboard",
@@ -651,7 +653,7 @@ const translations = {
     "pricing.enterprise.feature1": "Unlimited job postings",
     "pricing.enterprise.feature2": "Unlimited candidate profiles",
     "pricing.enterprise.feature3": "AI-powered matching & search",
-    "pricing.enterprise.feature4": "Interview scheduling",
+    "pricing.enterprise.feature4": "Unlimited Interview scheduling",
     "pricing.enterprise.feature5": "24/7 priority support",
     "pricing.enterprise.feature6": "Unlimited team members",
     "pricing.enterprise.feature7": "Advanced analytics",
@@ -685,10 +687,7 @@ const translations = {
     "pricing.free.features4": "Email support",
     "pricing.free.features5": "1 team member",
     "pricing.free.features6": "14-day free trial period",
-    "pricing.free.features7": "❌ Advanced Analytics",
-    "pricing.free.features8": "❌ Custom Reports",
-    "pricing.free.features9": "❌ Export to PDF",
-    "pricing.free.features10": "❌ API Access",
+    "pricing.free.features7": "Basic interview scheduling (3 per trial)",
 
     // About
     "about.section.title": "About TalentHub",
@@ -748,6 +747,9 @@ const translations = {
     "settings.account.cancel": "Cancel",
     "settings.account.confirmDelete": "Yes, delete my account",
     "settings.account.deleting": "Deleting...",
+
+    "settings.team.title": "Team Management",
+    "settings.team.description": "Manage team members and their permissions",
 
 
     "reports.title": "Reports & Analytics",
@@ -1007,6 +1009,7 @@ const translations = {
     "dashboard.noActiveSubscription": "لا يوجد اشتراك فعال",
     "dashboard.free.trial.active": "خطتك التجريبة فعالة",
     "dashboard.your.current.plan": "خطة اشتراك الحالية",
+    "dashboard.renews.on": "يُجدد في:",
     "dashboard.loading.subscription": "تحميل الاشتركات....",
     "dashboard.subscriptonStatus.desc": "حالة الاشتركات",
     "dashboard.upgrade.plan": "الترقية إلى الخطة المدفوعة",
@@ -1561,6 +1564,7 @@ const translations = {
     "pricing.starter.feature3": "بحث أساسي عن المرشحين",
     "pricing.starter.feature4": "دعم عبر البريد الإلكتروني",
     "pricing.starter.feature5": " 2 عضو في الفريق",
+    "pricing.starter.feature6": "جدولة المقابلات (10 مقابلات)",
 
     //professional pricing
     "pricing.professional": "المحترف",
@@ -1569,7 +1573,7 @@ const translations = {
     "pricing.professional.feature1": "حتى 50 إعلان وظيفة نشط",
     "pricing.professional.feature2": "ملفات مرشحين غير محدودة",
     "pricing.professional.feature3": "بحث متقدم بذكاء اصطناعي",
-    "pricing.professional.feature4": "جدولة المقابلات",
+    "pricing.professional.feature4": "غير محدود من جدولة المقابلات",
     "pricing.professional.feature5": "دعم بريد إلكتروني ذو أولوية",
     "pricing.professional.feature6": "10 أعضاء في الفريق",
     "pricing.professional.feature7": "لوحة تحليلات البيانات",
@@ -1582,7 +1586,7 @@ const translations = {
     "pricing.enterprise.feature1": "إعلانات وظائف غير محدودة",
     "pricing.enterprise.feature2": "ملفات مرشحين غير محدودة",
     "pricing.enterprise.feature3": "بحث متقدم بذكاء اصطناعي",
-    "pricing.enterprise.feature4": "جدولة المقابلات",
+    "pricing.enterprise.feature4": "غير محدود من جدولة المقابلات",
     "pricing.enterprise.feature5": "دعم 24/7 ذو أولوية",
     "pricing.enterprise.feature6": "أعضاء غير محدودين في الفريق",
     "pricing.enterprise.feature7": "تحليلات متقدمة",
@@ -1615,10 +1619,7 @@ const translations = {
     "pricing.free.features4": "دعم عبر البريد الإلكتروني",
     "pricing.free.features5": "1 عضو في الفريق",
     "pricing.free.features6": "فترة تجربة مجانية لمدة 14 يوماً",
-    "pricing.free.features7": "❌ تحليلات البيانات",
-    "pricing.free.features8": "❌ تقارير مخصصة",
-    "pricing.free.features9": "❌ تصدير إلى ملف PDF",
-    "pricing.free.features10": "❌ API الوصول إلى",
+    "pricing.free.features7": "جدولة المقابلات (3 لكل تجربة)",
 
     // About
     "about.section.title": "حول TalentHub",
@@ -1679,6 +1680,8 @@ const translations = {
     "settings.account.confirmDelete": "نعم، احذف حسابي",
     "settings.account.deleting": "جاري الحذف...",
 
+    "settings.team.title": "إدارة الفرق",
+    "settings.team.description": "إدارة أعضاء الفريق وصلاحياتهم",
 
     "reports.title": "التقارير والتحليلات",
     "reports.subtitle": "رؤى ومقاييس فورية لخط التوظيف الخاص بك",

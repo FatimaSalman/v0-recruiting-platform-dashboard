@@ -5,12 +5,13 @@ import { useSupabase } from "@/lib/supabase/supabase-provider"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Calendar, List, Plus, Clock, MapPin, Users, Video, Phone, UserCheck, CheckCircle  } from "lucide-react"
+import { Calendar, List, Plus, Clock, MapPin, Users, Video, Phone, UserCheck, CheckCircle } from "lucide-react"
 import Link from "next/link"
 import { format, isToday, isTomorrow, isPast } from "date-fns"
 import { ar, enUS } from "date-fns/locale"
 import { useI18n } from "@/lib/i18n-context"
-
+import { useRouter } from "next/navigation"
+import { getInterviewStats } from "@/lib/interview-utils"
 
 const GetInterviewIcon = ({ type }: { type: string }) => {
   if (type === "video") {
@@ -44,9 +45,12 @@ export function InterviewScheduling() {
   const supabase = useSupabase()
   const { t, locale } = useI18n()
   const dateLocale = locale === 'ar' ? ar : enUS
+  const [interviewStats, setInterviewStats] = useState<any>(null)
+  const router = useRouter()
 
   useEffect(() => {
     fetchInterviews()
+    fetchInterviewStats()
   }, [])
 
   async function fetchInterviews() {
@@ -68,6 +72,26 @@ export function InterviewScheduling() {
       console.error("Error fetching interviews:", error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function fetchInterviewStats() {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const stats = await getInterviewStats(user.id)
+      setInterviewStats(stats)
+    } catch (error) {
+      console.error("Error fetching interview stats:", error)
+    }
+  }
+
+  const handleNewInterview = () => {
+    if (interviewStats?.canSchedule === false) {
+      router.push("/dashboard/pricing?upgrade=interviews")
+    } else {
+      router.push("/dashboard/interviews/new")
     }
   }
 
@@ -151,7 +175,7 @@ export function InterviewScheduling() {
 
           <Button asChild>
             <Link href="/dashboard/interviews/new">
-              <Plus className="me-2 h-4 w-4" />
+              <Plus className="mr-2 h-4 w-4" />
               {t("interviews.schedule")}
             </Link>
           </Button>
@@ -210,6 +234,74 @@ export function InterviewScheduling() {
           </CardContent>
         </Card>
       </div>
+
+
+      {/* Interview Stats Banner */}
+      {interviewStats && (
+        <Card className="mb-6 border-blue-200">
+          <CardContent className="pt-6">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <Calendar className="w-5 h-5 text-blue-500" />
+                <div>
+                  <h3 className="font-semibold">Interview Scheduling</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {interviewStats.hasUnlimited ? (
+                      "You have unlimited interviews"
+                    ) : interviewStats.limit ? (
+                      `${interviewStats.remaining} interviews remaining this month`
+                    ) : (
+                      "Checking your usage..."
+                    )}
+                  </p>
+                </div>
+              </div>
+
+              {interviewStats.limit && !interviewStats.hasUnlimited && (
+                <div className="flex items-center gap-4">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">{interviewStats.used}</div>
+                    <div className="text-xs text-muted-foreground">scheduled</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">{interviewStats.limit}</div>
+                    <div className="text-xs text-muted-foreground">monthly limit</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-blue-600">{interviewStats.remaining}</div>
+                    <div className="text-xs text-muted-foreground">remaining</div>
+                  </div>
+                </div>
+              )}
+
+              {interviewStats.needsUpgrade && (
+                <Button
+                  variant="outline"
+                  onClick={() => router.push("/dashboard/pricing?upgrade=interviews")}
+                  className="border-blue-300 text-blue-700 hover:bg-blue-50"
+                >
+                  Upgrade for More
+                </Button>
+              )}
+            </div>
+
+            {interviewStats.limit && !interviewStats.hasUnlimited && (
+              <div className="mt-4">
+                <div className="flex justify-between text-sm mb-1">
+                  <span>0</span>
+                  <span>{interviewStats.limit}</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div
+                    className="bg-blue-500 h-2 rounded-full"
+                    style={{ width: `${Math.min((interviewStats.used / interviewStats.limit) * 100, 100)}%` }}
+                  />
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* View Content */}
       {viewMode === "list" ? (
@@ -282,7 +374,7 @@ export function InterviewScheduling() {
                 </p>
                 <Button asChild>
                   <Link href="/dashboard/interviews/new">
-                    <Plus className="me-2 h-4 w-4" />
+                    <Plus className="mr-2 h-4 w-4" />
                     {t("interviews.schedule")}
                   </Link>
                 </Button>

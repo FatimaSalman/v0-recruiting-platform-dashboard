@@ -9,7 +9,7 @@ import Link from "next/link"
 import type { User } from "@supabase/supabase-js"
 import { useI18n } from "@/lib/i18n-context"
 import { Badge } from "@/components/ui/badge"
-import { PRICING_PLANS, formatPrice } from "@/lib/products"
+import { formatPrice, getTranslatedPlans } from "@/lib/products"
 import { useSearchParams } from "next/navigation"
 import { SubscriptionSuccess } from "@/components/subscription-success"
 import { useRouter } from "next/navigation"
@@ -136,12 +136,12 @@ export function DashboardOverview({ user }: { user: User }) {
   }, [user.id, supabase])
 
   const getPlanName = (planId: string) => {
-    const plan = PRICING_PLANS.find(p => p.id === planId)
+    const plan = getTranslatedPlans(t).find(p => p.id === planId)
     return plan ? plan.name : 'Unknown Plan'
   }
 
   const getPlanPrice = (planId: string) => {
-    const plan = PRICING_PLANS.find(p => p.id === planId)
+    const plan = getTranslatedPlans(t).find(p => p.id === planId)
     return plan ? formatPrice(plan.priceInCents, plan.currency) : ''
   }
 
@@ -432,7 +432,7 @@ export function DashboardOverview({ user }: { user: User }) {
                 {subscription.current_period_end && (
                   <div className="text-sm">
                     <p className="text-muted-foreground">
-                      Renews on: {new Date(subscription.current_period_end).toLocaleDateString()}
+                      {t("dashboard.renews.on")} {new Date(subscription.current_period_end).toLocaleDateString()}
                     </p>
                   </div>
                 )}

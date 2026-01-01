@@ -1,5 +1,5 @@
 // lib/subscription-utils.ts
-import { createClient } from '@supabase/supabase-js'
+import { createServerClient } from "./supabase/server"
 
 export type PlanType = 'free-trial' | 'starter-monthly' | 'professional-monthly' | 'enterprise-monthly'
 
@@ -12,16 +12,7 @@ export interface SubscriptionInfo {
 }
 
 export async function getUserSubscription(userId: string): Promise<SubscriptionInfo | null> {
-    const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!,
-        {
-            auth: {
-                autoRefreshToken: false,
-                persistSession: false
-            }
-        }
-    )
+    const supabase = createServerClient()
 
     try {
         // First check subscription table

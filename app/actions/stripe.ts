@@ -208,13 +208,13 @@ export async function handleStripeWebhook(request: Request) {
   console.log('=== WEBHOOK DEBUG ===')
   console.log('Body received:', body.substring(0, 500) + '...')
   console.log('Signature header:', sig?.substring(0, 50) + '...')
-  console.log('STRIPE_WEBHOOK_SECRET configured:', !!process.env.STRIPE_WEBHOOK_SECRET)
+  console.log('STRIPE_WEBHOOK_SECRET configured:', !!process.env.NEXT_PUBLIC_STRIPE_WEBHOOK_SECRET)
 
   try {
     const event = stripe.webhooks.constructEvent(
       body,
       sig!,
-      process.env.STRIPE_WEBHOOK_SECRET!
+      process.env.NEXT_PUBLIC_STRIPE_WEBHOOK_SECRET!
     )
 
     console.log('✅ Webhook verified successfully!')
@@ -381,7 +381,7 @@ async function markSubscriptionCancelled(subscriptionId: string) {
 export async function verifyAndSaveSubscription(sessionId: string, tempSessionId?: string) {
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY!,
     {
       auth: {
         autoRefreshToken: false,

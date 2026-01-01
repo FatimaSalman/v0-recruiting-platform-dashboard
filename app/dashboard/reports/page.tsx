@@ -14,10 +14,9 @@ import {
 } from "lucide-react"
 import { format, subMonths, subDays, startOfMonth, endOfMonth, differenceInDays } from "date-fns"
 import { useI18n } from "@/lib/i18n-context"
-import { createClient } from "@/lib/supabase/server"
-import { redirect } from "next/navigation"
-import { checkAnalyticsAccess } from "@/lib/subscription-utils"
-
+// import { checkAnalyticsAccess } from "@/lib/subscription-utils"
+import { useSupabase } from "@/lib/supabase/supabase-provider"
+import { useRouter } from "next/navigation"
 
 interface AnalyticsData {
   overview: {
@@ -69,16 +68,17 @@ interface AnalyticsData {
   }>
 }
 
-export default async function ReportsPage() {
+export default function ReportsPage() {
 
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null)
   const [loading, setLoading] = useState(true)
   const [dateRange, setDateRange] = useState("30")
-  const [timeframe, setTimeframe] = useState("month")
+  const [timeframe, setTimeFrame] = useState("month")
   const [error, setError] = useState<string | null>(null)
   const { t } = useI18n()
 
-  const supabase = await createClient()
+  const supabase = useSupabase()
+  const router = useRouter()
 
 
   const fetchAnalytics = useCallback(async () => {
@@ -89,13 +89,15 @@ export default async function ReportsPage() {
       const { data: { user }, error } = await supabase.auth.getUser()
 
       if (error || !user) {
-        redirect('/auth/login')
+        router.push('/auth/login')
+        return
       }
 
-      const hasAccess = await checkAnalyticsAccess(user.id)
-      if (!hasAccess) {
-        redirect("/dashboard/pricing?upgrade=analytics&feature=reports")
-      }
+      // const hasAccess = await checkAnalyticsAccess(user.id)
+      // if (!hasAccess) {
+      //   router.push("/dashboard/pricing?upgrade=analytics&feature=reports")
+      //   return
+      // }
 
       const now = new Date()
       let startDate: Date
@@ -442,7 +444,7 @@ export default async function ReportsPage() {
     } finally {
       setLoading(false)
     }
-  }, [supabase, dateRange])
+  }, [supabase, dateRange, router])
 
   useEffect(() => {
     fetchAnalytics()

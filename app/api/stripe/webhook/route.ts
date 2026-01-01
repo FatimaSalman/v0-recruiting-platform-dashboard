@@ -2,8 +2,8 @@ import { handleStripeWebhook } from '@/app/actions/stripe'
 
 export async function POST(request: Request) {
     console.log('🔄 Webhook endpoint called')
-    console.log('Webhook secret exists:', !!process.env.STRIPE_WEBHOOK_SECRET)
-    console.log('Webhook secret length:', process.env.STRIPE_WEBHOOK_SECRET?.length)
+    console.log('Webhook secret exists:', !!process.env.NEXT_PUBLIC_STRIPE_WEBHOOK_SECRET)
+    console.log('Webhook secret length:', process.env.NEXT_PUBLIC_STRIPE_WEBHOOK_SECRET?.length)
 
     return handleStripeWebhook(request)
 }

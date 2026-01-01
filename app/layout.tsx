@@ -1,33 +1,23 @@
 import type React from "react"
-import { Geist, Geist_Mono, Cairo } from 'next/font/google'
+import { Inter } from 'next/font/google'
 import { Analytics } from "@vercel/analytics/next"
 import { Providers } from "./providers"
 import "./globals.css"
 import type { Metadata } from "next"
 
-const geist = Geist({
+// Use a system font or local font instead
+const inter = Inter({
   subsets: ['latin'],
   display: 'swap',
-  preload: true,
-  fallback: ['system-ui', 'sans-serif']
-})
-
-const geistMono = Geist_Mono({
-  subsets: ['latin'],
-  display: 'swap',
-  fallback: ['monospace']
-})
-
-const cairo = Cairo({
-  subsets: ['arabic'],
-  display: 'swap',
-  fallback: ['sans-serif']
+  variable: '--font-inter',
+  // Add this to prevent Google Fonts fetching during build
+  preload: false,
+  adjustFontFallback: false,
 })
 
 export const metadata: Metadata = {
   title: "TalentHub - AI-Powered Recruitment Platform",
   description: "Find and manage top talent with AI-powered candidate matching",
-  generator: "v0.app",
   icons: {
     icon: [
       {
@@ -54,7 +44,7 @@ export default function RootLayout({
 
   return (
     <html suppressHydrationWarning lang={params?.lang ?? 'en'} dir={direction}>
-      <body className={direction === 'rtl' ? `${cairo.className} antialiased` : `${geist.className} ${geistMono.className} font-sans antialiased`}
+      <body className={`${inter.variable} font-sans antialiased`}
         suppressHydrationWarning
       >
         <Providers>{children}</Providers>

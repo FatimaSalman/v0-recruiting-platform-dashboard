@@ -37,11 +37,14 @@ export const PRICING_PLANS: PricingPlan[] = [
       maxJobs: 5,
       maxTeamMembers: 1,
       hasAnalytics: false,
+      hasAdvancedReports: false,
       hasCustomBranding: false,
       hasAPI: false,
       schedulerInterview: false,
       maxInterviewsPerMonth: 3, // Add this
-      hasUnlimitedInterviews: false
+      hasUnlimitedInterviews: false,
+      supportLevel: "community",
+      supportResponseTime: "72h"
     }
   }, {
     id: "starter-monthly",
@@ -57,17 +60,21 @@ export const PRICING_PLANS: PricingPlan[] = [
       "pricing.starter.feature4",
       "pricing.starter.feature5",
       "pricing.starter.feature6",
+      "pricing.starter.feature7",
     ],
     limits: {
       maxCandidates: 50,
       maxJobs: 10,
       maxTeamMembers: 2,
-      hasAnalytics: false,
+      hasAnalytics: true,
+      hasAdvancedReports: false,
       hasCustomBranding: false,
       hasAPI: false,
       schedulerInterview: false,
       maxInterviewsPerMonth: 10, // Add this
-      hasUnlimitedInterviews: false
+      hasUnlimitedInterviews: false,
+      supportLevel: "email",
+      supportResponseTime: "48h"
     }
   },
   {
@@ -89,15 +96,18 @@ export const PRICING_PLANS: PricingPlan[] = [
       "pricing.professional.feature8",
     ],
     limits: {
-      maxCandidates: null,
+      maxCandidates: 99999,
       maxJobs: 50,
       maxTeamMembers: 10,
       hasAnalytics: true,
+      hasAdvancedReports: true,
       hasCustomBranding: true,
       hasAPI: false,
       schedulerInterview: true,
-      maxInterviewsPerMonth: null, // Add this
-      hasUnlimitedInterviews: true
+      maxInterviewsPerMonth: 99999, // Add this
+      hasUnlimitedInterviews: true,
+      supportLevel: "priority-email", // ← Higher support level
+      supportResponseTime: "24h" // ← Faster response time
     }
   },
   {
@@ -121,15 +131,23 @@ export const PRICING_PLANS: PricingPlan[] = [
       "pricing.enterprise.feature11",
     ],
     limits: {
-      maxCandidates: null,
-      maxJobs: null,
-      maxTeamMembers: null,
-      hasAnalytics: true,
+      maxCandidates: 99999,
+      maxJobs: 99999,
+      maxTeamMembers: 99999,
+      hasAnalytics: true, 
+      hasAdvancedReports: true, 
+      hasExportCapabilities: true,
+      hasPredictiveAnalytics: true, 
+      hasCustomReports: true, 
+      hasAPIIntegration: true, 
+      hasDataWarehouse: true, 
       hasCustomBranding: true,
       hasAPI: true,
       schedulerInterview: true,
-      maxInterviewsPerMonth: null, // Add this
-      hasUnlimitedInterviews: true
+      maxInterviewsPerMonth: 99999, // Add this
+      hasUnlimitedInterviews: true,
+      supportLevel: "dedicated", // ← Highest support level
+      supportResponseTime: "4h"
     }
   },
 ]

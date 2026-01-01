@@ -1,140 +1,155 @@
-// components/upgrade-prompt.tsx
 "use client"
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { BarChart3, Lock, ArrowRight, CheckCircle } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import {
+    AlertCircle,
+    CheckCircle,
+    Crown,
+    Zap,
+    Star,
+    X,
+    Brain,
+    Download,
+    BarChart3,
+    LineChart
+} from "lucide-react"
 import Link from "next/link"
 import { useI18n } from "@/lib/i18n-context"
 
 interface UpgradePromptProps {
-    featureName?: string
-    requiredPlan?: 'basic' | 'premium' | 'enterprise'
+    open: boolean
+    onOpenChange: (open: boolean) => void
+    requiredFeature: string
+    currentPlan: string
 }
 
 export function UpgradePrompt({
-    featureName = "Advanced Analytics & Reports",
-    requiredPlan = "basic"
+    open,
+    onOpenChange,
+    requiredFeature,
+    currentPlan
 }: UpgradePromptProps) {
     const { t } = useI18n()
 
-    const planFeatures = {
-        basic: [
-            "Basic analytics dashboard",
-            "Monthly hiring metrics",
-            "Candidate pipeline tracking",
-            "Export to CSV",
-            "5 report templates"
-        ],
-        premium: [
-            "All Basic features",
-            "Advanced analytics",
-            "Real-time reporting",
-            "Custom report builder",
-            "Predictive hiring insights",
-            "Team collaboration"
-        ],
-        enterprise: [
-            "All Premium features",
-            "Unlimited data retention",
-            "API access",
-            "White-label reports",
-            "Dedicated support",
-            "SLA guarantees"
-        ]
+    const getFeatureInfo = () => {
+        const features = {
+            advanced_reports: {
+                title: t("upgrade.features.advancedReports.title"),
+                description: t("upgrade.features.advancedReports.description"),
+                icon: BarChart3,
+                availableIn: ["professional", "enterprise"],
+                recommendedPlan: "professional-monthly"
+            },
+            predictive_analytics: {
+                title: t("upgrade.features.predictiveAnalytics.title"),
+                description: t("upgrade.features.predictiveAnalytics.description"),
+                icon: Brain,
+                availableIn: ["enterprise"],
+                recommendedPlan: "enterprise-monthly"
+            },
+            data_export: {
+                title: t("upgrade.features.dataExport.title"),
+                description: t("upgrade.features.dataExport.description"),
+                icon: Download,
+                availableIn: ["professional", "enterprise"],
+                recommendedPlan: "professional-monthly"
+            },
+            trend_analysis: {
+                title: t("upgrade.features.trendAnalysis.title"),
+                description: t("upgrade.features.trendAnalysis.description"),
+                icon: LineChart,
+                availableIn: ["professional", "enterprise"],
+                recommendedPlan: "professional-monthly"
+            }
+        }
+
+        return features[requiredFeature as keyof typeof features] || features.advanced_reports
     }
 
-    const features = planFeatures[requiredPlan]
+    const featureInfo = getFeatureInfo()
 
     return (
-        <div className="container mx-auto max-w-4xl py-8">
-            <Card className="border-primary/20">
-                <CardHeader className="text-center">
-                    <div className="flex justify-center mb-4">
-                        <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-                            <BarChart3 className="w-8 h-8 text-primary" />
-                        </div>
-                    </div>
-                    <CardTitle className="text-2xl">
-                        <Lock className="inline w-5 h-5 me-2 text-muted-foreground" />
-                        {featureName} {t("subscription.locked")}
-                    </CardTitle>
-                    <CardDescription className="text-lg">
-                        {t("subscription.upgradeRequired")} {requiredPlan.charAt(0).toUpperCase() + requiredPlan.slice(1)} {t("subscription.plan")}
-                    </CardDescription>
-                </CardHeader>
+        <Dialog open={open} onOpenChange={onOpenChange}>
+            <DialogContent className="max-w-lg">
+                <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2">
+                        <AlertCircle className="w-5 h-5 text-amber-500" />
+                        {t("upgrade.title")}
+                    </DialogTitle>
+                    <DialogDescription>
+                        {t("upgrade.description")}
+                    </DialogDescription>
+                </DialogHeader>
 
-                <CardContent>
-                    <div className="grid md:grid-cols-2 gap-8">
-                        <div>
-                            <h3 className="text-lg font-semibold mb-4">
-                                {t("subscription.includedInPlan")} {requiredPlan.charAt(0).toUpperCase() + requiredPlan.slice(1)}:
-                            </h3>
-                            <ul className="space-y-3">
-                                {features.map((feature, index) => (
-                                    <li key={index} className="flex items-start gap-2">
-                                        <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-                                        <span className="text-sm">{feature}</span>
-                                    </li>
+                <div className="space-y-6">
+                    {/* Feature Info */}
+                    <div className="flex items-start gap-4 p-4 bg-gradient-to-r from-blue-500/5 to-purple-500/5 border border-blue-500/10 rounded-lg">
+                        <div className="p-2 bg-primary/10 rounded-lg">
+                            <featureInfo.icon className="w-6 h-6 text-primary" />
+                        </div>
+                        <div className="flex-1">
+                            <h4 className="font-semibold mb-1">{featureInfo.title}</h4>
+                            <p className="text-sm text-muted-foreground">{featureInfo.description}</p>
+                            <div className="flex items-center gap-2 mt-3">
+                                {featureInfo.availableIn.map(plan => (
+                                    <Badge key={plan} variant="outline" className="text-xs">
+                                        {plan === "enterprise" ? (
+                                            <Crown className="w-3 h-3 me-1" />
+                                        ) : (
+                                            <Zap className="w-3 h-3 me-1" />
+                                        )}
+                                        {t(`plans.${plan}`)}
+                                    </Badge>
                                 ))}
-                            </ul>
-                        </div>
-
-                        <div className="bg-muted/30 rounded-lg p-6">
-                            <h4 className="font-semibold mb-4">{t("subscription.choosePlan")}</h4>
-                            <div className="space-y-4">
-                                <div className="p-4 border rounded-lg hover:border-primary transition-colors">
-                                    <div className="flex items-center justify-between mb-2">
-                                        <h5 className="font-semibold">{t("pricing.basic")}</h5>
-                                        <span className="text-lg font-bold text-primary">$29/month</span>
-                                    </div>
-                                    <p className="text-sm text-muted-foreground mb-3">
-                                        {t("pricing.basicDesc")}
-                                    </p>
-                                    <Button asChild className="w-full">
-                                        <Link href="/dashboard/pricing?plan=basic">
-                                            {t("pricing.choosePlan")} <ArrowRight className="ms-2 w-4 h-4" />
-                                        </Link>
-                                    </Button>
-                                </div>
-
-                                <div className="p-4 border-2 border-primary rounded-lg bg-primary/5">
-                                    <div className="flex items-center justify-between mb-2">
-                                        <h5 className="font-semibold">{t("pricing.premium")}</h5>
-                                        <span className="text-lg font-bold text-primary">$79/month</span>
-                                    </div>
-                                    <p className="text-sm text-muted-foreground mb-3">
-                                        {t("pricing.premiumDesc")}
-                                    </p>
-                                    <Button asChild className="w-full">
-                                        <Link href="/dashboard/pricing?plan=premium">
-                                            {t("pricing.choosePlan")} <ArrowRight className="ms-2 w-4 h-4" />
-                                        </Link>
-                                    </Button>
-                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <div className="mt-8 pt-6 border-t text-center">
-                        <p className="text-sm text-muted-foreground mb-4">
-                            {t("subscription.currentlyOnTrial")}
-                        </p>
-                        <div className="flex gap-4 justify-center">
-                            <Button variant="outline" asChild>
-                                <Link href="/dashboard">
-                                    {t("common.backToDashboard")}
-                                </Link>
-                            </Button>
-                            <Button asChild>
-                                <Link href="/dashboard/pricing">
-                                    {t("pricing.viewAllPlans")}
-                                </Link>
-                            </Button>
-                        </div>
+                    {/* Benefits List */}
+                    <div className="space-y-2">
+                        <h4 className="font-semibold text-sm">{t("upgrade.benefitsTitle")}</h4>
+                        <ul className="space-y-2">
+                            {[
+                                t("upgrade.benefits.realTimeData"),
+                                t("upgrade.benefits.customReports"),
+                                t("upgrade.benefits.exportOptions"),
+                                t("upgrade.benefits.predictiveInsights"),
+                                t("upgrade.benefits.teamCollaboration")
+                            ].map((benefit, index) => (
+                                <li key={index} className="flex items-center gap-2 text-sm">
+                                    <CheckCircle className="w-4 h-4 text-green-500" />
+                                    <span>{benefit}</span>
+                                </li>
+                            ))}
+                        </ul>
                     </div>
-                </CardContent>
-            </Card>
-        </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex gap-2 pt-4">
+                        <Button
+                            variant="outline"
+                            className="flex-1"
+                            onClick={() => onOpenChange(false)}
+                        >
+                            {t("common.later")}
+                        </Button>
+                        <Button className="flex-1" asChild>
+                            <Link href={`/dashboard/pricing?feature=${requiredFeature}&recommended=${featureInfo.recommendedPlan}`}>
+                                <Crown className="me-2 h-4 w-4" />
+                                {t("upgrade.viewPlans")}
+                            </Link>
+                        </Button>
+                    </div>
+                </div>
+            </DialogContent>
+        </Dialog>
     )
 }

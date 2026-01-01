@@ -23,12 +23,14 @@ import {
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { TeamManagement } from "./team-management"
+import { SupportContact } from "./support-contact"
 
 export function SettingsPageContent() {
     const { locale, setLocale, t } = useI18n()
     const supabase = useSupabase()
     const [loading, setLoading] = useState(false)
     const [saveMessage, setSaveMessage] = useState("")
+    const [subscription, setSubscription] = useState<any>(null)
     const [userProfile, setUserProfile] = useState({
         full_name: "",
         company_name: "",
@@ -232,6 +234,19 @@ export function SettingsPageContent() {
                 <Card>
                     <CardContent className="space-y-4">
                         <TeamManagement />
+                    </CardContent>
+                </Card>
+
+                {/* Support Contact Settings */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Support</CardTitle>
+                        <CardDescription>
+                            Contact our support team for help with your account
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <SupportContact subscriptionPlan={subscription?.plan_id || 'free-trial'} />
                     </CardContent>
                 </Card>
 

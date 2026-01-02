@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState, useEffect } from "react"
-import { Home, Search, Users, Briefcase, Calendar, FileText, Settings, Menu, X, LogOut, CreditCard, XCircle } from "lucide-react"
+import { Home, Search, Users, Briefcase, Calendar, FileText, Settings, Menu, X, LogOut, CreditCard, XCircle, BarChart3 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { useSupabase } from "@/lib/supabase/supabase-provider"
@@ -31,9 +31,10 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     { icon: Users, label: t("nav.candidates"), href: "/dashboard/candidates" },
     { icon: Briefcase, label: t("nav.jobs"), href: "/dashboard/jobs" },
     { icon: Calendar, label: t("nav.interviews"), href: "/dashboard/interviews" },
+    { icon: FileText, label: t("nav.applications"), href: "/dashboard/applications" },
     { icon: CreditCard, label: t("nav.pricing"), href: "/dashboard/pricing" },
-    { icon: FileText, label: t("nav.reports"), href: "/dashboard/reports" },
-    { icon: Settings, label: t("nav.settings"), href: "/dashboard/settings" },
+    { icon: BarChart3, label: t("nav.reports"), href: "/dashboard/reports" },
+    { icon: Settings, label: t("nav.settings"), href: "/dashboard/settings", },
   ]
 
   useEffect(() => {
@@ -64,8 +65,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed lg:static inset-y-0 start-0 z-50 w-64 bg-card border-e border-s border-border transform transition-transform duration-200 ease-in-out lg:translate-x-0",
-          sidebarOpen ? "translate-x-0" : "ltr:-translate-x-full rtl:translate-x-full",
+          "fixed lg:static inset-y-0 start-0 z-50 w-64 bg-card border-e border-border transform transition-transform duration-200 ease-in-out",
         )}
       >
         <div className="flex flex-col h-full">

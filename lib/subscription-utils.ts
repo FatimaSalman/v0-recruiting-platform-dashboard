@@ -187,3 +187,45 @@ export async function checkAnalyticsAccess(userId: string, supabase: SupabaseCli
         features
     }
 }
+
+export async function checkApplicationLimits(
+    supabase: any,
+    userId: string,
+    planType: string
+): Promise<{
+    canCreate: boolean
+    currentCount: number
+    limit: number
+    message?: string
+}> {
+    const plan = planType || 'free-trial'
+
+    const limits = PLAN_LIMITS[plan] || PLAN_LIMITS['free-trial']
+
+    // Get current application count
+    const { count, error } = await supabase
+        .from("applications")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", userId)
+
+    if (error) {
+        console.error("Error fetching application count:", error)
+        return {
+            canCreate: true,
+            currentCount: 0,
+            limit: limits.maxApplications
+        }
+    }
+
+    const currentCount = count || 0
+    const canCreate = currentCount < limits.maxApplications
+
+    return {
+        canCreate,
+        currentCount,
+        limit: limits.maxApplications,
+        message: !canCreate
+            ? `You've reached your limit of ${limits.maxApplications} applications. Upgrade to add more.`
+            : undefined
+    }
+}

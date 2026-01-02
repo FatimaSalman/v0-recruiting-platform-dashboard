@@ -281,7 +281,7 @@ export function RecentActivity({ userId }: { userId: string }) {
                                     <Icon className="w-4 h-4" />
                                 </div>
                                 <div className={cn(
-                                    "absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-background",
+                                    "absolute -top-1 -end-1 w-3 h-3 rounded-full border-2 border-background",
                                     color
                                 )} />
                             </div>
@@ -301,7 +301,7 @@ export function RecentActivity({ userId }: { userId: string }) {
                                         variant="outline"
                                         className="mt-2 text-xs"
                                     >
-                                        {activity.metadata.status}
+                                        {t(`status.interview.${activity.metadata.status.toLowerCase()}`)}
                                     </Badge>
                                 )}
                             </div>

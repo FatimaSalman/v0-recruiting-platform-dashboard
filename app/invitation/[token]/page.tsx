@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { useSupabase } from '@/lib/supabase/supabase-provider'
 import { Mail, CheckCircle, XCircle } from 'lucide-react'
 import { toast } from "@/components/ui/use-toast"
+import { useI18n } from "@/lib/i18n-context"
 
 interface InvitationData {
     id: string
@@ -29,6 +30,7 @@ export default function InvitationPage() {
     const router = useRouter()
     const supabase = useSupabase()
     const token = params.token as string
+    const { t } = useI18n()
 
     useEffect(() => {
         verifyInvitation()
@@ -59,12 +61,12 @@ export default function InvitationPage() {
                 .single()
 
             if (inviteError || !invitation) {
-                setError('Invalid or expired invitation')
+                setError(t("invitation.error.invalid"))
                 return
             }
 
             if (invitation.status !== 'pending') {
-                setError('This invitation has already been processed')
+                setError(t("invitation.error.processed"))
                 return
             }
 
@@ -77,11 +79,11 @@ export default function InvitationPage() {
                 .eq('id', invitation.user_id)
                 .single()
 
-            setTeamOwnerEmail(ownerData?.email || 'the team owner')
+            setTeamOwnerEmail(ownerData?.email || t("invitation.teamOwner"))
 
         } catch (error) {
             console.error('Error verifying invitation:', error)
-            setError('Failed to verify invitation')
+            setError(t("invitation.error.verifyFailed"))
         } finally {
             setLoading(false)
         }
@@ -105,7 +107,7 @@ export default function InvitationPage() {
 
             // Verify logged in user email matches invitation email
             if (user.email?.toLowerCase() !== invitation.email.toLowerCase()) {
-                setError(`Please log in with ${invitation.email} to accept this invitation`)
+                setError(t("invitation.error.loginMatch").replace("{email}", invitation.email))
                 setLoading(false)
                 return
             }
@@ -130,7 +132,7 @@ export default function InvitationPage() {
 
         } catch (error) {
             console.error('Error accepting invitation:', error)
-            setError('Failed to accept invitation')
+            setError(t("invitation.error.acceptFailed"))
             setLoading(false)
         }
     }
@@ -141,7 +143,7 @@ export default function InvitationPage() {
                 <Card className="w-full max-w-md">
                     <CardContent className="pt-6 text-center">
                         <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-4"></div>
-                        <p>Verifying invitation...</p>
+                        <p>{t("invitation.verifying")}</p>
                     </CardContent>
                 </Card>
             </div>
@@ -155,13 +157,13 @@ export default function InvitationPage() {
                     <CardHeader>
                         <CardTitle className="text-red-600 flex items-center gap-2">
                             <XCircle className="w-5 h-5" />
-                            Invalid Invitation
+                            {t("invitation.invalidTitle")}
                         </CardTitle>
                         <CardDescription>{error}</CardDescription>
                     </CardHeader>
                     <CardContent>
                         <Button className="w-full" asChild>
-                            <a href="/auth/login">Go to Login</a>
+                            <a href="/auth/login">{t("invitation.goToLogin")}</a>
                         </Button>
                     </CardContent>
                 </Card>
@@ -176,10 +178,10 @@ export default function InvitationPage() {
                     <CardHeader>
                         <CardTitle className="text-green-600 flex items-center gap-2">
                             <CheckCircle className="w-5 h-5" />
-                            Invitation Accepted!
+                            {t("invitation.acceptedTitle")}
                         </CardTitle>
                         <CardDescription>
-                            You have successfully joined the team. Redirecting to dashboard...
+                            {t("invitation.acceptedDesc")}
                         </CardDescription>
                     </CardHeader>
                 </Card>
@@ -191,12 +193,12 @@ export default function InvitationPage() {
             <div className="min-h-screen flex items-center justify-center p-4">
                 <Card className="w-full max-w-md">
                     <CardHeader>
-                        <CardTitle>No Invitation Found</CardTitle>
-                        <CardDescription>The invitation link is invalid or has expired.</CardDescription>
+                        <CardTitle>{t("invitation.notFoundTitle")}</CardTitle>
+                        <CardDescription>{t("invitation.notFoundDesc")}</CardDescription>
                     </CardHeader>
                     <CardContent>
                         <Button className="w-full" asChild>
-                            <a href="/">Return to Home</a>
+                            <a href="/">{t("invitation.returnHome")}</a>
                         </Button>
                     </CardContent>
                 </Card>
@@ -210,22 +212,22 @@ export default function InvitationPage() {
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <Mail className="w-5 h-5" />
-                        Team Invitation
+                        {t("invitation.teamInviteTitle")}
                     </CardTitle>
                     <CardDescription>
-                        You've been invited to join a team on TalentHub
+                        {t("invitation.teamInviteDesc")}
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <div className="text-center">
-                        <p className="text-sm text-muted-foreground mb-2">To accept this invitation:</p>
+                        <p className="text-sm text-muted-foreground mb-2">{t("invitation.acceptPrompt")}</p>
                         <Button className="w-full mb-2" asChild>
-                            <a href={`/auth/login?email=${encodeURIComponent('invitation.email')}`}>
-                                Log in with {invitation.email}
+                            <a href={`/auth/login?email=${encodeURIComponent(invitation.email)}`}>
+                                {t("invitation.loginWith").replace("{email}", invitation.email)}
                             </a>
                         </Button>
                         <Button variant="outline" className="w-full" asChild>
-                            <a href="/auth/sign-up">Create new account</a>
+                            <a href="/auth/sign-up">{t("invitation.createAccount")}</a>
                         </Button>
                     </div>
                 </CardContent>

@@ -77,7 +77,7 @@ export function UpgradePrompt({
     const featureInfo = getFeatureInfo()
 
     return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="max-w-lg">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">

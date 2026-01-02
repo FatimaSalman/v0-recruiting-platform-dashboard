@@ -25,7 +25,7 @@ export function SupportContact({ subscriptionPlan = 'free-trial' }: SupportConta
     const [submitting, setSubmitting] = useState(false)
     const [submitted, setSubmitted] = useState(false)
 
-    const { t } = useI18n()
+    const { t, direction } = useI18n()
     const supabase = useSupabase()
 
 
@@ -48,7 +48,7 @@ export function SupportContact({ subscriptionPlan = 'free-trial' }: SupportConta
                 responseTime: t("support.response.48h"),
                 email: "support@talenthub.com",
                 available: ["email"],
-                description: t("ssupport.descriptions.starter")
+                description: t("support.descriptions.starter")
             },
             'professional-monthly': {
                 level: t("support.levels.priority"),
@@ -175,7 +175,7 @@ export function SupportContact({ subscriptionPlan = 'free-trial' }: SupportConta
                             {supportInfo.available.includes("chat") && (
                                 <Button variant="outline" size="sm">
                                     <MessageSquare className="me-2 h-4 w-4" />
-                                    {t("support.liveChat")}
+                                    {t("support.chat")}
                                 </Button>
                             )}
                             {supportInfo.available.includes("phone") && (
@@ -216,7 +216,7 @@ export function SupportContact({ subscriptionPlan = 'free-trial' }: SupportConta
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <Label htmlFor="category">{t("support.category")}</Label>
-                                    <Select value={category} onValueChange={setCategory}>
+                                    <Select value={category} onValueChange={setCategory} dir={direction}>
                                         <SelectTrigger>
                                             <SelectValue />
                                         </SelectTrigger>

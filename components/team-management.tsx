@@ -322,11 +322,11 @@ export function TeamManagement() {
     function getRoleBadge(role: string) {
         switch (role) {
             case 'owner':
-                return <Badge className="bg-purple-500/10 text-purple-500 border-purple-500/20">Owner</Badge>
+                return <Badge className="bg-purple-500/10 text-purple-500 border-purple-500/20">{t("team.role.owner")}</Badge>
             case 'admin':
-                return <Badge className="bg-blue-500/10 text-blue-500 border-blue-500/20">Admin</Badge>
+                return <Badge className="bg-blue-500/10 text-blue-500 border-blue-500/20">{t("team.role.admin")}</Badge>
             case 'member':
-                return <Badge className="bg-green-500/10 text-green-500 border-green-500/20">Member</Badge>
+                return <Badge className="bg-green-500/10 text-green-500 border-green-500/20">{t("team.role.member")}</Badge>
             default:
                 return <Badge variant="outline">{role}</Badge>
         }
@@ -335,11 +335,11 @@ export function TeamManagement() {
     function getStatusBadge(status: string) {
         switch (status) {
             case 'active':
-                return <Badge className="bg-green-500/10 text-green-500 border-green-500/20">Active</Badge>
+                return <Badge className="bg-green-500/10 text-green-500 border-green-500/20">{t("status.active")}</Badge>
             case 'pending':
-                return <Badge className="bg-yellow-500/10 text-yellow-500 border-yellow-500/20">Pending</Badge>
+                return <Badge className="bg-yellow-500/10 text-yellow-500 border-yellow-500/20">{t("status.pending")}</Badge>
             case 'inactive':
-                return <Badge className="bg-gray-500/10 text-gray-500 border-gray-500/20">Inactive</Badge>
+                return <Badge className="bg-gray-500/10 text-gray-500 border-gray-500/20">{t("status.inactive")}</Badge>
             default:
                 return <Badge variant="outline">{status}</Badge>
         }
@@ -354,25 +354,25 @@ export function TeamManagement() {
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <Users className="w-5 h-5" />
-                        Team Management
+                        {t("settings.team.title")}
                     </CardTitle>
                     <CardDescription>
-                        Manage your team members and permissions. Your plan supports up to {teamLimits.maxTeamMembers} team members.
+                        {t("settings.team.description")} {t("team.planSupports").replace("{count}", teamLimits.maxTeamMembers.toString())}
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div className="border rounded-lg p-4 text-center">
                             <div className="text-2xl font-bold">{teamLimits.currentCount}</div>
-                            <div className="text-sm text-muted-foreground">Current Members</div>
+                            <div className="text-sm text-muted-foreground">{t("team.currentMembers")}</div>
                         </div>
                         <div className="border rounded-lg p-4 text-center">
                             <div className="text-2xl font-bold">{teamLimits.maxTeamMembers}</div>
-                            <div className="text-sm text-muted-foreground">Plan Limit</div>
+                            <div className="text-sm text-muted-foreground">{t("team.planLimit")}</div>
                         </div>
                         <div className="border rounded-lg p-4 text-center">
                             <div className="text-2xl font-bold">{availableSlots}</div>
-                            <div className="text-sm text-muted-foreground">Available Slots</div>
+                            <div className="text-sm text-muted-foreground">{t("team.availableSlots")}</div>
                         </div>
                     </div>
                 </CardContent>
@@ -383,30 +383,29 @@ export function TeamManagement() {
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <UserPlus className="w-5 h-5" />
-                        Invite Team Member
+                        {t("team.inviteMember")}
                     </CardTitle>
                     <CardDescription>
-                        Invite colleagues to collaborate on your recruitment efforts.
+                        {t("team.inviteMemberDesc")}
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
                     {availableSlots <= 0 ? (
                         <div className="text-center py-6">
                             <UserX className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                            <h3 className="text-lg font-semibold mb-2">Team Limit Reached</h3>
+                            <h3 className="text-lg font-semibold mb-2">{t("team.limitReached")}</h3>
                             <p className="text-muted-foreground mb-4">
-                                Your current plan allows up to {teamLimits.maxTeamMembers} team members.
-                                Upgrade your plan to add more team members.
+                                {t("team.limitDesc").replace("{count}", teamLimits.maxTeamMembers.toString())}
                             </p>
                             <Button asChild>
-                                <a href="/dashboard/pricing">Upgrade Plan</a>
+                                <a href="/dashboard/pricing">{t("dashboard.upgrade.plan.button")}</a>
                             </Button>
                         </div>
                     ) : (
                         <div className="space-y-4">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <Label>Email Address</Label>
+                                    <Label>{t("auth.email")}</Label>
                                     <Input
                                         type="email"
                                         placeholder="colleague@company.com"
@@ -415,39 +414,39 @@ export function TeamManagement() {
                                     />
                                 </div>
                                 <div>
-                                    <Label>Role</Label>
+                                    <Label>{t("settings.role")}</Label>
                                     <Select value={role} onValueChange={(value: 'admin' | 'member') => setRole(value)}>
                                         <SelectTrigger>
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="member">Member</SelectItem>
-                                            <SelectItem value="admin">Admin</SelectItem>
+                                            <SelectItem value="member">{t("team.role.member")}</SelectItem>
+                                            <SelectItem value="admin">{t("team.role.admin")}</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>
                             </div>
 
                             <div className="space-y-2">
-                                <h4 className="text-sm font-medium">Permissions for {role}:</h4>
+                                <h4 className="text-sm font-medium">{t("team.permissionsFor").replace("{role}", role)}</h4>
                                 <ul className="text-sm text-muted-foreground space-y-1">
                                     <li className="flex items-center gap-2">
                                         <Check className="w-4 h-4 text-green-500" />
-                                        View candidates and jobs
+                                        {t("team.perm.viewCandJob")}
                                     </li>
                                     <li className="flex items-center gap-2">
                                         <Check className="w-4 h-4 text-green-500" />
-                                        Schedule interviews
+                                        {t("team.perm.schedule")}
                                     </li>
                                     {role === 'admin' && (
                                         <>
                                             <li className="flex items-center gap-2">
                                                 <Check className="w-4 h-4 text-green-500" />
-                                                Edit candidates and jobs
+                                                {t("team.perm.editCandJob")}
                                             </li>
                                             <li className="flex items-center gap-2">
                                                 <Check className="w-4 h-4 text-green-500" />
-                                                View analytics and reports
+                                                {t("team.perm.viewReports")}
                                             </li>
                                         </>
                                     )}
@@ -460,7 +459,7 @@ export function TeamManagement() {
                                 className="w-full"
                             >
                                 <Send className="me-2 h-4 w-4" />
-                                {inviting ? "Sending Invitation..." : "Send Invitation"}
+                                {inviting ? t("team.sendingInvite") : t("team.sendInvite")}
                             </Button>
                         </div>
                     )}
@@ -472,7 +471,7 @@ export function TeamManagement() {
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <Users className="w-5 h-5" />
-                        Team Members ({teamMembers.length + 1})
+                        {t("features.teamMembers")} ({teamMembers.length + 1})
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -491,14 +490,14 @@ export function TeamManagement() {
                                     </div>
                                     <div>
                                         <div className="flex items-center gap-2">
-                                            <span className="font-medium">You</span>
+                                            <span className="font-medium">{t("team.you")}</span>
                                             {getRoleBadge('owner')}
                                             {getStatusBadge('active')}
                                         </div>
-                                        <p className="text-sm text-muted-foreground">Account Owner</p>
+                                        <p className="text-sm text-muted-foreground">{t("team.accountOwner")}</p>
                                     </div>
                                 </div>
-                                <Badge variant="outline">Full Access</Badge>
+                                <Badge variant="outline">{t("team.fullAccess")}</Badge>
                             </div>
 
                             {/* Team members */}
@@ -517,19 +516,19 @@ export function TeamManagement() {
                                             <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                                 {member.status === 'pending' && (
                                                     <>
-                                                        <span>Invited {new Date(member.invited_at).toLocaleDateString()}</span>
+                                                        <span>{t("team.invited")} {new Date(member.invited_at).toLocaleDateString()}</span>
                                                         <Button
                                                             variant="ghost"
                                                             size="sm"
                                                             onClick={() => resendInvitation(member.id, member.email)}
                                                             className="h-6"
                                                         >
-                                                            Resend
+                                                            {t("team.resend")}
                                                         </Button>
                                                     </>
                                                 )}
                                                 {member.status === 'active' && member.joined_at && (
-                                                    <span>Joined {new Date(member.joined_at).toLocaleDateString()}</span>
+                                                    <span>{t("team.joined")} {new Date(member.joined_at).toLocaleDateString()}</span>
                                                 )}
                                             </div>
                                         </div>
@@ -556,20 +555,20 @@ export function TeamManagement() {
                                                 <DropdownMenuItem
                                                     onClick={() => updateTeamMemberRole(member.id, member.role === 'admin' ? 'member' : 'admin')}
                                                 >
-                                                    {member.role === 'admin' ? 'Make Member' : 'Make Admin'}
+                                                    {member.role === 'admin' ? t("team.makeMember") : t("team.makeAdmin")}
                                                 </DropdownMenuItem>
                                                 {member.status === 'pending' && (
                                                     <DropdownMenuItem
                                                         onClick={() => resendInvitation(member.id, member.email)}
                                                     >
-                                                        Resend Invitation
+                                                        {t("team.resendInvite")}
                                                     </DropdownMenuItem>
                                                 )}
                                                 <DropdownMenuItem
                                                     onClick={() => removeTeamMember(member.id)}
                                                     className="text-red-600"
                                                 >
-                                                    Remove from Team
+                                                    {t("team.removeFromTeam")}
                                                 </DropdownMenuItem>
                                             </DropdownMenuContent>
                                         </DropdownMenu>
@@ -580,9 +579,9 @@ export function TeamManagement() {
                             {teamMembers.length === 0 && (
                                 <div className="text-center py-8">
                                     <UserPlus className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                                    <h3 className="text-lg font-semibold mb-2">No team members yet</h3>
+                                    <h3 className="text-lg font-semibold mb-2">{t("team.noMembers")}</h3>
                                     <p className="text-muted-foreground">
-                                        Invite colleagues to collaborate on your recruitment efforts.
+                                        {t("team.inviteMemberDesc")}
                                     </p>
                                 </div>
                             )}

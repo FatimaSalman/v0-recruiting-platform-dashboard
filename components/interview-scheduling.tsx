@@ -175,7 +175,7 @@ export function InterviewScheduling() {
 
           <Button asChild>
             <Link href="/dashboard/interviews/new">
-              <Plus className="mr-2 h-4 w-4" />
+              <Plus className="me-2 h-4 w-4" />
               {t("interviews.schedule")}
             </Link>
           </Button>
@@ -247,11 +247,11 @@ export function InterviewScheduling() {
                   <h3 className="font-semibold">Interview Scheduling</h3>
                   <p className="text-sm text-muted-foreground">
                     {interviewStats.hasUnlimited ? (
-                      "You have unlimited interviews"
+                      t("interviews.stats.unlimited")
                     ) : interviewStats.limit ? (
-                      `${interviewStats.remaining} interviews remaining this month`
+                      `${interviewStats.remaining} ${t("interviews.stats.remainingMonth")}`
                     ) : (
-                      "Checking your usage..."
+                      t("interviews.stats.checking")
                     )}
                   </p>
                 </div>
@@ -261,15 +261,15 @@ export function InterviewScheduling() {
                 <div className="flex items-center gap-4">
                   <div className="text-center">
                     <div className="text-2xl font-bold">{interviewStats.used}</div>
-                    <div className="text-xs text-muted-foreground">scheduled</div>
+                    <div className="text-xs text-muted-foreground">{t("interviews.stats.scheduled")}</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold">{interviewStats.limit}</div>
-                    <div className="text-xs text-muted-foreground">monthly limit</div>
+                    <div className="text-xs text-muted-foreground">{t("interviews.stats.monthlyLimit")}</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-blue-600">{interviewStats.remaining}</div>
-                    <div className="text-xs text-muted-foreground">remaining</div>
+                    <div className="text-xs text-muted-foreground">{t("interviews.stats.remaining")}</div>
                   </div>
                 </div>
               )}
@@ -280,7 +280,7 @@ export function InterviewScheduling() {
                   onClick={() => router.push("/dashboard/pricing?upgrade=interviews")}
                   className="border-blue-300 text-blue-700 hover:bg-blue-50"
                 >
-                  Upgrade for More
+                  {t("reports.upgradeForMore")}
                 </Button>
               )}
             </div>
@@ -374,7 +374,7 @@ export function InterviewScheduling() {
                 </p>
                 <Button asChild>
                   <Link href="/dashboard/interviews/new">
-                    <Plus className="mr-2 h-4 w-4" />
+                    <Plus className="me-2 h-4 w-4" />
                     {t("interviews.schedule")}
                   </Link>
                 </Button>
@@ -425,7 +425,7 @@ export function InterviewScheduling() {
                           </div>
                         </div>
 
-                        <div className="ml-20 space-y-3">
+                        <div className="ms-20 space-y-3">
                           {dayInterviews.map((interview: { id: Key | null | undefined; title: string | number | bigint | boolean | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | Promise<string | number | bigint | boolean | ReactPortal | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | null | undefined> | null | undefined; status: string; interview_type: string; scheduled_at: string | number | Date; duration_minutes: any; location: string | number | bigint | boolean | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | Promise<string | number | bigint | boolean | ReactPortal | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | null | undefined> | null | undefined; candidate: { name: string | number | bigint | boolean | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | Promise<string | number | bigint | boolean | ReactPortal | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | null | undefined> | null | undefined }; interviewer_name: string | number | bigint | boolean | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | Promise<string | number | bigint | boolean | ReactPortal | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | null | undefined> | null | undefined; interviewer_email: string | number | bigint | boolean | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | Promise<string | number | bigint | boolean | ReactPortal | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | null | undefined> | null | undefined }) => (
                             <div
                               key={interview.id}
@@ -466,7 +466,7 @@ export function InterviewScheduling() {
                                       <span className="text-muted-foreground">{t("interviews.interviewer")} </span>
                                       <span className="font-medium">{interview.interviewer_name}</span>
                                       {interview.interviewer_email && (
-                                        <span className="text-muted-foreground ml-2">
+                                        <span className="text-muted-foreground ms-2">
                                           ({interview.interviewer_email})
                                         </span>
                                       )}

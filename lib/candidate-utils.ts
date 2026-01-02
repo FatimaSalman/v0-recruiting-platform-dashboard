@@ -24,7 +24,8 @@ export interface CandidateImportData {
 
 export async function importCandidates(
     candidates: CandidateImportData[],
-    userId: string
+    userId: string,
+    t?: (key: string) => string
 ): Promise<{ success: number; errors: string[] }> {
     const supabase = createClient()
     const errors: string[] = []
@@ -40,12 +41,12 @@ export async function importCandidates(
             })
 
             if (error) {
-                errors.push(`Failed to import ${candidate.name}: ${error.message}`)
+                errors.push(`${t ? t("candidates.import.failed") : "Failed to import"} ${candidate.name}: ${error.message}`)
             } else {
                 successCount++
             }
         } catch (err) {
-            errors.push(`Failed to import ${candidate.name}: ${err}`)
+            errors.push(`${t ? t("candidates.import.failed") : "Failed to import"} ${candidate.name}: ${err}`)
         }
     }
 

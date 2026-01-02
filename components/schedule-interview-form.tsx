@@ -143,7 +143,7 @@ export function ScheduleInterviewForm() {
       // Check interview limit one more time
       const { canSchedule } = await checkInterviewAccess(user.id)
       if (!canSchedule) {
-        throw new Error("Interview limit reached. Please upgrade your plan.")
+        throw new Error(t("interviews.error.limit"))
       }
 
       const { error: insertError } = await supabase.from("interviews").insert({
@@ -179,10 +179,10 @@ export function ScheduleInterviewForm() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-amber-600">
               <AlertCircle className="w-5 h-5" />
-              Interview Limit Reached
+              {t("interviews.limit.title")}
             </CardTitle>
             <CardDescription>
-              Your current plan has reached its interview scheduling limit
+              {t("interviews.limit.description")}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -194,11 +194,13 @@ export function ScheduleInterviewForm() {
                     <Calendar className="w-6 h-6 text-amber-600" />
                   </div>
                   <div>
-                    <h3 className="font-semibold">Interview Scheduling Usage</h3>
+                    <h3 className="font-semibold">{t("interviews.usage.title")}</h3>
                     <p className="text-sm text-muted-foreground">
                       {interviewStats?.limit ?
-                        `You've scheduled ${interviewStats.used} of ${interviewStats.limit} interviews this month` :
-                        "Checking your usage..."
+                        t("interviews.usage.description")
+                          .replace("{used}", interviewStats.used.toString())
+                          .replace("{limit}", interviewStats.limit.toString()) :
+                        t("interviews.stats.checking")
                       }
                     </p>
                   </div>
@@ -207,7 +209,7 @@ export function ScheduleInterviewForm() {
                 {interviewStats?.limit && (
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span>Monthly Limit</span>
+                      <span>{t("interviews.stats.monthlyLimit")}</span>
                       <span className="font-semibold">{interviewStats.limit} interviews</span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
@@ -217,7 +219,7 @@ export function ScheduleInterviewForm() {
                       />
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span>Used</span>
+                      <span>{t("interviews.usage.used")}</span>
                       <span className="font-semibold">{interviewStats.used} / {interviewStats.limit}</span>
                     </div>
                   </div>
@@ -226,27 +228,27 @@ export function ScheduleInterviewForm() {
 
               {/* Upgrade Options */}
               <div className="space-y-4">
-                <h3 className="font-semibold">Upgrade for Unlimited Interviews</h3>
+                <h3 className="font-semibold">{t("interviews.upgrade.title")}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {/* Starter Plan (Current) */}
                   <Card className="border-amber-200">
                     <CardHeader>
-                      <CardTitle>Starter</CardTitle>
-                      <CardDescription>Current Plan</CardDescription>
+                      <CardTitle>{t("pricing.starter")}</CardTitle>
+                      <CardDescription>{t("interviews.upgrade.starter.current")}</CardDescription>
                     </CardHeader>
                     <CardContent>
                       <ul className="space-y-2 text-sm">
                         <li className="flex items-center gap-2">
                           <Check className="w-4 h-4 text-green-500" />
-                          10 interviews/month
+                          {t("feature.interviews.10")}
                         </li>
                         <li className="flex items-center gap-2">
                           <Check className="w-4 h-4 text-green-500" />
-                          2 team members
+                          {t("feature.team.2")}
                         </li>
                         <li className="flex items-center gap-2">
                           <Check className="w-4 h-4 text-green-500" />
-                          Basic analytics
+                          {t("feature.analytics.basic")}
                         </li>
                       </ul>
                     </CardContent>
@@ -255,29 +257,29 @@ export function ScheduleInterviewForm() {
                   {/* Professional Plan (Recommended) */}
                   <Card className="border-primary/30 border-2 relative">
                     <div className="absolute -top-2 left-1/2 -translate-x-1/2">
-                      <Badge className="bg-primary text-primary-foreground">Recommended</Badge>
+                      <Badge className="bg-primary text-primary-foreground">{t("interviews.upgrade.professional.recommended")}</Badge>
                     </div>
                     <CardHeader>
-                      <CardTitle>Professional</CardTitle>
-                      <CardDescription>Unlimited interviews</CardDescription>
+                      <CardTitle>{t("pricing.professional")}</CardTitle>
+                      <CardDescription>{t("interviews.upgrade.professional.desc")}</CardDescription>
                     </CardHeader>
                     <CardContent>
                       <ul className="space-y-2 text-sm">
                         <li className="flex items-center gap-2">
                           <Check className="w-4 h-4 text-green-500" />
-                          <strong>Unlimited interviews</strong>
+                          <strong>{t("feature.interviews.unlimited")}</strong>
                         </li>
                         <li className="flex items-center gap-2">
                           <Check className="w-4 h-4 text-green-500" />
-                          10 team members
+                          {t("feature.team.10")}
                         </li>
                         <li className="flex items-center gap-2">
                           <Check className="w-4 h-4 text-green-500" />
-                          Advanced analytics
+                          {t("feature.analytics.advanced")}
                         </li>
                         <li className="flex items-center gap-2">
                           <Check className="w-4 h-4 text-green-500" />
-                          Custom branding
+                          {t("feature.branding.custom")}
                         </li>
                       </ul>
                     </CardContent>
@@ -286,22 +288,22 @@ export function ScheduleInterviewForm() {
                   {/* Enterprise Plan */}
                   <Card>
                     <CardHeader>
-                      <CardTitle>Enterprise</CardTitle>
-                      <CardDescription>Full platform access</CardDescription>
+                      <CardTitle>{t("pricing.enterprise")}</CardTitle>
+                      <CardDescription>{t("interviews.upgrade.enterprise.desc")}</CardDescription>
                     </CardHeader>
                     <CardContent>
                       <ul className="space-y-2 text-sm">
                         <li className="flex items-center gap-2">
                           <Check className="w-4 h-4 text-green-500" />
-                          Unlimited everything
+                          {t("feature.everything.unlimited")}
                         </li>
                         <li className="flex items-center gap-2">
                           <Check className="w-4 h-4 text-green-500" />
-                          24/7 support
+                          {t("feature.support.247")}
                         </li>
                         <li className="flex items-center gap-2">
                           <Check className="w-4 h-4 text-green-500" />
-                          White-label solution
+                          {t("feature.whitelabel")}
                         </li>
                       </ul>
                     </CardContent>
@@ -318,14 +320,14 @@ export function ScheduleInterviewForm() {
                     router.push("/dashboard/interviews")
                   }}
                 >
-                  Back to Interviews
+                  {t("interviews.back")}
                 </Button>
                 <Button
                   className="flex-1"
                   onClick={() => router.push("/dashboard/pricing?upgrade=interviews")}
                 >
-                  <Zap className="mr-2 h-4 w-4" />
-                  Upgrade Plan
+                  <Zap className="me-2 h-4 w-4" />
+                  {t("interviews.upgradePlan")}
                 </Button>
               </div>
             </div>
@@ -350,11 +352,11 @@ export function ScheduleInterviewForm() {
               <div className="flex items-center gap-3">
                 <Calendar className="w-5 h-5 text-blue-500" />
                 <div>
-                  <h3 className="font-semibold">Interview Scheduling</h3>
+                  <h3 className="font-semibold">{t("interviews.title")}</h3>
                   <p className="text-sm text-muted-foreground">
                     {interviewStats.limit ?
-                      `${interviewStats.remaining} interviews remaining this month` :
-                      "Checking your usage..."
+                      `${interviewStats.remaining} ${t("interviews.stats.remainingMonth")}` :
+                      t("interviews.stats.checking")
                     }
                   </p>
                 </div>
@@ -363,7 +365,7 @@ export function ScheduleInterviewForm() {
                 <div className="flex items-center gap-4">
                   <div className="text-right">
                     <div className="text-2xl font-bold">{interviewStats.remaining}</div>
-                    <div className="text-xs text-muted-foreground">remaining</div>
+                    <div className="text-xs text-muted-foreground">{t("interviews.stats.remaining")}</div>
                   </div>
                   <div className="w-32">
                     <div className="flex justify-between text-xs mb-1">

@@ -9,16 +9,16 @@ interface LanguageSelectorProps {
 }
 
 export function LanguageSelector({ className }: LanguageSelectorProps) {
-    const { locale, setLocale } = useI18n()
+    const { locale, setLocale, t } = useI18n()
 
     return (
         <Select value={locale} onValueChange={(value) => setLocale(value as "en" | "ar")}>
             <SelectTrigger className={className}>
-                <SelectValue placeholder="Select Language" />
+                <SelectValue placeholder={t("language.select")} />
             </SelectTrigger>
             <SelectContent>
-                <SelectItem value="en">English</SelectItem>
-                <SelectItem value="ar">العربية (Arabic)</SelectItem>
+                <SelectItem value="en">{t("language.english")}</SelectItem>
+                <SelectItem value="ar">{t("language.arabic")}</SelectItem>
             </SelectContent>
         </Select>
     )

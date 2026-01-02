@@ -41,7 +41,7 @@ export function JobsManagement() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [jobToDelete, setJobToDelete] = useState<string | null>(null)
   const supabase = useSupabase()
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
 
   useEffect(() => {
     fetchJobs()
@@ -191,7 +191,7 @@ export function JobsManagement() {
                     <div className="flex items-center gap-1">
                       <DollarSign className="h-4 w-4" />
                       <span>
-                        ${job.salary_min.toLocaleString()} - ${job.salary_max.toLocaleString()}
+                        {job.salary_min.toLocaleString(locale)} - {job.salary_max.toLocaleString(locale)}
                       </span>
                     </div>
                   )}

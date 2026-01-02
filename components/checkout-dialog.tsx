@@ -39,10 +39,10 @@ export function CheckoutDialog({ planId, open, onOpenChange }: CheckoutDialogPro
       if (sessionUrl) {
         window.location.href = sessionUrl;
       } else {
-        throw new Error("Failed to create checkout session")
+        throw new Error(t("checkout.error.createSession"))
       }
     } catch (err: any) {
-      setError(err.message || "Falied to start checkout")
+      setError(err.message || t("checkout.error.start"))
       setLoading(false)
     }
   }

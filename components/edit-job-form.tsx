@@ -301,7 +301,7 @@ export function EditJobForm({ jobId }: EditJobFormProps) {
                       <button
                         type="button"
                         onClick={() => handleRemoveSkill(skill)}
-                        className="ml-2 hover:text-destructive"
+                        className="ms-2 hover:text-destructive"
                       >
                         <X className="h-3 w-3" />
                       </button>

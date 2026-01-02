@@ -123,7 +123,7 @@ export function PricingPlans() {
       </div>
 
       {/* Free Trial Banner */}
-      <div className="mb-12 bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 rounded-lg p-6">
+      <div className="mb-12 bg-gradient-to-r from-primary/10 to-primary/5 rtl:bg-gradient-to-l border border-primary/20 rounded-lg p-6">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <div>
             <h3 className="text-2xl font-bold mb-2">{t("pricing.trial.bannerTitle")}</h3>
@@ -194,7 +194,7 @@ export function PricingPlans() {
               variant={plan.popular ? "default" : "outline"}
               onClick={() => setSelectedPlan(plan.id)}
             >
-              {plan.id.includes("free") ? "Get Started" : `${(t("pricing.subscribePrefix"))} ${formatPrice(plan.priceInCents, plan.currency)}/ ${(t("pricing.month"))}`}
+              {plan.id.includes("free") ? t("pricing.getStarted") : `${(t("pricing.subscribePrefix"))} ${formatPrice(plan.priceInCents, plan.currency)}/ ${(t("pricing.month"))}`}
             </Button>
 
             <div className="space-y-3">

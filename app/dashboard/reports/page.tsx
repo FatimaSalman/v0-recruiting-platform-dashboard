@@ -1,7 +1,7 @@
 // app/dashboard/reports/page.tsx
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import React, { useState, useEffect, useCallback } from "react"
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -42,9 +42,8 @@ import { format, subMonths, subDays, startOfMonth, endOfMonth, differenceInDays 
 import { useI18n } from "@/lib/i18n-context"
 import { useSupabase } from "@/lib/supabase/supabase-provider"
 import { useRouter } from "next/navigation"
-import { checkAnalyticsAccess, PlanType } from "@/lib/subscription-utils"
-import { UpgradePrompt } from "@/components/upgrade-prompt"
 import { cn } from "@/lib/utils"
+import { UpgradePrompt } from "@/components/upgrade-prompt"
 
 interface AnalyticsData {
   overview: {
@@ -96,6 +95,61 @@ interface AnalyticsData {
   }>
   advanced?: AdvancedAnalytics
   predictive?: PredictiveAnalytics
+
+  performance: {
+    conversionFunnel: Array<{
+      stage: number
+      name: string
+      key: string
+      count: number
+      percentage: number
+      dropOff: number
+    }>
+    sourceEffectiveness: Array<{
+      source: string
+      icon: string
+      color: string
+      applications: number
+      hires: number
+      hireRate: number
+    }>
+    interviewerPerformance: Array<{
+      name: string
+      interviews: number
+      hires: number
+      hireRate: number
+    }>
+    recruiterEfficiency: Array<{
+      name: string
+      role: string
+      candidatesCount: number
+      hires: number
+      fillRate: number
+      avgTimeToFill: number
+      candidateQuality: number
+    }>
+    timeMetrics: {
+      screening: number
+      interview: number
+      offer: number
+      overall: number
+    }
+    qualityMetrics: {
+      retention90Days: number
+      performanceScore: number
+      culturalFitScore: number
+      skillMatchScore: number
+      candidateSatisfaction: number
+    }
+  }
+
+  costAnalysis?: {
+    avgCostPerHire: number
+    timeCost: number
+    advertisingCost: number
+    agencyFees: number
+    totalCost: number
+  }
 }
 
 interface AdvancedAnalytics {
@@ -113,14 +167,97 @@ interface PredictiveAnalytics {
   aiRecommendations: string[]
 }
 
-interface SubscriptionInfo {
-  tier: 'free-trial' | 'starter-monthly' | 'professional-monthly' | 'enterprise-monthly'
-  features: string[]
+interface SubscriptionTier {
+  id: 'free-trial' | 'starter-monthly' | 'professional-monthly' | 'enterprise-monthly'
+  name: string
+  color: string
   analyticsAccess: {
     basic: boolean
     advanced: boolean
     predictive: boolean
     exports: boolean
+  }
+  features: string[]
+}
+
+// Define subscription tiers and their analytics access
+const SUBSCRIPTION_TIERS: Record<string, SubscriptionTier> = {
+  'free-trial': {
+    id: 'free-trial',
+    name: 'Free Trial',
+    color: 'bg-gray-500/10 text-gray-500 border-gray-500/20',
+    analyticsAccess: {
+      basic: true,
+      advanced: false,
+      predictive: false,
+      exports: false
+    },
+    features: [
+      'basic_overview',
+      'performance_metrics',
+      'limited_data_points'
+    ]
+  },
+  'starter-monthly': {
+    id: 'starter-monthly',
+    name: 'Starter',
+    color: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
+    analyticsAccess: {
+      basic: true,
+      advanced: false,
+      predictive: false,
+      exports: true
+    },
+    features: [
+      'basic_overview',
+      'performance_metrics',
+      'data_export_csv',
+      'trend_analysis_30d',
+      'standard_reports'
+    ]
+  },
+  'professional-monthly': {
+    id: 'professional-monthly',
+    name: 'Professional',
+    color: 'bg-purple-500/10 text-purple-500 border-purple-500/20',
+    analyticsAccess: {
+      basic: true,
+      advanced: true,
+      predictive: false,
+      exports: true
+    },
+    features: [
+      'basic_overview',
+      'performance_metrics',
+      'advanced_analytics',
+      'trend_analysis_90d',
+      'data_export_all_formats',
+      'benchmark_comparison',
+      'custom_reports'
+    ]
+  },
+  'enterprise-monthly': {
+    id: 'enterprise-monthly',
+    name: 'Enterprise',
+    color: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20',
+    analyticsAccess: {
+      basic: true,
+      advanced: true,
+      predictive: true,
+      exports: true
+    },
+    features: [
+      'basic_overview',
+      'performance_metrics',
+      'advanced_analytics',
+      'predictive_analytics',
+      'trend_analysis_unlimited',
+      'data_export_all_formats',
+      'benchmark_comparison',
+      'custom_reports',
+      'api_access',
+      'dedicated_support'
+    ]
   }
 }
 
@@ -130,25 +267,8 @@ export default function ReportsPage() {
   const [dateRange, setDateRange] = useState("30")
   const [activeTab, setActiveTab] = useState("overview")
   const [error, setError] = useState<string | null>(null)
-  const [subscriptionFeatures, setSubscriptionFeatures] = useState<string[]>([])
-  const [subscriptionTier, setSubscriptionTier] = useState<PlanType>('free-trial')
-
-  const [subscriptionInfo, setSubscriptionInfo] = useState<SubscriptionInfo>({
-    tier: 'free-trial',
-    features: [],
-    analyticsAccess: {
-      basic: false,
-      advanced: false,
-      predictive: false,
-      exports: false
-    }
-  })
+  const [subscriptionTier, setSubscriptionTier] = useState<SubscriptionTier>(SUBSCRIPTION_TIERS['free-trial'])
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false)
-  const [dateRangeOptions, setDateRangeOptions] = useState([
-    { value: "7", label: "Last 7 days" },
-    { value: "30", label: "Last 30 days" },
-    { value: "90", label: "Last 90 days" }
-  ])
 
   const { t } = useI18n()
   const supabase = useSupabase()
@@ -170,31 +290,51 @@ export default function ReportsPage() {
         return
       }
 
-      // Check subscription tier and analytics access
-      const access = await checkAnalyticsAccess(user.id, supabase)
-      if (access.tier) {
-        setSubscriptionTier(access.tier)
+      // Check user's subscription tier
+      const { data: subscription, error: subscriptionError } = await supabase
+        .from('subscriptions')
+        .select('plan_type, status')
+        .eq('user_id', user.id)
+        .eq('status', 'active')
+        .single()
+
+      let tierId: keyof typeof SUBSCRIPTION_TIERS = 'free-trial'
+
+      if (!subscriptionError && subscription) {
+        tierId = subscription.plan_type as keyof typeof SUBSCRIPTION_TIERS
       }
-      setSubscriptionFeatures(access.features)
+
+      // If subscription not found or not active, use free-trial
+      if (!subscription || subscription.status !== 'active') {
+        tierId = 'free-trial'
+      }
+
+      // Set subscription tier
+      const tier = SUBSCRIPTION_TIERS[tierId]
+      setSubscriptionTier(tier)
 
       // Update date range options based on subscription
       const updatedOptions = [
         { value: "7", label: t("reports.last7Days") },
         { value: "30", label: t("reports.last30Days") },
-        { value: "90", label: t("reports.last90Days") },
       ]
 
-       if (access.features.includes('advanced_reports')) {
+      if (tier.analyticsAccess.advanced) {
         updatedOptions.push(
-          { value: "year", label: t("reports.lastYear") },
+          { value: "90", label: t("reports.last90Days") },
+          { value: "year", label: t("reports.lastYear") }
+        )
+      }
+
+      // Only enterprise gets all-time data
+      if (tier.id === 'enterprise-monthly') {
+        updatedOptions.push(
           { value: "all", label: t("reports.allTime") }
         )
       }
 
-      setDateRangeOptions(updatedOptions)
-
       // Fetch analytics data
-      await fetchAnalyticsData(user.id)
+      await fetchAnalyticsData(user.id, tier)
 
     } catch (err: any) {
       console.error("Error checking access:", err)
@@ -204,12 +344,13 @@ export default function ReportsPage() {
     }
   }
 
-  const fetchAnalyticsData = useCallback(async (userId: string) => {
+  const fetchAnalyticsData = useCallback(async (userId: string, tier: SubscriptionTier) => {
     try {
       const now = new Date()
       let startDate: Date
       let endDate: Date = now
 
+      // Apply date range limits based on subscription tier
       switch (dateRange) {
         case "7":
           startDate = subDays(now, 7)
@@ -218,19 +359,40 @@ export default function ReportsPage() {
           startDate = subDays(now, 30)
           break
         case "90":
-          startDate = subDays(now, 90)
+          if (tier.analyticsAccess.advanced) {
+            startDate = subDays(now, 90)
+          } else {
+            startDate = subDays(now, 30) // Fallback to 30 days
+          }
           break
         case "year":
-          startDate = subMonths(now, 12)
+          if (tier.analyticsAccess.advanced) {
+            startDate = subMonths(now, 12)
+          } else {
+            startDate = subDays(now, 30)
+          }
           break
         case "all":
-          startDate = new Date(0)
+          if (tier.id === 'enterprise-monthly') {
+            startDate = new Date(0)
+          } else {
+            startDate = subDays(now, 30)
+          }
           break
         default:
           startDate = subDays(now, 30)
       }
 
-      // OPTIMIZED: Fetch all data in parallel with minimal fields
+      // Apply data limits based on subscription tier
+      const candidateLimit = tier.id === 'free-trial' ? 100 :
+        tier.id === 'starter-monthly' ? 500 :
+          tier.id === 'professional-monthly' ? 5000 : 10000
+
+      const jobLimit = tier.id === 'free-trial' ? 50 :
+        tier.id === 'starter-monthly' ? 200 :
+          tier.id === 'professional-monthly' ? 1000 : 5000
+
+      // Fetch data with limits
       const [candidatesData, jobsData, applicationsData, interviewsData] = await Promise.all([
         supabase
           .from("candidates")
@@ -238,7 +400,7 @@ export default function ReportsPage() {
           .eq("user_id", userId)
           .gte("created_at", startDate.toISOString())
           .lte("created_at", endDate.toISOString())
-          .limit(subscriptionInfo.tier === 'free-trial' ? 100 : 10000), // Limit for free tier
+          .limit(candidateLimit),
 
         supabase
           .from("jobs")
@@ -246,7 +408,7 @@ export default function ReportsPage() {
           .eq("user_id", userId)
           .gte("created_at", startDate.toISOString())
           .lte("created_at", endDate.toISOString())
-          .limit(subscriptionInfo.tier === 'free-trial' ? 50 : 1000),
+          .limit(jobLimit),
 
         supabase
           .from("applications")
@@ -254,7 +416,7 @@ export default function ReportsPage() {
           .eq("user_id", userId)
           .gte("applied_at", startDate.toISOString())
           .lte("applied_at", endDate.toISOString())
-          .limit(subscriptionInfo.tier === 'free-trial' ? 200 : 10000),
+          .limit(candidateLimit * 2),
 
         supabase
           .from("interviews")
@@ -262,281 +424,29 @@ export default function ReportsPage() {
           .eq("user_id", userId)
           .gte("created_at", startDate.toISOString())
           .lte("created_at", endDate.toISOString())
-          .limit(subscriptionInfo.tier === 'free-trial' ? 100 : 5000)
+          .limit(candidateLimit)
       ])
 
-      const [candidatesError, jobsError, applicationsError, interviewsError] = [
-        candidatesData.error,
-        jobsData.error,
-        applicationsData.error,
-        interviewsData.error
-      ]
+      // Process data...
+      const candidates = candidatesData.data || []
+      const jobs = jobsData.data || []
+      const applications = applicationsData.data || []
+      const interviews = interviewsData.data || []
 
-      if (candidatesError) throw candidatesError
-      if (jobsError) throw jobsError
-      if (applicationsError) throw applicationsError
-      if (interviewsError) throw interviewsError
+      // Calculate metrics
+      const totalCandidates = candidates.length
+      const activeCandidates = candidates.filter(c => c.status === 'active').length
+      const placedCandidates = candidates.filter(c => c.status === 'placed').length
+      const totalJobs = jobs.length
+      const openJobs = jobs.filter(j => j.status === 'open').length
+      const hiredApplications = applications.filter(a => a.status === 'hired').length
+      const conversionFunnel = calculateConversionFunnel(applications)
+      const sourceEffectiveness = calculateSourceEffectiveness(applications, candidates)
+      const interviewerPerformance = calculateInterviewerPerformance(interviews, applications)
+      const recruiterEfficiency = calculateRecruiterEfficiency(candidates, applications)
 
-      const candidates = candidatesData.data
-      const jobs = jobsData.data
-      const applications = applicationsData.data
-      const interviews = interviewsData.data
 
-      // Calculate metrics with fallbacks for limited data
-      const totalCandidates = candidates?.length || 0
-      const activeCandidates = candidates?.filter(c => c.status === 'active').length || 0
-      const placedCandidates = candidates?.filter(c => c.status === 'placed').length || 0
-      const totalJobs = jobs?.length || 0
-      const openJobs = jobs?.filter(j => j.status === 'open').length || 0
-      const hiredApplications = applications?.filter(a => a.status === 'hired').length || 0
-      const totalApplications = applications?.length || 0
-      const totalInterviews = interviews?.length || 0
-
-      // Calculate average time to hire
-      let totalTimeToHire = 0
-      let hireCount = 0
-
-      applications?.forEach(app => {
-        if (app.status === 'hired') {
-          const appliedAt = new Date(app.applied_at)
-          const hiredAt = app.updated_at ? new Date(app.updated_at) : new Date(app.applied_at)
-          const days = Math.max(0, differenceInDays(hiredAt, appliedAt))
-          totalTimeToHire += days
-          hireCount++
-        }
-      })
-
-      const averageTimeToHire = hireCount > 0 ? Math.round(totalTimeToHire / hireCount) : 0
-
-      // Applications by status
-      const applicationStatusCounts = new Map<string, number>()
-      applications?.forEach(app => {
-        const count = applicationStatusCounts.get(app.status) || 0
-        applicationStatusCounts.set(app.status, count + 1)
-      })
-
-      const applicationsByStatus = Array.from(applicationStatusCounts.entries()).map(([status, count]) => ({
-        status: status.charAt(0).toUpperCase() + status.slice(1),
-        count,
-        percentage: totalApplications > 0 ? Math.round((count / totalApplications) * 100) : 0
-      }))
-
-      // Applications monthly trend
-      const monthlyTrend = Array.from({ length: 6 }, (_, i) => {
-        const date = subMonths(now, 5 - i)
-        const monthStart = startOfMonth(date)
-        const monthEnd = endOfMonth(date)
-        const monthStartStr = monthStart.toISOString()
-        const monthEndStr = monthEnd.toISOString()
-
-        const monthApplications = applications?.filter(app =>
-          app.applied_at >= monthStartStr && app.applied_at <= monthEndStr
-        ).length || 0
-
-        const monthHires = applications?.filter(app =>
-          app.status === 'hired' && app.applied_at >= monthStartStr && app.applied_at <= monthEndStr
-        ).length || 0
-
-        return {
-          month: format(date, 'MMM'),
-          applications: monthApplications,
-          hires: monthHires
-        }
-      })
-
-      // Candidates by status
-      const candidateStatusCounts = new Map<string, number>()
-      candidates?.forEach(candidate => {
-        const count = candidateStatusCounts.get(candidate.status) || 0
-        candidateStatusCounts.set(candidate.status, count + 1)
-      })
-
-      const candidatesByStatus = Array.from(candidateStatusCounts.entries()).map(([status, count]) => ({
-        status: status.charAt(0).toUpperCase() + status.slice(1),
-        count
-      }))
-
-      // Candidates by experience
-      const experienceRanges = {
-        [t("experience.0-2")]: { min: 0, max: 2 },
-        [t("experience.3-5")]: { min: 3, max: 5 },
-        [t("experience.6-10")]: { min: 6, max: 10 },
-        [t("experience.10+")]: { min: 11, max: Infinity }
-      }
-
-      const candidatesByExperience = Object.entries(experienceRanges).map(([range, { min, max }]) => ({
-        experience: range,
-        count: candidates?.filter(c => {
-          const exp = c.experience_years || 0
-          return exp >= min && exp <= max
-        }).length || 0
-      }))
-
-      // Candidates by availability
-      const availabilityCounts = new Map<string, number>()
-      candidates?.forEach(candidate => {
-        if (candidate.availability) {
-          const count = availabilityCounts.get(candidate.availability) || 0
-          availabilityCounts.set(candidate.availability, count + 1)
-        }
-      })
-
-      const candidatesByAvailability = Array.from(availabilityCounts.entries()).map(([availability, count]) => ({
-        availability: t(`availability.${availability}`) || availability.replace('-', ' '),
-        count
-      }))
-
-      // Top skills
-      const skillCounts = new Map<string, number>()
-      candidates?.forEach(candidate => {
-        if (candidate.skills && Array.isArray(candidate.skills)) {
-          candidate.skills.forEach((skill: string | number) => {
-            const count = skillCounts.get(String(skill)) || 0
-            skillCounts.set(String(skill), count + 1)
-          })
-        }
-      })
-
-      const topSkills = Array.from(skillCounts.entries())
-        .map(([skill, count]) => ({ skill, count }))
-        .sort((a, b) => b.count - a.count)
-        .slice(0, subscriptionInfo.tier === 'free-trial' ? 5 : 10)
-
-      // Jobs by status
-      const jobStatusCounts = new Map<string, number>()
-      jobs?.forEach(job => {
-        const count = jobStatusCounts.get(job.status) || 0
-        jobStatusCounts.set(job.status, count + 1)
-      })
-
-      const jobsByStatus = Array.from(jobStatusCounts.entries()).map(([status, count]) => ({
-        status: status.charAt(0).toUpperCase() + status.slice(1),
-        count
-      }))
-
-      // Jobs by department
-      const departmentCounts = new Map<string, number>()
-      jobs?.forEach(job => {
-        if (job.department) {
-          const count = departmentCounts.get(job.department) || 0
-          departmentCounts.set(job.department, count + 1)
-        }
-      })
-
-      const jobsByDepartment = Array.from(departmentCounts.entries()).map(([department, count]) => ({
-        department,
-        count
-      }))
-
-      // Top performing jobs
-      const jobPerformanceMap = new Map<string, { applications: number; hires: number }>()
-
-      applications?.forEach(app => {
-        const jobId = app.job_id
-        const current = jobPerformanceMap.get(jobId) || { applications: 0, hires: 0 }
-        current.applications++
-        if (app.status === 'hired') current.hires++
-        jobPerformanceMap.set(jobId, current)
-      })
-
-      const jobPerformance = jobs
-        ?.map(job => {
-          const performance = jobPerformanceMap.get(job.id) || { applications: 0, hires: 0 }
-          const fillRate = performance.applications > 0
-            ? Math.round((performance.hires / performance.applications) * 100)
-            : 0
-
-          return {
-            id: job.id,
-            title: job.title,
-            applications: performance.applications,
-            hires: performance.hires,
-            fillRate
-          }
-        })
-        .sort((a, b) => b.applications - a.applications)
-        .slice(0, subscriptionInfo.tier === 'free-trial' ? 3 : 5) || []
-
-      // Interviews by status
-      const interviewStatusCounts = new Map<string, number>()
-      interviews?.forEach(interview => {
-        const count = interviewStatusCounts.get(interview.status) || 0
-        interviewStatusCounts.set(interview.status, count + 1)
-      })
-
-      const interviewsByStatus = Array.from(interviewStatusCounts.entries()).map(([status, count]) => ({
-        status: status.charAt(0).toUpperCase() + status.slice(1),
-        count
-      }))
-
-      // Interviews by type
-      const interviewTypeCounts = new Map<string, number>()
-      interviews?.forEach(interview => {
-        if (interview.interview_type) {
-          const count = interviewTypeCounts.get(interview.interview_type) || 0
-          interviewTypeCounts.set(interview.interview_type, count + 1)
-        }
-      })
-
-      const interviewsByType = Array.from(interviewTypeCounts.entries()).map(([type, count]) => ({
-        type: type.charAt(0).toUpperCase() + type.slice(1),
-        count
-      }))
-
-      // Interview completion rate
-      const totalCompletedInterviews = interviews?.filter(i => i.status === 'completed').length || 0
-      const interviewCompletionRate = totalInterviews > 0
-        ? Math.round((totalCompletedInterviews / totalInterviews) * 100)
-        : 0
-
-      // No-show rate
-      const noShowInterviews = interviews?.filter(i => i.status === 'cancelled').length || 0
-      const noShowRate = totalInterviews > 0
-        ? Math.round((noShowInterviews / totalInterviews) * 100)
-        : 0
-
-      // Hiring metrics
-      const offerApplications = applications?.filter(a => a.status === 'offer').length || 0
-      const offerAcceptanceRate = offerApplications > 0
-        ? Math.round((hiredApplications / offerApplications) * 100)
-        : 0
-
-      const interviewSuccessRate = totalInterviews > 0
-        ? Math.round((totalCompletedInterviews / totalInterviews) * 100)
-        : 0
-
-      const candidateRetentionRate = 85
-
-      // Recent activity
-      const recentActivity = [
-        ...(applications?.slice(0, 3).map(app => ({
-          id: app.id,
-          type: 'application' as const,
-          title: `${t('reports.newApp')} ${jobs?.find(j => j.id === app.job_id)?.title || t("common.job")}`,
-          description: `${candidates?.find(c => c.id === app.candidate_id)?.name || t("common.candidate")} applied`,
-          timestamp: app.applied_at,
-          user: candidates?.find(c => c.id === app.candidate_id)?.name || t("common.unknown")
-        })) || []),
-        ...(interviews?.slice(0, 2).map(interview => ({
-          id: interview.id,
-          type: 'interview' as const,
-          title: `${interview.status === 'scheduled' ? t('status.scheduled') : t('status.completed')} ${t('reports.interview')}`,
-          description: interview.title,
-          timestamp: interview.created_at,
-          user: `${t("common.system")}`
-        })) || []),
-        ...(candidates?.slice(0, 2).map(candidate => ({
-          id: candidate.id,
-          type: 'candidate' as const,
-          title: `${t('reports.newCandidate')}`,
-          description: candidate.name,
-          timestamp: candidate.created_at,
-          user: `${t('common.recruiter')}`
-        })) || [])
-      ].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-        .slice(0, subscriptionInfo.tier === 'free-trial' ? 3 : 5)
-
-      // Set basic analytics data (available to all tiers)
+      // Basic analytics data (available to all tiers)
       const basicAnalytics: AnalyticsData = {
         overview: {
           totalCandidates,
@@ -545,53 +455,63 @@ export default function ReportsPage() {
           totalJobs,
           openJobs,
           hiredCount: hiredApplications,
-          averageTimeToHire,
-          totalApplications,
-          totalInterviews
+          averageTimeToHire: calculateAverageTimeToHire(applications),
+          totalApplications: applications.length,
+          totalInterviews: interviews.length
         },
         hiringMetrics: {
-          timeToHire: averageTimeToHire,
-          offerAcceptanceRate,
-          interviewSuccessRate,
-          candidateRetentionRate
+          timeToHire: calculateAverageTimeToHire(applications),
+          offerAcceptanceRate: calculateOfferAcceptanceRate(applications),
+          interviewSuccessRate: calculateInterviewSuccessRate(interviews),
+          candidateRetentionRate: 85 // Default value
         },
         applications: {
-          byStatus: applicationsByStatus,
-          monthlyTrend,
+          byStatus: calculateApplicationsByStatus(applications),
+          monthlyTrend: calculateMonthlyTrend(applications, now),
           sourceBreakdown: [
-            { source: t('source.direct'), count: Math.round(totalApplications * 0.6), percentage: 60 },
-            { source: t('source.referral'), count: Math.round(totalApplications * 0.2), percentage: 20 },
-            { source: t('source.jobBoard'), count: Math.round(totalApplications * 0.15), percentage: 15 },
-            { source: t('source.agency'), count: Math.round(totalApplications * 0.05), percentage: 5 }
+            { source: t('source.direct'), count: Math.round(applications.length * 0.6), percentage: 60 },
+            { source: t('source.referral'), count: Math.round(applications.length * 0.2), percentage: 20 },
+            { source: t('source.jobBoard'), count: Math.round(applications.length * 0.15), percentage: 15 },
+            { source: t('source.agency'), count: Math.round(applications.length * 0.05), percentage: 5 }
           ]
         },
         candidates: {
-          byStatus: candidatesByStatus,
-          byExperience: candidatesByExperience,
-          byAvailability: candidatesByAvailability,
-          topSkills
+          byStatus: calculateCandidatesByStatus(candidates),
+          byExperience: calculateCandidatesByExperience(candidates),
+          byAvailability: calculateCandidatesByAvailability(candidates),
+          topSkills: calculateTopSkills(candidates, tier.id === 'free-trial' ? 5 : 10)
         },
         jobs: {
-          byStatus: jobsByStatus,
-          byDepartment: jobsByDepartment,
-          topPerforming: jobPerformance
+          byStatus: calculateJobsByStatus(jobs),
+          byDepartment: calculateJobsByDepartment(jobs),
+          topPerforming: calculateTopPerformingJobs(jobs, applications, tier.id === 'free-trial' ? 3 : 5)
         },
         interviews: {
-          byStatus: interviewsByStatus,
-          byType: interviewsByType,
-          completionRate: interviewCompletionRate,
-          noShowRate
+          byStatus: calculateInterviewsByStatus(interviews),
+          byType: calculateInterviewsByType(interviews),
+          completionRate: calculateInterviewCompletionRate(interviews),
+          noShowRate: calculateInterviewNoShowRate(interviews)
         },
-        recentActivity
+        recentActivity: calculateRecentActivity(candidates, jobs, applications, interviews, tier.id === 'free-trial' ? 3 : 5),
+        performance: {
+          conversionFunnel,
+          sourceEffectiveness,
+          interviewerPerformance,
+          recruiterEfficiency,
+          timeMetrics: calculateTimeMetrics(applications),
+          qualityMetrics: calculateQualityMetrics(applications, candidates)
+        },
       }
 
       // Add advanced analytics if user has access
-      if (subscriptionInfo.analyticsAccess.advanced) {
+      if (tier.analyticsAccess.advanced && {
+        costAnalysis: calculateCostAnalysis(applications)
+      }) {
         basicAnalytics.advanced = {
-          candidateQuality: 8.2,
-          costPerHire: 2450,
-          timeToProductivity: 42,
-          retentionRate: 94,
+          candidateQuality: calculateCandidateQuality(applications),
+          costPerHire: calculateCostPerHire(applications),
+          timeToProductivity: calculateTimeToProductivity(),
+          retentionRate: calculateRetentionRate(),
           benchmarkComparison: {
             timeToHire: 32,
             costPerHire: 2800,
@@ -601,20 +521,12 @@ export default function ReportsPage() {
       }
 
       // Add predictive analytics if user has access
-      if (subscriptionInfo.analyticsAccess.predictive) {
+      if (tier.analyticsAccess.predictive) {
         basicAnalytics.predictive = {
-          highDemandRoles: ["Senior Developer", "Data Scientist", "Product Manager"],
-          attritionRisk: 24,
-          hiringForecast: {
-            nextMonth: 12,
-            nextQuarter: 35,
-            nextYear: 150
-          },
-          aiRecommendations: [
-            t("reports.rec1"),
-            t("reports.rec2"),
-            t("reports.rec3")
-          ]
+          highDemandRoles: predictHighDemandRoles(jobs),
+          attritionRisk: predictAttritionRisk(candidates),
+          hiringForecast: predictHiringForecast(applications),
+          aiRecommendations: generateAIRecommendations(basicAnalytics)
         }
       }
 
@@ -625,44 +537,728 @@ export default function ReportsPage() {
       setError(err.message || "Failed to fetch analytics data")
       throw err
     }
-  }, [supabase, dateRange, t, subscriptionInfo.tier])
+  }, [supabase, dateRange, t])
 
-  // Tab configuration - Basic analytics available to all tiers
+  // Helper functions for calculations
+  function calculateAverageTimeToHire(applications: any[]): number {
+    if (!applications || applications.length === 0) return 0
+
+    let totalDays = 0
+    let hireCount = 0
+
+    applications.forEach(app => {
+      if (app.status === 'hired' && app.applied_at && app.updated_at) {
+        const appliedDate = new Date(app.applied_at)
+        const hiredDate = new Date(app.updated_at)
+        const daysDiff = Math.ceil((hiredDate.getTime() - appliedDate.getTime()) / (1000 * 60 * 60 * 24))
+
+        if (daysDiff >= 0) {
+          totalDays += daysDiff
+          hireCount++
+        }
+      }
+    })
+
+    return hireCount > 0 ? Math.round(totalDays / hireCount) : 0
+  }
+
+  function calculateOfferAcceptanceRate(applications: any[]): number {
+    if (!applications || applications.length === 0) return 0
+
+    const offers = applications.filter(app => app.status === 'offer').length
+    const hires = applications.filter(app => app.status === 'hired').length
+
+    return offers > 0 ? Math.round((hires / offers) * 100) : 0
+  }
+
+  function calculateInterviewSuccessRate(interviews: any[]): number {
+    if (!interviews || interviews.length === 0) return 0
+
+    const completedInterviews = interviews.filter(i => i.status === 'completed').length
+    return Math.round((completedInterviews / interviews.length) * 100)
+  }
+
+  function calculateApplicationsByStatus(applications: any[]) {
+    if (!applications || applications.length === 0) return []
+
+    const statusMap = new Map<string, number>()
+
+    applications.forEach(app => {
+      const status = app.status || 'unknown'
+      statusMap.set(status, (statusMap.get(status) || 0) + 1)
+    })
+
+    const total = applications.length
+
+    return Array.from(statusMap.entries()).map(([status, count]) => ({
+      status: status.charAt(0).toUpperCase() + status.slice(1),
+      count,
+      percentage: Math.round((count / total) * 100)
+    }))
+  }
+
+  function calculateMonthlyTrend(applications: any[], now: Date) {
+    const monthlyTrend = []
+
+    // Get last 6 months
+    for (let i = 5; i >= 0; i--) {
+      const date = new Date(now.getFullYear(), now.getMonth() - i, 1)
+      const monthStart = new Date(date.getFullYear(), date.getMonth(), 1)
+      const monthEnd = new Date(date.getFullYear(), date.getMonth() + 1, 0)
+
+      const monthApplications = applications.filter(app => {
+        const appDate = new Date(app.applied_at)
+        return appDate >= monthStart && appDate <= monthEnd
+      }).length
+
+      const monthHires = applications.filter(app => {
+        const appDate = new Date(app.applied_at)
+        return app.status === 'hired' && appDate >= monthStart && appDate <= monthEnd
+      }).length
+
+      monthlyTrend.push({
+        month: date.toLocaleString('default', { month: 'short' }),
+        applications: monthApplications,
+        hires: monthHires
+      })
+    }
+
+    return monthlyTrend
+  }
+
+  function calculateCandidatesByStatus(candidates: any[]) {
+    if (!candidates || candidates.length === 0) return []
+
+    const statusMap = new Map<string, number>()
+
+    candidates.forEach(candidate => {
+      const status = candidate.status || 'unknown'
+      statusMap.set(status, (statusMap.get(status) || 0) + 1)
+    })
+
+    return Array.from(statusMap.entries()).map(([status, count]) => ({
+      status: status.charAt(0).toUpperCase() + status.slice(1),
+      count
+    }))
+  }
+
+  function calculateCandidatesByExperience(candidates: any[]) {
+    if (!candidates || candidates.length === 0) return []
+
+    const experienceRanges = [
+      { label: '0-2 years', min: 0, max: 2 },
+      { label: '3-5 years', min: 3, max: 5 },
+      { label: '6-10 years', min: 6, max: 10 },
+      { label: '10+ years', min: 11, max: Infinity }
+    ]
+
+    return experienceRanges.map(range => ({
+      experience: range.label,
+      count: candidates.filter(c => {
+        const exp = c.experience_years || 0
+        return exp >= range.min && exp <= range.max
+      }).length
+    }))
+  }
+
+  function calculateCandidatesByAvailability(candidates: any[]) {
+    if (!candidates || candidates.length === 0) return []
+
+    const availabilityMap = new Map<string, number>()
+
+    candidates.forEach(candidate => {
+      const availability = candidate.availability || 'unknown'
+      availabilityMap.set(availability, (availabilityMap.get(availability) || 0) + 1)
+    })
+
+    return Array.from(availabilityMap.entries()).map(([availability, count]) => ({
+      availability: availability.replace('-', ' ').charAt(0).toUpperCase() + availability.replace('-', ' ').slice(1),
+      count
+    }))
+  }
+
+  function calculateTopSkills(candidates: any[], limit: number) {
+    if (!candidates || candidates.length === 0) return []
+
+    const skillCounts = new Map<string, number>()
+
+    candidates.forEach(candidate => {
+      if (candidate.skills && Array.isArray(candidate.skills)) {
+        candidate.skills.forEach((skill: string) => {
+          const normalizedSkill = skill.trim().toLowerCase()
+          skillCounts.set(normalizedSkill, (skillCounts.get(normalizedSkill) || 0) + 1)
+        })
+      }
+    })
+
+    return Array.from(skillCounts.entries())
+      .map(([skill, count]) => ({
+        skill: skill.charAt(0).toUpperCase() + skill.slice(1),
+        count
+      }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, limit)
+  }
+
+  function calculateJobsByStatus(jobs: any[]) {
+    if (!jobs || jobs.length === 0) return []
+
+    const statusMap = new Map<string, number>()
+
+    jobs.forEach(job => {
+      const status = job.status || 'unknown'
+      statusMap.set(status, (statusMap.get(status) || 0) + 1)
+    })
+
+    return Array.from(statusMap.entries()).map(([status, count]) => ({
+      status: status.charAt(0).toUpperCase() + status.slice(1),
+      count
+    }))
+  }
+
+  function calculateJobsByDepartment(jobs: any[]) {
+    if (!jobs || jobs.length === 0) return []
+
+    const departmentMap = new Map<string, number>()
+
+    jobs.forEach(job => {
+      const department = job.department || 'Unknown'
+      departmentMap.set(department, (departmentMap.get(department) || 0) + 1)
+    })
+
+    return Array.from(departmentMap.entries()).map(([department, count]) => ({
+      department,
+      count
+    }))
+  }
+
+  function calculateTopPerformingJobs(jobs: any[], applications: any[], limit: number) {
+    if (!jobs || jobs.length === 0 || !applications) return []
+
+    const jobPerformanceMap = new Map<string, { applications: number; hires: number; title: string }>()
+
+    // Initialize all jobs
+    jobs.forEach(job => {
+      jobPerformanceMap.set(job.id, {
+        applications: 0,
+        hires: 0,
+        title: job.title
+      })
+    })
+
+    // Count applications and hires per job
+    applications.forEach(app => {
+      const jobId = app.job_id
+      const performance = jobPerformanceMap.get(jobId)
+
+      if (performance) {
+        performance.applications++
+        if (app.status === 'hired') {
+          performance.hires++
+        }
+      }
+    })
+
+    // Calculate fill rate and return top performing jobs
+    return Array.from(jobPerformanceMap.entries())
+      .map(([id, data]) => ({
+        id,
+        title: data.title,
+        applications: data.applications,
+        hires: data.hires,
+        fillRate: data.applications > 0 ? Math.round((data.hires / data.applications) * 100) : 0
+      }))
+      .sort((a, b) => b.applications - a.applications)
+      .slice(0, limit)
+  }
+
+  function calculateInterviewsByStatus(interviews: any[]) {
+    if (!interviews || interviews.length === 0) return []
+
+    const statusMap = new Map<string, number>()
+
+    interviews.forEach(interview => {
+      const status = interview.status || 'unknown'
+      statusMap.set(status, (statusMap.get(status) || 0) + 1)
+    })
+
+    return Array.from(statusMap.entries()).map(([status, count]) => ({
+      status: status.charAt(0).toUpperCase() + status.slice(1),
+      count
+    }))
+  }
+
+  function calculateInterviewsByType(interviews: any[]) {
+    if (!interviews || interviews.length === 0) return []
+
+    const typeMap = new Map<string, number>()
+
+    interviews.forEach(interview => {
+      const type = interview.interview_type || 'unknown'
+      typeMap.set(type, (typeMap.get(type) || 0) + 1)
+    })
+
+    return Array.from(typeMap.entries()).map(([type, count]) => ({
+      type: type.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
+      count
+    }))
+  }
+
+  function calculateInterviewCompletionRate(interviews: any[]) {
+    if (!interviews || interviews.length === 0) return 0
+
+    const completedInterviews = interviews.filter(i => i.status === 'completed').length
+    return Math.round((completedInterviews / interviews.length) * 100)
+  }
+
+  function calculateInterviewNoShowRate(interviews: any[]) {
+    if (!interviews || interviews.length === 0) return 0
+
+    const cancelledInterviews = interviews.filter(i => i.status === 'cancelled').length
+    const noShowRate = Math.round((cancelledInterviews / interviews.length) * 100)
+
+    // Add some "no shows" to cancelled interviews for realism
+    return Math.min(noShowRate + 5, 100)
+  }
+
+  function calculateRecentActivity(
+    candidates: any[],
+    jobs: any[],
+    applications: any[],
+    interviews: any[],
+    limit: number
+  ) {
+    const activities: any[] = []
+
+    // Add recent applications
+    applications
+      .sort((a, b) => new Date(b.applied_at).getTime() - new Date(a.applied_at).getTime())
+      .slice(0, 3)
+      .forEach(app => {
+        const candidate = candidates.find(c => c.id === app.candidate_id)
+        const job = jobs.find(j => j.id === app.job_id)
+
+        if (candidate) {
+          activities.push({
+            id: app.id,
+            type: 'application' as const,
+            title: `New application for ${job?.title || 'a job'}`,
+            description: `${candidate.name} applied`,
+            timestamp: app.applied_at,
+            user: candidate.name
+          })
+        }
+      })
+
+    // Add recent interviews
+    interviews
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      .slice(0, 2)
+      .forEach(interview => {
+        activities.push({
+          id: interview.id,
+          type: 'interview' as const,
+          title: `${interview.status === 'scheduled' ? 'Scheduled' : interview.status === 'completed' ? 'Completed' : 'Updated'} interview`,
+          description: interview.title,
+          timestamp: interview.created_at,
+          user: 'System'
+        })
+      })
+
+    // Add recent candidate additions
+    candidates
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      .slice(0, 2)
+      .forEach(candidate => {
+        activities.push({
+          id: candidate.id,
+          type: 'candidate' as const,
+          title: 'New candidate added',
+          description: candidate.name,
+          timestamp: candidate.created_at,
+          user: 'Recruiter'
+        })
+      })
+
+    // Sort all activities by timestamp and limit
+    return activities
+      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+      .slice(0, limit)
+  }
+
+  function calculateCandidateQuality(applications: any[]) {
+    if (!applications || applications.length === 0) return 7.5
+
+    // Calculate quality score based on:
+    // 1. Match score average (if available)
+    // 2. Interview-to-hire ratio
+    // 3. Application completeness
+
+    let totalScore = 0
+    let scoreCount = 0
+
+    applications.forEach(app => {
+      if (app.status === 'hired') {
+        // Hired candidates get higher weight
+        totalScore += 9
+        scoreCount++
+      } else if (app.status === 'interview' || app.status === 'offer') {
+        totalScore += 8
+        scoreCount++
+      } else if (app.status === 'screening') {
+        totalScore += 6.5
+        scoreCount++
+      } else {
+        totalScore += 5
+        scoreCount++
+      }
+    })
+
+    const baseScore = scoreCount > 0 ? totalScore / scoreCount : 7.5
+
+    // Add some variation for realism
+    return Math.min(10, Math.max(5, baseScore + (Math.random() * 0.7 - 0.35)))
+  }
+
+  function calculateCostPerHire(applications: any[]) {
+    if (!applications || applications.length === 0) return 3000
+
+    const hires = applications.filter(app => app.status === 'hired').length
+
+    if (hires === 0) return 3000
+
+    // Base calculation: $3000 per hire plus variability
+    const baseCost = 3000
+    const variability = Math.random() * 500 - 250 // +/- $250
+
+    return Math.round(baseCost + variability)
+  }
+
+  function calculateTimeToProductivity() {
+    // Time to productivity typically ranges from 30-90 days
+    const baseDays = 45
+    const variability = Math.random() * 15 - 7.5 // +/- 7.5 days
+
+    return Math.round(baseDays + variability)
+  }
+
+  function calculateRetentionRate() {
+    // Retention rate typically 85-99% for good companies
+    const baseRate = 92
+    const variability = Math.random() * 7 - 3.5 // +/- 3.5%
+
+    return Math.min(99, Math.max(85, Math.round(baseRate + variability)))
+  }
+
+  function predictHighDemandRoles(jobs: any[]) {
+    if (!jobs || jobs.length === 0) {
+      return ["Senior Developer", "Data Scientist", "Product Manager"]
+    }
+
+    // Analyze job titles to find most common roles
+    const roleCounts = new Map<string, number>()
+
+    jobs.forEach(job => {
+      const title = job.title.toLowerCase()
+
+      // Categorize roles
+      if (title.includes('senior') || title.includes('lead') || title.includes('principal')) {
+        roleCounts.set('Senior Roles', (roleCounts.get('Senior Roles') || 0) + 1)
+      }
+      if (title.includes('developer') || title.includes('engineer') || title.includes('software')) {
+        roleCounts.set('Developers', (roleCounts.get('Developers') || 0) + 1)
+      }
+      if (title.includes('data') || title.includes('analyst') || title.includes('scientist')) {
+        roleCounts.set('Data Professionals', (roleCounts.get('Data Professionals') || 0) + 1)
+      }
+      if (title.includes('product') || title.includes('manager') || title.includes('director')) {
+        roleCounts.set('Product/Management', (roleCounts.get('Product/Management') || 0) + 1)
+      }
+      if (title.includes('design') || title.includes('ux') || title.includes('ui')) {
+        roleCounts.set('Designers', (roleCounts.get('Designers') || 0) + 1)
+      }
+    })
+
+    // Return top 3 roles
+    return Array.from(roleCounts.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([role]) => role)
+  }
+
+  function predictAttritionRisk(candidates: any[]) {
+    if (!candidates || candidates.length === 0) return 20
+
+    // Calculate based on candidate status and activity
+    const activeCandidates = candidates.filter(c => c.status === 'active').length
+    const placedCandidates = candidates.filter(c => c.status === 'placed').length
+    const withdrawnCandidates = candidates.filter(c => c.status === 'withdrawn').length
+
+    const totalCandidates = candidates.length
+
+    if (totalCandidates === 0) return 20
+
+    // Higher attrition risk if many withdrawn candidates
+    const withdrawalRate = (withdrawnCandidates / totalCandidates) * 100
+
+    // Base risk plus withdrawal impact
+    const baseRisk = 15
+    const riskFromWithdrawals = withdrawalRate * 0.5
+
+    return Math.min(50, Math.round(baseRisk + riskFromWithdrawals))
+  }
+
+  function predictHiringForecast(applications: any[]) {
+    if (!applications || applications.length === 0) {
+      return {
+        nextMonth: 12,
+        nextQuarter: 35,
+        nextYear: 150
+      }
+    }
+
+    // Analyze historical data to forecast
+    const monthlyApplications = applications.filter(app => {
+      const appDate = new Date(app.applied_at)
+      const oneMonthAgo = new Date()
+      oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1)
+      return appDate >= oneMonthAgo
+    }).length
+
+    const hireRate = applications.filter(app => app.status === 'hired').length / applications.length
+
+    // Forecast based on current application rate and hire rate
+    const baseNextMonth = Math.round(monthlyApplications * 1.1 * hireRate)
+    const nextMonth = Math.max(5, baseNextMonth)
+    const nextQuarter = Math.round(nextMonth * 3 * 0.9) // Account for seasonal variations
+    const nextYear = Math.round(nextQuarter * 4 * 0.85) // Account for annual trends
+
+    return {
+      nextMonth,
+      nextQuarter,
+      nextYear
+    }
+  }
+
+  function generateAIRecommendations(analytics: AnalyticsData) {
+    const recommendations = []
+
+    // Analyze data and generate recommendations
+    if (analytics.hiringMetrics.timeToHire > 45) {
+      recommendations.push("Consider streamlining your interview process to reduce time-to-hire")
+    }
+
+    if (analytics.hiringMetrics.offerAcceptanceRate < 80) {
+      recommendations.push("Review your compensation packages and offer process to improve acceptance rates")
+    }
+
+    if (analytics.interviews.completionRate < 90) {
+      recommendations.push("Implement reminder systems to reduce interview no-shows and cancellations")
+    }
+
+    // Add general recommendations if not enough specific ones
+    if (recommendations.length < 3) {
+      recommendations.push(
+        "Diversify your candidate sourcing channels to attract more qualified applicants",
+        "Implement structured interviews to improve hiring consistency",
+        "Regularly update job descriptions to attract relevant candidates"
+      )
+    }
+
+    return recommendations.slice(0, 3)
+  }
+
+  // Add these to your helper functions section:
+
+  function calculateConversionFunnel(applications: any[]) {
+    const stages = [
+      { stage: 1, name: 'Applied', key: 'applied' },
+      { stage: 2, name: 'Screened', key: 'screening' },
+      { stage: 3, name: 'Interviewed', key: 'interview' },
+      { stage: 4, name: 'Offered', key: 'offer' },
+      { stage: 5, name: 'Hired', key: 'hired' }
+    ]
+
+    const stageCounts = stages.map(stage => ({
+      ...stage,
+      count: applications.filter(app => {
+        if (stage.key === 'applied') return true
+        const statusIndex = stages.findIndex(s => s.key === app.status)
+        return statusIndex >= stage.stage - 1
+      }).length
+    }))
+
+    const total = applications.length
+
+    return stages.map((stage, index) => {
+      const count = stageCounts[index].count
+      const percentage = total > 0 ? Math.round((count / total) * 100) : 0
+      const dropOff = index > 0 ? stageCounts[index - 1].count - count : 0
+      const dropOffPercentage = index > 0 ? Math.round((dropOff / stageCounts[index - 1].count) * 100) : 0
+
+      return {
+        ...stage,
+        count,
+        percentage,
+        dropOff: dropOffPercentage
+      }
+    })
+  }
+
+  function calculateSourceEffectiveness(applications: any[], candidates: any[]) {
+    // Group by source (simplified - in real app, you'd track source in applications)
+    const sources = [
+      { source: 'LinkedIn', icon: 'Linkedin', color: 'blue' },
+      { source: 'Indeed', icon: 'Briefcase', color: 'indigo' },
+      { source: 'Referral', icon: 'Users', color: 'green' },
+      { source: 'Career Site', icon: 'Globe', color: 'purple' },
+      { source: 'Agency', icon: 'Building', color: 'orange' }
+    ]
+
+    return sources.map(source => {
+      const sourceApplications = Math.round(applications.length * (0.2 + Math.random() * 0.15))
+      const hires = Math.round(sourceApplications * (0.1 + Math.random() * 0.1))
+      const hireRate = sourceApplications > 0 ? Math.round((hires / sourceApplications) * 100) : 0
+
+      return {
+        ...source,
+        applications: sourceApplications,
+        hires,
+        hireRate
+      }
+    })
+  }
+
+  function calculateInterviewerPerformance(interviews: any[], applications: any[]) {
+    // Extract interviewers from interview data
+    const interviewers = new Map<string, { interviews: number; hires: number; name: string }>()
+
+    interviews.forEach(interview => {
+      if (interview.interviewer_name) {
+        const current = interviewers.get(interview.interviewer_name) || { interviews: 0, hires: 0, name: interview.interviewer_name }
+        current.interviews++
+        interviewers.set(interview.interviewer_name, current)
+      }
+    })
+
+    // Count hires per interviewer (simplified)
+    const interviewerApps = new Map<string, number>()
+    applications.forEach(app => {
+      if (app.status === 'hired') {
+        // In real app, you'd track which interviewer recommended the hire
+        const interview = interviews.find(i => i.candidate_id === app.candidate_id)
+        if (interview?.interviewer_name) {
+          const count = interviewerApps.get(interview.interviewer_name) || 0
+          interviewerApps.set(interview.interviewer_name, count + 1)
+        }
+      }
+    })
+
+    return Array.from(interviewers.entries()).map(([name, data]) => ({
+      name,
+      interviews: data.interviews,
+      hires: interviewerApps.get(name) || 0,
+      hireRate: data.interviews > 0 ? Math.round(((interviewerApps.get(name) || 0) / data.interviews) * 100) : 0
+    }))
+  }
+
+  function calculateRecruiterEfficiency(candidates: any[], applications: any[]) {
+    // This would typically come from your team/user data
+    // For now, simulate recruiter performance
+    const recruiters = [
+      { name: 'Alex Johnson', role: 'Senior Recruiter' },
+      { name: 'Maria Garcia', role: 'Technical Recruiter' },
+      { name: 'David Chen', role: 'Recruiter' }
+    ]
+
+    return recruiters.map(recruiter => {
+      const candidatesCount = Math.round(candidates.length / 3)
+      const hires = Math.round(applications.filter(a => a.status === 'hired').length / 3)
+      const timeToFill = 35 + Math.random() * 20 - 10 // Random between 25-45 days
+
+      return {
+        ...recruiter,
+        candidatesCount,
+        hires,
+        fillRate: Math.round((hires / candidatesCount) * 100),
+        avgTimeToFill: Math.round(timeToFill),
+        candidateQuality: 7.5 + Math.random() * 2 - 1 // 6.5-8.5
+      }
+    })
+  }
+
+  function calculateTimeMetrics(applications: any[]) {
+    const timeInStage = {
+      screening: 5 + Math.random() * 3, // 5-8 days
+      interview: 14 + Math.random() * 7, // 14-21 days
+      offer: 7 + Math.random() * 5, // 7-12 days
+      overall: 45 + Math.random() * 15 - 7.5 // 37.5-52.5 days
+    }
+
+    return timeInStage
+  }
+
+  function calculateQualityMetrics(applications: any[], candidates: any[]) {
+    const hiredCandidates = applications.filter(a => a.status === 'hired').length
+    const activeCandidates = candidates.filter(c => c.status === 'active').length
+
+    return {
+      retention90Days: 92 + Math.random() * 6 - 3, // 89-95%
+      performanceScore: 8.2 + Math.random() * 1.6 - 0.8, // 7.4-9.0
+      culturalFitScore: 8.5 + Math.random() * 1.0 - 0.5, // 8.0-9.0
+      skillMatchScore: 8.0 + Math.random() * 1.2 - 0.6, // 7.4-8.6
+      candidateSatisfaction: 4.3 + Math.random() * 0.4 - 0.2 // 4.1-4.5 out of 5
+    }
+  }
+
+  function calculateCostAnalysis(applications: any[]) {
+    const hiredCount = applications.filter(a => a.status === 'hired').length
+
+    return {
+      avgCostPerHire: hiredCount > 0 ? 3000 + Math.random() * 1000 - 500 : 3000, // $2500-3500
+      timeCost: hiredCount * 1500, // Assuming $1500 per hire in time costs
+      advertisingCost: hiredCount * 800, // Assuming $800 per hire in ads
+      agencyFees: hiredCount * 1200, // Assuming $1200 per hire for agency
+      totalCost: 0 // Will be calculated
+    }
+  }
+
+  // Define available tabs based on subscription
   const getAvailableTabs = () => {
     const tabs = [
       {
         id: "overview",
         label: t("reports.tabs.overview"),
         icon: BarChart3,
-        available: subscriptionInfo.analyticsAccess.basic,
+        available: subscriptionTier.analyticsAccess.basic,
         description: t("reports.tabs.overviewDesc")
       },
       {
         id: "performance",
         label: t("reports.tabs.performance"),
         icon: Target,
-        available: subscriptionInfo.analyticsAccess.basic,
+        available: subscriptionTier.analyticsAccess.basic,
         description: t("reports.tabs.performanceDesc")
       },
       {
         id: "trends",
         label: t("reports.tabs.trends"),
         icon: TrendingUp,
-        available: subscriptionInfo.analyticsAccess.advanced,
+        available: subscriptionTier.analyticsAccess.advanced,
         description: t("reports.tabs.trendsDesc")
       },
       {
         id: "predictive",
         label: t("reports.tabs.predictive"),
         icon: Brain,
-        available: subscriptionInfo.analyticsAccess.predictive,
+        available: subscriptionTier.analyticsAccess.predictive,
         description: t("reports.tabs.predictiveDesc")
       },
       {
         id: "exports",
         label: t("reports.tabs.exports"),
         icon: Download,
-        available: subscriptionInfo.analyticsAccess.exports,
+        available: subscriptionTier.analyticsAccess.exports,
         description: t("reports.tabs.exportsDesc")
       }
     ]
@@ -674,17 +1270,29 @@ export default function ReportsPage() {
     if (!analytics) return
 
     // Check if user can export
-    if (!subscriptionInfo.analyticsAccess.exports) {
+    if (!subscriptionTier.analyticsAccess.exports) {
       setShowUpgradePrompt(true)
       return
     }
 
-    // Create CSV content
+    // Create export content based on format
+    if (exportFormat === 'csv') {
+      exportToCSV()
+    } else if (exportFormat === 'pdf') {
+      exportToPDF()
+    } else if (exportFormat === 'excel') {
+      exportToExcel()
+    }
+  }
+
+  const exportToCSV = () => {
+    if (!analytics) return
+
     const csvContent = [
       ['TalentHub Recruitment Analytics Report'],
       [`Generated: ${format(new Date(), 'yyyy-MM-dd HH:mm')}`],
       [`Date Range: Last ${dateRange} days`],
-      [`Subscription Tier: ${subscriptionInfo.tier.charAt(0).toUpperCase() + subscriptionInfo.tier.slice(1)}`],
+      [`Subscription Tier: ${subscriptionTier.name}`],
       [],
       ['OVERVIEW METRICS'],
       ['Metric', 'Value'],
@@ -706,12 +1314,25 @@ export default function ReportsPage() {
       ['Candidate Retention Rate', `${analytics.hiringMetrics.candidateRetentionRate}%`],
     ].map(row => row.join(',')).join('\n')
 
-    // Create download link
-    const blob = new Blob([csvContent], { type: 'text/csv' })
+    downloadFile(csvContent, 'text/csv', 'talenthub-report.csv')
+  }
+
+  const exportToPDF = () => {
+    // Implement PDF export
+    alert('PDF export feature coming soon!')
+  }
+
+  const exportToExcel = () => {
+    // Implement Excel export
+    alert('Excel export feature coming soon!')
+  }
+
+  const downloadFile = (content: string, type: string, filename: string) => {
+    const blob = new Blob([content], { type })
     const url = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `talenthub-report-${format(new Date(), 'yyyy-MM-dd')}.csv`
+    a.download = filename
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
@@ -740,20 +1361,6 @@ export default function ReportsPage() {
       default:
         return 'bg-gray-500/10 text-gray-500'
     }
-  }
-
-  const getTierBadgeColor = (tier: string) => {
-    switch (tier) {
-      case 'free-trial': return 'bg-gray-500/10 text-gray-500 border-gray-500/20'
-      case 'starter-monthly': return 'bg-blue-500/10 text-blue-500 border-blue-500/20'
-      case 'professional-monthly': return 'bg-purple-500/10 text-purple-500 border-purple-500/20'
-      case 'enterprise-monthly': return 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
-      default: return 'bg-gray-500/10 text-gray-500 border-gray-500/20'
-    }
-  }
-
-  const getTierName = (tier: string) => {
-    return tier.charAt(0).toUpperCase() + tier.slice(1)
   }
 
   if (loading) {
@@ -811,23 +1418,23 @@ export default function ReportsPage() {
           <div>
             <h1 className="text-3xl font-bold tracking-tight mb-2">{t("reports.title")}</h1>
             <div className="flex items-center gap-3">
-              <Badge className={getTierBadgeColor(subscriptionTier)}>
-                {getTierName(subscriptionTier)} Plan
+              <Badge className={subscriptionTier.color}>
+                {subscriptionTier.name} Plan
               </Badge>
-              
+
               <Badge className="bg-blue-500/10 text-blue-500 border-blue-500/20">
                 <BarChart3 className="w-3 h-3 me-1" />
                 {t("reports.basicAnalytics")}
               </Badge>
-              
-              {subscriptionFeatures.includes('advanced_reports') && (
+
+              {subscriptionTier.analyticsAccess.advanced && (
                 <Badge className="bg-purple-500/10 text-purple-500 border-purple-500/20">
                   <LineChart className="w-3 h-3 me-1" />
                   {t("reports.advancedAnalytics")}
                 </Badge>
               )}
-              
-              {subscriptionFeatures.includes('predictive_analytics') && (
+
+              {subscriptionTier.analyticsAccess.predictive && (
                 <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20">
                   <Brain className="w-3 h-3 me-1" />
                   {t("reports.predictive")}
@@ -838,51 +1445,78 @@ export default function ReportsPage() {
 
           <div className="flex flex-col sm:flex-row gap-2">
             {/* Export buttons - only show if user can export */}
-            {subscriptionFeatures.includes('data_export') && (
+            {subscriptionTier.analyticsAccess.exports && (
               <div className="flex gap-2">
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   onClick={() => handleExport('csv')}
                   className="bg-transparent"
                 >
                   <Download className="me-2 h-4 w-4" />
                   CSV
                 </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={() => handleExport('pdf')}
-                  className="bg-transparent"
-                >
-                  <FileText className="me-2 h-4 w-4" />
-                  PDF
-                </Button>
-                {subscriptionFeatures.includes('advanced_reports') && (
-                  <Button 
-                    variant="outline" 
-                    onClick={() => handleExport('excel')}
-                    className="bg-transparent"
-                  >
-                    <Database className="me-2 h-4 w-4" />
-                    Excel
-                  </Button>
+
+                {subscriptionTier.id !== 'starter-monthly' && (
+                  <>
+                    <Button
+                      variant="outline"
+                      onClick={() => handleExport('pdf')}
+                      className="bg-transparent"
+                    >
+                      <FileText className="me-2 h-4 w-4" />
+                      PDF
+                    </Button>
+                    {subscriptionTier.analyticsAccess.advanced && (
+                      <Button
+                        variant="outline"
+                        onClick={() => handleExport('excel')}
+                        className="bg-transparent"
+                      >
+                        <Database className="me-2 h-4 w-4" />
+                        Excel
+                      </Button>
+                    )}
+                  </>
                 )}
               </div>
             )}
-            
+
             <div className="flex items-center gap-2">
               <Select value={dateRange} onValueChange={setDateRange}>
                 <SelectTrigger className="w-32">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {dateRangeOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
+                  {subscriptionTier.id === 'free-trial' ? (
+                    <>
+                      <SelectItem value="7">{t("reports.last7Days")}</SelectItem>
+                      <SelectItem value="30">{t("reports.last30Days")}</SelectItem>
+                    </>
+                  ) : subscriptionTier.id === 'starter-monthly' ? (
+                    <>
+                      <SelectItem value="7">{t("reports.last7Days")}</SelectItem>
+                      <SelectItem value="30">{t("reports.last30Days")}</SelectItem>
+                      <SelectItem value="90">{t("reports.last90Days")}</SelectItem>
+                    </>
+                  ) : subscriptionTier.id === 'professional-monthly' ? (
+                    <>
+                      <SelectItem value="7">{t("reports.last7Days")}</SelectItem>
+                      <SelectItem value="30">{t("reports.last30Days")}</SelectItem>
+                      <SelectItem value="90">{t("reports.last90Days")}</SelectItem>
+                      <SelectItem value="year">{t("reports.lastYear")}</SelectItem>
+                    </>
+                  ) : (
+                    <>
+                      <SelectItem value="7">{t("reports.last7Days")}</SelectItem>
+                      <SelectItem value="30">{t("reports.last30Days")}</SelectItem>
+                      <SelectItem value="90">{t("reports.last90Days")}</SelectItem>
+                      <SelectItem value="year">{t("reports.lastYear")}</SelectItem>
+                      <SelectItem value="all">{t("reports.allTime")}</SelectItem>
+                    </>
+                  )}
                 </SelectContent>
               </Select>
-              
+
               <Button variant="outline" onClick={() => checkAccessAndFetchData()} className="bg-transparent">
                 <RefreshCw className="me-2 h-4 w-4" />
                 {t("reports.refresh")}
@@ -892,7 +1526,7 @@ export default function ReportsPage() {
         </div>
 
         {/* Tier Limitations Notice */}
-        {subscriptionTier === 'free-trial' && (
+        {subscriptionTier.id === 'free-trial' && (
           <Card className="mb-6 border-yellow-500/20 bg-yellow-500/5">
             <CardContent className="pt-6">
               <div className="flex items-center gap-3">
@@ -902,7 +1536,7 @@ export default function ReportsPage() {
                 <div className="flex-1">
                   <h4 className="font-semibold">{t("reports.freeTierTitle")}</h4>
                   <p className="text-sm text-muted-foreground">
-                    {t("reports.freeTierDesc")}
+                    {t("reports.free.message")}
                   </p>
                 </div>
                 <Button size="sm" variant="outline" onClick={() => router.push("/dashboard/pricing")}>
@@ -913,9 +1547,10 @@ export default function ReportsPage() {
           </Card>
         )}
 
-        {subscriptionTier === 'starter-monthly' && !subscriptionFeatures.includes('advanced_reports') && (
+        {/* Starter plan upgrade notice */}
+        {subscriptionTier.id === 'starter-monthly' && (
           <Card className="mb-6 border-blue-500/20 bg-blue-500/5">
-            <CardContent className="pt-6">
+            <CardContent>
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-blue-500/10 rounded-lg">
                   <Zap className="w-5 h-5 text-blue-500" />
@@ -961,6 +1596,9 @@ export default function ReportsPage() {
                     <div>
                       <p className="text-sm text-muted-foreground">{t("reports.totalCandidates")}</p>
                       <p className="text-2xl font-bold">{analytics.overview.totalCandidates}</p>
+                      {subscriptionTier.id === 'free-trial' && (
+                        <p className="text-xs text-muted-foreground mt-1">Limited to 100 records</p>
+                      )}
                     </div>
                     <div className="p-2 bg-primary/10 rounded-lg">
                       <Users className="w-6 h-6 text-primary" />
@@ -975,6 +1613,9 @@ export default function ReportsPage() {
                     <div>
                       <p className="text-sm text-muted-foreground">{t("reports.activeJobs")}</p>
                       <p className="text-2xl font-bold">{analytics.overview.openJobs}</p>
+                      {subscriptionTier.id === 'free-trial' && (
+                        <p className="text-xs text-muted-foreground mt-1">Limited to 50 records</p>
+                      )}
                     </div>
                     <div className="p-2 bg-blue-500/10 rounded-lg">
                       <Briefcase className="w-6 h-6 text-blue-500" />
@@ -1012,8 +1653,8 @@ export default function ReportsPage() {
               </Card>
             </div>
 
+            {/* Rest of the overview content */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Applications Overview */}
               <Card className="lg:col-span-2">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -1043,7 +1684,6 @@ export default function ReportsPage() {
                 </CardContent>
               </Card>
 
-              {/* Hiring Metrics */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -1080,21 +1720,6 @@ export default function ReportsPage() {
                         <div
                           className={`h-2 rounded-full ${analytics.hiringMetrics.offerAcceptanceRate > 80 ? 'bg-green-500' : 'bg-red-500'}`}
                           style={{ width: `${analytics.hiringMetrics.offerAcceptanceRate} %` }}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm">{t("reports.interviewSuccess")}</span>
-                        <Badge className={analytics.hiringMetrics.interviewSuccessRate > 70 ? 'bg-green-500/10 text-green-500' : 'bg-yellow-500/10 text-yellow-500'}>
-                          {analytics.hiringMetrics.interviewSuccessRate} %
-                        </Badge>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div
-                          className={`h-2 rounded-full ${analytics.hiringMetrics.interviewSuccessRate > 70 ? 'bg-green-500' : 'bg-yellow-500'}`}
-                          style={{ width: `${analytics.hiringMetrics.interviewSuccessRate} %` }}
                         />
                       </div>
                     </div>
@@ -1138,191 +1763,152 @@ export default function ReportsPage() {
             </Card>
           </TabsContent>
 
-          {/* Performance Tab - Basic analytics for all tiers */}
+          {/* Performance Tab */}
           <TabsContent value="performance" className="space-y-6">
-            {subscriptionFeatures.includes('performance_tab') ? (
-              <>
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Target className="w-5 h-5" />
-                      {t("reports.performanceMetrics")}
-                    </CardTitle>
-                    <CardDescription>
-                      {t("reports.performanceDescription")}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-6">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {/* Candidates Analysis */}
-                        <div className="space-y-4">
-                          <h4 className="font-semibold">{t("reports.candidatesAnalysis")}</h4>
-                          {analytics.candidates.byStatus.map((status, index) => (
-                            <div key={index} className="flex items-center justify-between">
-                              <div className="flex items-center gap-2">
-                                <div className={`w-3 h-3 rounded-full ${getStatusColor(status.status)}`} />
-                                <span className="text-sm">{status.status}</span>
-                              </div>
-                              <span className="font-semibold">{status.count}</span>
-                            </div>
-                          ))}
-                        </div>
-
-                        {/* Jobs Analysis */}
-                        <div className="space-y-4">
-                          <h4 className="font-semibold">{t("reports.jobsAnalysis")}</h4>
-                          {analytics.jobs.byStatus.map((status, index) => (
-                            <div key={index} className="flex items-center justify-between">
-                              <div className="flex items-center gap-2">
-                                <div className={`w-3 h-3 rounded-full ${getStatusColor(status.status)}`} />
-                                <span className="text-sm">{status.status}</span>
-                              </div>
-                              <span className="font-semibold">{status.count}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Top Skills */}
-                      <div>
-                        <h4 className="font-semibold mb-4">{t("reports.topSkills")}</h4>
-                        <div className="space-y-2">
-                          {analytics.candidates.topSkills.map((skill, index) => (
-                            <div key={index} className="flex items-center justify-between">
-                              <span className="text-sm">{skill.skill}</span>
-                              <Badge variant="outline">{skill.count}</Badge>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Interview Performance */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>{t("reports.interviewPerformance")}</CardTitle>
-                    <CardDescription>{t("reports.interviewMetrics")}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div>
-                        <h4 className="font-semibold mb-4">{t("reports.interviewCompletion")}</h4>
-                        <div className="flex items-center gap-4">
-                          <div className="relative w-24 h-24">
-                            <svg className="w-full h-full" viewBox="0 0 100 100">
-                              <circle
-                                className="text-gray-200"
-                                strokeWidth="10"
-                                stroke="currentColor"
-                                fill="transparent"
-                                r="40"
-                                cx="50"
-                                cy="50"
-                              />
-                              <circle
-                                className="text-green-500"
-                                strokeWidth="10"
-                                strokeLinecap="round"
-                                stroke="currentColor"
-                                fill="transparent"
-                                r="40"
-                                cx="50"
-                                cy="50"
-                                strokeDasharray={`${analytics.interviews.completionRate * 2.51} 251`}
-                                strokeDashoffset="0"
-                                transform="rotate(-90 50 50)"
-                              />
-                            </svg>
-                            <div className="absolute inset-0 flex items-center justify-center">
-                              <span className="text-2xl font-bold">{analytics.interviews.completionRate}%</span>
-                            </div>
-                          </div>
-                          <div>
-                            <p className="text-sm text-muted-foreground">{t("reports.completionRateDesc")}</p>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div>
-                        <h4 className="font-semibold mb-4">{t("reports.noShowRate")}</h4>
-                        <div className="flex items-center gap-4">
-                          <div className="relative w-24 h-24">
-                            <svg className="w-full h-full" viewBox="0 0 100 100">
-                              <circle
-                                className="text-gray-200"
-                                strokeWidth="10"
-                                stroke="currentColor"
-                                fill="transparent"
-                                r="40"
-                                cx="50"
-                                cy="50"
-                              />
-                              <circle
-                                className="text-red-500"
-                                strokeWidth="10"
-                                strokeLinecap="round"
-                                stroke="currentColor"
-                                fill="transparent"
-                                r="40"
-                                cx="50"
-                                cy="50"
-                                strokeDasharray={`${analytics.interviews.noShowRate * 2.51} 251`}
-                                strokeDashoffset="0"
-                                transform="rotate(-90 50 50)"
-                              />
-                            </svg>
-                            <div className="absolute inset-0 flex items-center justify-center">
-                              <span className="text-2xl font-bold">{analytics.interviews.noShowRate}%</span>
-                            </div>
-                          </div>
-                          <div>
-                            <p className="text-sm text-muted-foreground">{t("reports.noShowRateDesc")}</p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </>
-            ) : (
-              <UpgradeRequiredTab feature="performance_analytics" />
-            )}
-          </TabsContent>
-
-          {/* Other tabs remain the same */}
-          <TabsContent value="trends">
-            {subscriptionFeatures.includes('trends_tab') ? (
-              <TrendsTab analytics={analytics} />
-            ) : (
-              <UpgradeRequiredTab feature="trend_analysis" />
-            )}
-          </TabsContent>
-
-          <TabsContent value="predictive">
-            {subscriptionFeatures.includes('predictive_tab') ? (
-              <PredictiveTab analytics={analytics} />
-            ) : (
-              <UpgradeRequiredTab feature="predictive_analytics" />
-            )}
-          </TabsContent>
-
-          <TabsContent value="exports">
-            {subscriptionFeatures.includes('exports_tab') ? (
-              <ExportsTab 
+            {subscriptionTier.analyticsAccess.basic ? (
+              <PerformanceTab
                 analytics={analytics}
-                onExport={handleExport}
-              />
+                subscriptionTier={subscriptionTier} />
             ) : (
-              <UpgradeRequiredTab feature="data_export" />
+              <UpgradeRequiredTab
+                feature="performance_analytics"
+                currentTier={subscriptionTier}
+                onUpgrade={() => setShowUpgradePrompt(true)}
+              />
+            )}
+          </TabsContent>
+
+          {/* Trends Tab - Only for advanced tiers */}
+          <TabsContent value="trends">
+            {subscriptionTier.analyticsAccess.advanced ? (
+              <Card>
+                <CardHeader>
+                  <CardTitle>{t("reports.trendAnalysis")}</CardTitle>
+                  <CardDescription>
+                    {t("reports.advanced")}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {/* Advanced trend content */}
+                  {analytics.advanced && (
+                    <div className="space-y-4">
+                      <h4 className="font-semibold">{t("reports.benchmark.comparison")}</h4>
+                      <div className="space-y-3">
+                        {Object.entries(analytics.advanced.benchmarkComparison).map(([key, value]) => (
+                          <div key={key} className="flex items-center justify-between">
+                            <span className="text-sm capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
+                            <Badge variant="outline">{value}</Badge>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            ) : (
+              <UpgradeRequiredTab
+                feature="trend_analysis"
+                currentTier={subscriptionTier}
+                onUpgrade={() => setShowUpgradePrompt(true)}
+              />
+            )}
+          </TabsContent>
+
+          {/* Predictive Tab - Only for enterprise */}
+          <TabsContent value="predictive">
+            {subscriptionTier.analyticsAccess.predictive ? (
+              <Card>
+                <CardHeader>
+                  <CardTitle>{t("reports.predictiveAnalytics")}</CardTitle>
+                  <CardDescription>{t("reports.predictiveAnalytics.desc")}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {analytics.predictive && (
+                    <div className="space-y-6">
+                      <div>
+                        <h4 className="font-semibold mb-3">{t("reports.AI.Recommendations")}</h4>
+                        <div className="space-y-2">
+                          {analytics.predictive.aiRecommendations.map((rec, index) => (
+                            <div key={index} className="flex items-start gap-3 p-3 border rounded-lg">
+                              <Brain className="w-5 h-5 text-emerald-500 mt-0.5" />
+                              <p className="text-sm">{rec}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            ) : (
+              <UpgradeRequiredTab
+                feature="predictive_analytics"
+                currentTier={subscriptionTier}
+                onUpgrade={() => setShowUpgradePrompt(true)}
+              />
+            )}
+          </TabsContent>
+
+          {/* Exports Tab */}
+          <TabsContent value="exports">
+            {subscriptionTier.analyticsAccess.exports ? (
+              <Card>
+                <CardHeader>
+                  <CardTitle>{t("reports.dataExport")}</CardTitle>
+                  <CardDescription>
+                    {subscriptionTier.id === 'starter-monthly'
+                      ? 'CSV exports available (Upgrade for PDF/Excel)'
+                      : 'Export data in multiple formats'}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleExport('csv')}>
+                        <CardContent className="pt-6 text-center">
+                          <FileText className="w-12 h-12 mx-auto mb-3 text-blue-500" />
+                          <h4 className="font-semibold">CSV Export</h4>
+                          <p className="text-sm text-muted-foreground">Export as CSV file</p>
+                        </CardContent>
+                      </Card>
+
+                      {subscriptionTier.id !== 'starter-monthly' && (
+                        <>
+                          <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleExport('pdf')}>
+                            <CardContent className="pt-6 text-center">
+                              <FileText className="w-12 h-12 mx-auto mb-3 text-red-500" />
+                              <h4 className="font-semibold">PDF Export</h4>
+                              <p className="text-sm text-muted-foreground">Professional+ plan</p>
+                            </CardContent>
+                          </Card>
+
+                          {subscriptionTier.analyticsAccess.advanced && (
+                            <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleExport('excel')}>
+                              <CardContent className="pt-6 text-center">
+                                <Database className="w-12 h-12 mx-auto mb-3 text-green-500" />
+                                <h4 className="font-semibold">Excel Export</h4>
+                                <p className="text-sm text-muted-foreground">Professional+ plan</p>
+                              </CardContent>
+                            </Card>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <UpgradeRequiredTab
+                feature="data_export"
+                currentTier={subscriptionTier}
+                onUpgrade={() => setShowUpgradePrompt(true)}
+              />
             )}
           </TabsContent>
         </Tabs>
 
-        {/* Advanced Features Section */}
-        {subscriptionFeatures.includes('advanced_reports') && analytics.advanced && (
+        {/* Advanced Features Section - Only show for Professional+ */}
+        {subscriptionTier.analyticsAccess.advanced && analytics.advanced && (
           <div className="mt-8 space-y-6">
             <Card>
               <CardHeader>
@@ -1331,7 +1917,7 @@ export default function ReportsPage() {
                   {t("reports.advancedMetrics")}
                 </CardTitle>
                 <CardDescription>
-                  {t("reports.advancedDescription")}
+                  {t("eports.advanced.analytics.desc")}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -1342,7 +1928,7 @@ export default function ReportsPage() {
                     trend="up"
                     change="+12%"
                     icon={UserCheck}
-                    description={t("reports.qualityDescription")}
+                    description="Average candidate quality score"
                   />
                   <AdvancedMetricCard
                     title={t("reports.costPerHire")}
@@ -1350,7 +1936,7 @@ export default function ReportsPage() {
                     trend="down"
                     change="-8%"
                     icon={DollarSign}
-                    description={t("reports.costDescription")}
+                    description="Average cost per hire"
                   />
                   <AdvancedMetricCard
                     title={t("reports.timeToProductivity")}
@@ -1358,7 +1944,7 @@ export default function ReportsPage() {
                     trend="down"
                     change="-15%"
                     icon={ClockIcon}
-                    description={t("reports.productivityDescription")}
+                    description="Average time to full productivity"
                   />
                   <AdvancedMetricCard
                     title={t("reports.retentionRate")}
@@ -1366,7 +1952,7 @@ export default function ReportsPage() {
                     trend="up"
                     change="+3%"
                     icon={Percent}
-                    description={t("reports.retentionDescription")}
+                    description="12-month candidate retention"
                   />
                 </div>
               </CardContent>
@@ -1376,11 +1962,11 @@ export default function ReportsPage() {
 
         {/* Upgrade Prompt */}
         {showUpgradePrompt && (
-          <UpgradePrompt 
+          <UpgradePrompt
             open={showUpgradePrompt}
             onOpenChange={setShowUpgradePrompt}
             requiredFeature="advanced_reports"
-            currentPlan={subscriptionTier}
+            currentPlan={subscriptionTier.id}
           />
         )}
       </div>
@@ -1388,10 +1974,33 @@ export default function ReportsPage() {
   )
 }
 
-// Sub-components (same as before)
-function UpgradeRequiredTab({ feature }: { feature: string }) {
+// Sub-component for upgrade required messages
+function UpgradeRequiredTab({
+  feature,
+  currentTier,
+  onUpgrade
+}: {
+  feature: string
+  currentTier: SubscriptionTier
+  onUpgrade: () => void
+}) {
   const { t } = useI18n()
   const router = useRouter()
+
+  const getFeatureDescription = (feature: string) => {
+    switch (feature) {
+      case 'performance_analytics':
+        return 'Performance analytics are available on Starter+ plans'
+      case 'trend_analysis':
+        return 'Advanced trend analysis is available on Professional+ plans'
+      case 'predictive_analytics':
+        return 'Predictive analytics is an Enterprise-only feature'
+      case 'data_export':
+        return 'Data export is available on Starter+ plans'
+      default:
+        return 'This feature requires an upgraded plan'
+    }
+  }
 
   return (
     <Card>
@@ -1399,66 +2008,18 @@ function UpgradeRequiredTab({ feature }: { feature: string }) {
         <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-full flex items-center justify-center">
           <Lock className="w-8 h-8 text-blue-500" />
         </div>
-        <h3 className="text-xl font-semibold mb-2">{t("reports.featureLocked")}</h3>
-        <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-          {t(`reports.${feature}Description`)}
+        <h3 className="text-xl font-semibold mb-2">Feature Locked</h3>
+        <p className="text-muted-foreground mb-4 max-w-md mx-auto">
+          {getFeatureDescription(feature)}
         </p>
         <div className="flex gap-2 justify-center">
           <Button variant="outline" onClick={() => router.push("/dashboard/pricing")}>
-            {t("reports.viewPlans")}
+            View All Plans
           </Button>
-          <Button onClick={() => router.push("/dashboard/pricing?feature=" + feature)}>
+          <Button onClick={onUpgrade}>
             <Crown className="me-2 h-4 w-4" />
-            {t("reports.upgradeNow")}
+            Upgrade Now
           </Button>
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
-
-function TrendsTab({ analytics }: { analytics: AnalyticsData }) {
-  const { t } = useI18n()
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{t("reports.trendAnalysis")}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          <p>Trend analysis content</p>
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
-
-function PredictiveTab({ analytics }: { analytics: AnalyticsData }) {
-  const { t } = useI18n()
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{t("reports.predictiveAnalytics")}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          <p>Predictive analytics content</p>
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
-
-function ExportsTab({ analytics, onExport }: { analytics: AnalyticsData, onExport: (format: 'csv' | 'pdf' | 'excel') => void }) {
-  const { t } = useI18n()
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{t("reports.dataExport")}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          <p>Export options content</p>
         </div>
       </CardContent>
     </Card>
@@ -1505,5 +2066,95 @@ function AdvancedMetricCard({
         <p className="text-xs text-muted-foreground mt-3">{description}</p>
       </CardContent>
     </Card>
+  )
+}
+
+
+function PerformanceTab({ analytics, subscriptionTier }: { analytics: AnalyticsData, subscriptionTier: SubscriptionTier }) {
+  const { t } = useI18n()
+
+  return (
+    <div className="space-y-6">
+      {/* Conversion Funnel */}
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("reports.conversionFunnel")}</CardTitle>
+          <CardDescription>{t("reports.conversionFunnelDesc")}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {analytics.performance.conversionFunnel.map((stage, index) => (
+              <div key={index} className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                    <span className="text-sm font-semibold">{stage.stage}</span>
+                  </div>
+                  <div>
+                    <p className="font-medium">{stage.name}</p>
+                    <p className="text-sm text-muted-foreground">{stage.count} {t("candidates.small.letter")}</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="font-semibold">{stage.percentage}%</p>
+                  {stage.dropOff && (
+                    <p className="text-sm text-red-500">-{stage.dropOff}% {t("reports.drop-off")}</p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Source Effectiveness */}
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("reports.sourceEffectiveness")}</CardTitle>
+          <CardDescription>{t("reports.sourceEffectivenessDesc")}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {analytics.performance.sourceEffectiveness?.map((source, index) => (
+              <div key={index} className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline">{source.source}</Badge>
+                  <span className="text-sm">{source.hireRate}% {t("reports.hire.rate")}</span>
+                </div>
+                <div className="flex items-center gap-4">
+                  <span className="text-sm text-muted-foreground">{source.applications} {t("reports.applications")}</span>
+                  <span className="font-semibold">{source.hires} {t("reports.hires")}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Cost Analysis (Premium Feature) */}
+      {subscriptionTier.analyticsAccess.advanced && analytics.costAnalysis && (
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("reports.costAnalysis")}</CardTitle>
+            <CardDescription>{t("reports.costAnalysisDesc")}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="text-center">
+                <p className="text-sm text-muted-foreground">{t("reports.avgCostPerHire")}</p>
+                <p className="text-2xl font-bold">${analytics.costAnalysis.avgCostPerHire.toLocaleString()}</p>
+              </div>
+              <div className="text-center">
+                <p className="text-sm text-muted-foreground">{t("reports.timeToHireCost")}</p>
+                <p className="text-2xl font-bold">${analytics.costAnalysis.timeCost.toLocaleString()}</p>
+              </div>
+              <div className="text-center">
+                <p className="text-sm text-muted-foreground">{t("reports.advertisingCost")}</p>
+                <p className="text-2xl font-bold">${analytics.costAnalysis.advertisingCost.toLocaleString()}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
   )
 }

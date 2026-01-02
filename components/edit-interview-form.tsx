@@ -347,7 +347,7 @@ export function EditInterviewForm({ interviewId }: EditInterviewFormProps) {
                                             id="interviewer_name"
                                             value={formData.interviewer_name}
                                             onChange={(e) => setFormData({ ...formData, interviewer_name: e.target.value })}
-                                            placeholder="John Doe"
+                                            placeholder={t("editInterview.interviewerNamePlaceholder")}
                                         />
                                     </div>
                                 </div>
@@ -361,7 +361,7 @@ export function EditInterviewForm({ interviewId }: EditInterviewFormProps) {
                                             type="email"
                                             value={formData.interviewer_email}
                                             onChange={(e) => setFormData({ ...formData, interviewer_email: e.target.value })}
-                                            placeholder="john@company.com"
+                                            placeholder={t("editInterview.interviewerEmailPlaceholder")}
                                         />
                                     </div>
                                 </div>

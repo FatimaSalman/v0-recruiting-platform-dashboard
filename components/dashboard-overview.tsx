@@ -85,6 +85,8 @@ export function DashboardOverview({ user }: DashboardOverviewProps) {
   const { t, locale } = useI18n()
   const supabase = useSupabase()
   const router = useRouter()
+  const dateLocale = locale === 'ar' ? ar : enUS
+
 
   useEffect(() => {
     fetchDashboardData()
@@ -93,6 +95,9 @@ export function DashboardOverview({ user }: DashboardOverviewProps) {
   async function fetchDashboardData() {
     try {
       setLoading(true)
+
+      const { data: { user: currentUser } } = await supabase.auth.getUser()
+      if (!currentUser) return
 
       // Fetch subscription info
       const { data: subscriptionData } = await supabase
@@ -385,7 +390,7 @@ export function DashboardOverview({ user }: DashboardOverviewProps) {
             className={`hover:shadow-md transition-shadow cursor-pointer ${card.usage >= 80 ? 'border-amber-500/30' : ''}`}
             onClick={() => handleLimitClick(card)}
           >
-            <CardContent className="pt-6">
+            <CardContent>
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <div className={`p-2 rounded-lg ${card.icon === Briefcase ? 'bg-blue-500/10' :
@@ -455,7 +460,7 @@ export function DashboardOverview({ user }: DashboardOverviewProps) {
               key={index}
               className={`hover:shadow-md transition-shadow ${action.disabled ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}
             >
-              <CardContent className="pt-6">
+              <CardContent>
                 <div className="flex items-center gap-3">
                   <div className={`p-2 rounded-lg ${action.color} ${action.borderColor} border`}>
                     <action.icon className="w-5 h-5" />
@@ -555,8 +560,8 @@ export function DashboardOverview({ user }: DashboardOverviewProps) {
         <UpgradePrompt
           open={showUpgradePrompt}
           onOpenChange={setShowUpgradePrompt}
-          currentPlan={subscription.plan_type}
-          usageStats={statCards}
+          requiredFeature="dashboard_features"
+          currentPlan={subscription.plan_type || 'free-trial'}
         />
       )}
     </div>

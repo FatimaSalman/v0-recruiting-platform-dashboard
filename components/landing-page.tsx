@@ -19,7 +19,7 @@ interface LandingPageProps {
 
 
 export function LandingPage({ initialStats }: LandingPageProps) {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
 
   // Use initial stats if provided, otherwise use defaults
   const stats: LandingStats = initialStats || {
@@ -47,9 +47,9 @@ export function LandingPage({ initialStats }: LandingPageProps) {
   ]
 
   const statsDisplay = [
-    { label: t("landing.stats.jobs"), value: `${stats.totalJobs.toLocaleString()}+`, icon: Building2 },
-    { label: t("landing.stats.candidates"), value: `${stats.totalCandidates.toLocaleString()}+`, icon: Users },
-    { label: t("landing.stats.success"), value: `${stats.successRate}%`, icon: TrendingUp },
+    { label: t("landing.stats.jobs"), value: `${stats.totalJobs.toLocaleString(locale)}+`, icon: Building2 },
+    { label: t("landing.stats.candidates"), value: `${stats.totalCandidates.toLocaleString(locale)}+`, icon: Users },
+    { label: t("landing.stats.success"), value: (stats.successRate / 100).toLocaleString(locale, { style: 'percent' }), icon: TrendingUp },
   ]
 
   return (

@@ -58,7 +58,7 @@ export function AddJobForm() {
       const { data: userData, error: userError } = await supabase.auth.getUser()
 
       if (userError || !userData.user) {
-        throw new Error("You must be logged in to create a job")
+        throw new Error(t("jobs.form.error.notLoggedIn"))
       }
 
       const jobData = {
@@ -81,7 +81,7 @@ export function AddJobForm() {
 
       router.push("/dashboard/jobs")
     } catch (err: any) {
-      setError(err.message || "Failed to create job")
+      setError(err.message || t("jobs.form.error.creating"))
     } finally {
       setLoading(false)
     }
@@ -261,7 +261,7 @@ export function AddJobForm() {
                       <button
                         type="button"
                         onClick={() => handleRemoveSkill(skill)}
-                        className="ml-2 hover:text-destructive"
+                        className="ms-2 hover:text-destructive"
                       >
                         <X className="h-3 w-3" />
                       </button>

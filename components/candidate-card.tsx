@@ -121,8 +121,7 @@ export function CandidateCard({ candidate }: CandidateCardProps) {
                 </span>
               </div>
             {/* )} */}
-            <div className="absolute -top-1 -right-1">
-
+            <div className="absolute -top-1 -end-1">
               {getStatusBadge(candidate.status)}
             </div>
           </Link>
@@ -193,7 +192,7 @@ export function CandidateCard({ candidate }: CandidateCardProps) {
             )}
 
             {candidate.status === 'placed' && (
-              <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 ml-2">
+              <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 ms-2">
                 <Award className="w-3 h-3 me-1" />
                 {t("status.hired")}
               </Badge>

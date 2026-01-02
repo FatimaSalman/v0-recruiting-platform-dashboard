@@ -64,8 +64,8 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed lg:static inset-y-0 left-0 z-50 w-64 bg-card border-r border-l border-border transform transition-transform duration-200 ease-in-out lg:translate-x-0",
-          sidebarOpen ? "translate-x-0" : "-translate-x-full",
+          "fixed lg:static inset-y-0 start-0 z-50 w-64 bg-card border-e border-s border-border transform transition-transform duration-200 ease-in-out lg:translate-x-0",
+          sidebarOpen ? "translate-x-0" : "ltr:-translate-x-full rtl:translate-x-full",
         )}
       >
         <div className="flex flex-col h-full">
@@ -116,12 +116,12 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 </span>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{user?.user_metadata?.full_name || "User"}</p>
+                <p className="text-sm font-medium truncate">{user?.user_metadata?.full_name || t("common.user")}</p>
                 <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
               </div>
             </div>
             <Button variant="outline" size="sm" className="w-full justify-start bg-transparent" onClick={handleSignOut}>
-              <LogOut className="me-2 h-4 w-4" />
+              <LogOut className="me-2 h-4 w-4 rtl:rotate-180" />
               {t("auth.signout")}
             </Button>
           </div>
@@ -137,7 +137,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(true)}>
               <Menu className="w-5 h-5" />
             </Button>
-            <span className="ml-3 font-semibold text-lg">TalentHub</span>
+            <span className="ms-3 font-semibold text-lg">TalentHub</span>
           </div>
           <LanguageToggle />
         </header>

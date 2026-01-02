@@ -36,6 +36,17 @@ export function CandidateBulkActions({ selectedIds, onComplete }: CandidateBulkA
     const { t } = useI18n()
     const supabase = useSupabase()
 
+    const getActionText = (actionKey: string) => {
+        switch (actionKey) {
+            case "update_status": return t("bulk.update.status")
+            case "add_tag": return t("bulk.add.tag")
+            case "send_email": return t("candidates.send.email")
+            case "delete": return t("jobs.delete")
+            default:
+                return actionKey.replace("_", " ")
+        }
+    }
+
     const handleBulkAction = async () => {
         if (selectedIds.length === 0) return
 
@@ -112,7 +123,7 @@ export function CandidateBulkActions({ selectedIds, onComplete }: CandidateBulkA
                 {action === "update_status" && (
                     <Select value={status} onValueChange={setStatus}>
                         <SelectTrigger className="w-40">
-                            <SelectValue placeholder="Select status" />
+                            <SelectValue placeholder={t("bulk.actions.selectStatus")} />
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="active">{t("status.active")}</SelectItem>
@@ -152,18 +163,13 @@ export function CandidateBulkActions({ selectedIds, onComplete }: CandidateBulkA
                     <AlertDialogHeader>
                         <AlertDialogTitle>{t("confirm.bulk.action")}</AlertDialogTitle>
                         <AlertDialogDescription>
-                            {action === "delete" ? (
-                                `${t("delete.message")} ${selectedIds.length} 
-                                ${selectedIds.length === 1 ? t("candidates.singular") : t("candidates.small.letter")} ? 
-                                ${t("delete.action.undone")}`
-                            ) : (
-                                `${t("apply")} ${action.replace("_", " ")} ${t("to")} ${selectedIds.length}
-                                 ${selectedIds.length === 1 ? t("candidates.singular") : t("candidates.small.letter")}?`
-                            )}
+                            {action === "delete"
+                                ? t("bulk.actions.deleteConfirm").replace("{count}", selectedIds.length.toString())
+                                : t("bulk.actions.applyConfirm").replace("{action}", getActionText(action)).replace("{count}", selectedIds.length.toString())}
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogCancel>{t("jobs.form.cancel")}</AlertDialogCancel>
                         <AlertDialogAction
                             onClick={handleBulkAction}
                             className={

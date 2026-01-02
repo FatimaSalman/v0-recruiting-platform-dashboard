@@ -133,7 +133,7 @@ export function SettingsPageContent() {
 
         } catch (error) {
             console.error("Error deleting account:", error)
-            alert("Failed to delete account. Please contact support.")
+            alert(t("settings.account.deleteErrorAlert"))
         } finally {
             setDeleting(false)
             setDeleteDialogOpen(false)
@@ -240,9 +240,9 @@ export function SettingsPageContent() {
                 {/* Support Contact Settings */}
                 <Card>
                     <CardHeader>
-                        <CardTitle>Support</CardTitle>
+                        <CardTitle>{t("settings.support.title")}</CardTitle>
                         <CardDescription>
-                            Contact our support team for help with your account
+                            {t("settings.support.description")}
                         </CardDescription>
                     </CardHeader>
                     <CardContent>

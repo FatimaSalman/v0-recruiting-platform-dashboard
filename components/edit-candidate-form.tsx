@@ -504,9 +504,9 @@ export function EditCandidateForm({ candidateId }: EditCandidateFormProps) {
                                             <Badge key={index} variant="secondary" className="text-sm gap-1">
                                                 {skill}
                                                 <button
-                                                    type="button"
+                                                    type="button" 
                                                     onClick={() => handleRemoveSkill(skill)}
-                                                    className="ml-1 hover:text-destructive"
+                                                    className="ms-1 hover:text-destructive"
                                                 >
                                                     <X className="h-3 w-3" />
                                                 </button>

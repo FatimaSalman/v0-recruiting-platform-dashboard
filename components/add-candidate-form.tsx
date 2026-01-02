@@ -222,7 +222,7 @@ export function AddCandidateForm({ initialJobId }: AddCandidateFormProps) {
                   {formData.skills.map((skill) => (
                     <Badge key={skill} variant="secondary" className="gap-1">
                       {skill}
-                      <button type="button" onClick={() => removeSkill(skill)} className="ml-1 hover:text-destructive">
+                      <button type="button" onClick={() => removeSkill(skill)} className="ms-1 hover:text-destructive">
                         <X className="w-3 h-3" />
                       </button>
                     </Badge>
@@ -240,7 +240,7 @@ export function AddCandidateForm({ initialJobId }: AddCandidateFormProps) {
                   type="url"
                   value={formData.linkedin_url}
                   onChange={(e) => setFormData({ ...formData, linkedin_url: e.target.value })}
-                  placeholder="https://linkedin.com/in/..."
+                  placeholder={t("candidates.form.linkedinPlaceholder")}
                 />
               </div>
 
@@ -251,7 +251,7 @@ export function AddCandidateForm({ initialJobId }: AddCandidateFormProps) {
                   type="url"
                   value={formData.portfolio_url}
                   onChange={(e) => setFormData({ ...formData, portfolio_url: e.target.value })}
-                  placeholder="https://..."
+                  placeholder={t("candidates.form.portfolioPlaceholder")}
                 />
               </div>
             </div>

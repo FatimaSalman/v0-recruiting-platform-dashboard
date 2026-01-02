@@ -1,8 +1,25 @@
 "use client"
 
-import { useEffect, useState, useCallback } from "react"
+import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
-import { Search, Plus, Download, Filter, Mail, Phone, Calendar, MapPin, Briefcase, Star, X, Check, Tag, UserCheck, UserMinus, UserX, Award, Clock, Users, FileText } from "lucide-react"
+import {
+  Search,
+  Plus,
+  Download,
+  Filter,
+  Mail,
+  X,
+  Check,
+  Users,
+  FileText,
+  ArrowLeft,
+  ArrowRight,
+  UserCheck,
+  Clock,
+  Briefcase,
+  ArrowUp,
+  ArrowDown,
+} from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
@@ -138,8 +155,8 @@ export function CandidateSearchInterface() {
           status: candidate.status || 'active',
           availability: candidate.availability || 'immediate',
           experience: candidate.experience_years
-            ? `${candidate.experience_years} year${candidate.experience_years > 1 ? "s" : ""}`
-            : "Not specified",
+            ? `${candidate.experience_years} ${t("candidates.years")}`
+            : t("common.unknown"),
           matchScore: Math.floor(Math.random() * 30) + 70, // Mock match score (70-100)
           avatar: `/placeholder.svg?height=80&width=80&query=professional+person`,
           isHired: hasHiredApplications,
@@ -288,20 +305,20 @@ export function CandidateSearchInterface() {
 
       // Convert to CSV
       const headers = [
-        "Name",
-        "Email",
-        "Phone",
-        "Title",
-        "Experience Years",
-        "Location",
-        "Skills",
-        "Current Salary",
-        "Expected Salary",
-        "Notice Period",
-        "Status",
-        "Availability",
-        "Tags",
-        "Created At"
+        t("candidates.form.fullName"),
+        t("candidates.form.email"),
+        t("candidates.form.phone"),
+        t("candidates.form.jobTitle"),
+        t("candidates.form.experience"),
+        t("candidates.form.location"),
+        t("candidates.form.skills"),
+        t("editCandidate.currentSalary"),
+        t("editCandidate.expectedSalary"),
+        t("editCandidate.noticePeriod"),
+        t("jobs.form.status"),
+        t("availability"),
+        t("candidate.profile.tags"),
+        t("interview.details.created")
       ]
 
       const csvRows = [
@@ -338,7 +355,7 @@ export function CandidateSearchInterface() {
       setShowExportDialog(false)
     } catch (error) {
       console.error("Error exporting candidates:", error)
-      alert("Failed to export candidates. Please try again.")
+      alert(t("candidates.export.error") || "Failed to export candidates. Please try again.")
     }
   }
 
@@ -351,8 +368,8 @@ export function CandidateSearchInterface() {
         .map(c => c.email)
         .filter(email => email) as string[]
 
-      const subject = encodeURIComponent(bulkEmailContent.subject || "Regarding your application")
-      const body = encodeURIComponent(bulkEmailContent.message || "Hello,\n\nWe would like to follow up with you regarding your application.\n\nBest regards,\nRecruitment Team")
+      const subject = encodeURIComponent(bulkEmailContent.subject || t("candidate.emailSubject"))
+      const body = encodeURIComponent(bulkEmailContent.message || t("candidate.emailBodyDefault") || "Hello,\n\nWe would like to follow up with you regarding your application.\n\nBest regards,\nRecruitment Team")
 
       const mailtoLink = `mailto:?bcc=${selectedEmails.join(',')}&subject=${subject}&body=${body}`
 
@@ -361,7 +378,7 @@ export function CandidateSearchInterface() {
       setBulkEmailContent({ subject: "", message: "" })
     } catch (error) {
       console.error("Error sending bulk email:", error)
-      alert("Failed to open email client. Please check your email configuration.")
+      alert(t("candidates.email.error") || "Failed to open email client. Please check your email configuration.")
     }
   }
 
@@ -523,18 +540,18 @@ export function CandidateSearchInterface() {
         <CardContent className="space-y-4">
           {/* Search Bar */}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               type="text"
               placeholder={t("candidates.searchPlaceholder")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
+              className="ps-10"
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                className="absolute end-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -650,7 +667,7 @@ export function CandidateSearchInterface() {
                   onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
                   title={sortOrder === "asc" ? t("sort.ascending") : t("sort.descending")}
                 >
-                  {sortOrder === "asc" ? "↑" : "↓"}
+                  {sortOrder === "asc" ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />}
                 </Button>
               </div>
             </div>
@@ -680,7 +697,7 @@ export function CandidateSearchInterface() {
                   {searchQuery && (
                     <Badge variant="secondary" className="gap-1">
                       {t("nav.search")}: {searchQuery}
-                      <button onClick={() => setSearchQuery("")} className="ml-1 hover:text-destructive">
+                      <button onClick={() => setSearchQuery("")} className="ms-1 hover:text-destructive">
                         <X className="h-3 w-3" />
                       </button>
                     </Badge>
@@ -688,7 +705,7 @@ export function CandidateSearchInterface() {
                   {experienceFilter !== "all" && (
                     <Badge variant="secondary" className="gap-1">
                       {t("candidate.experience")}: {experienceFilter}
-                      <button onClick={() => setExperienceFilter("all")} className="ml-1 hover:text-destructive">
+                      <button onClick={() => setExperienceFilter("all")} className="ms-1 hover:text-destructive">
                         <X className="h-3 w-3" />
                       </button>
                     </Badge>
@@ -696,7 +713,7 @@ export function CandidateSearchInterface() {
                   {skillFilter !== "all" && (
                     <Badge variant="secondary" className="gap-1">
                       {t("candidates.skills")}: {skillFilter}
-                      <button onClick={() => setSkillFilter("all")} className="ml-1 hover:text-destructive">
+                      <button onClick={() => setSkillFilter("all")} className="ms-1 hover:text-destructive">
                         <X className="h-3 w-3" />
                       </button>
                     </Badge>
@@ -704,15 +721,15 @@ export function CandidateSearchInterface() {
                   {statusFilter !== "all" && (
                     <Badge variant="secondary" className="gap-1">
                       {t("jobs.form.status")}: {statusFilter}
-                      <button onClick={() => setStatusFilter("all")} className="ml-1 hover:text-destructive">
+                      <button onClick={() => setStatusFilter("all")} className="ms-1 hover:text-destructive">
                         <X className="h-3 w-3" />
                       </button>
                     </Badge>
                   )}
                   {availabilityFilter !== "all" && (
                     <Badge variant="secondary" className="gap-1">
-                      {t("avialability")}: {availabilityFilter}
-                      <button onClick={() => setAvailabilityFilter("all")} className="ml-1 hover:text-destructive">
+                      {t("availability")}: {availabilityFilter}
+                      <button onClick={() => setAvailabilityFilter("all")} className="ms-1 hover:text-destructive">
                         <X className="h-3 w-3" />
                       </button>
                     </Badge>
@@ -720,7 +737,7 @@ export function CandidateSearchInterface() {
                   {salaryRangeFilter !== "all" && (
                     <Badge variant="secondary" className="gap-1">
                       {t("salary")}: {salaryRangeFilter}
-                      <button onClick={() => setSalaryRangeFilter("all")} className="ml-1 hover:text-destructive">
+                      <button onClick={() => setSalaryRangeFilter("all")} className="ms-1 hover:text-destructive">
                         <X className="h-3 w-3" />
                       </button>
                     </Badge>
@@ -901,7 +918,7 @@ export function CandidateSearchInterface() {
                   type="checkbox"
                   checked={selectedCandidates.includes(candidate.id)}
                   onChange={() => toggleCandidateSelection(candidate.id)}
-                  className="absolute left-2 top-2 z-10 h-5 w-5 rounded border-gray-300 text-primary focus:ring-primary"
+                  className="absolute start-2 top-2 z-10 h-5 w-5 rounded border-gray-300 text-primary focus:ring-primary"
                 />
                 <div className={selectedCandidates.includes(candidate.id) ? "opacity-100" : "opacity-100"}>
                   <CandidateCard
@@ -925,7 +942,8 @@ export function CandidateSearchInterface() {
           {/* Pagination */}
           {filteredCandidates.length > 10 && (
             <div className="flex justify-center items-center gap-2 mt-8">
-              <Button variant="outline" size="sm" disabled>
+              <Button variant="outline" size="sm" disabled className="gap-1">
+                <ArrowLeft className="h-4 w-4 rtl:rotate-180" />
                 {t("previous")}
               </Button>
               <div className="flex items-center gap-1">
@@ -934,8 +952,9 @@ export function CandidateSearchInterface() {
                 <Button variant="ghost" size="sm" className="w-8 h-8 p-0">3</Button>
                 <span className="text-muted-foreground">...</span>
               </div>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" className="gap-1">
                 {t("next")}
+                <ArrowRight className="h-4 w-4 rtl:rotate-180" />
               </Button>
             </div>
           )}

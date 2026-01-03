@@ -54,14 +54,13 @@ Before you begin, ensure you have installed:
 ## 🚀 Quick Start
 
 ### 1. Clone the Repository
-```bash
+
 git clone <your-repository-url>
 cd recruiting-platform-dashboard
 2. Install Dependencies
-bash
+
 npm install
-# or
-yarn install
+
 3. Environment Setup
 Create a .env.local file in the root directory with the following variables:
 

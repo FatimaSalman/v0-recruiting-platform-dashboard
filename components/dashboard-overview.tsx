@@ -35,12 +35,13 @@ import {
 import Link from "next/link"
 import { useSupabase } from "@/lib/supabase/supabase-provider"
 import { useI18n } from "@/lib/i18n-context"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { formatDistanceToNow } from "date-fns"
 import { ar, enUS } from "date-fns/locale"
 import { UpgradePrompt } from "./upgrade-prompt"
 import { getSubscriptionInfo, getUsagePercentage, type SubscriptionInfo } from "@/lib/subscription-utils"
 import { Progress } from "./progress"
+import { verifyAndSaveSubscription } from "@/app/actions/stripe"
 
 interface Stats {
   totalJobs: number
@@ -80,7 +81,10 @@ export function DashboardOverview({ user }: DashboardOverviewProps) {
     is_active: true,
     limits: getSubscriptionInfo('free-trial', 'trialing').limits
   })
+  const [subscriptionError, setSubscriptionError] = useState<string | null>(null)
+  const [subscriptionLoading, setSubscriptionLoading] = useState(false)
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false)
+  const searchParams = useSearchParams()
 
   const { t, locale } = useI18n()
   const supabase = useSupabase()
@@ -89,8 +93,48 @@ export function DashboardOverview({ user }: DashboardOverviewProps) {
 
 
   useEffect(() => {
-    fetchDashboardData()
-  }, [])
+    checkSubscriptionSuccess()
+  }, [searchParams, router])
+
+  const checkSubscriptionSuccess = async () => {
+    const sessionId = searchParams.get("session_id")
+    const subscriptionSuccess = searchParams.get("subscription")
+    const tempSessionId = searchParams.get("temp_session_id")
+
+    if (subscriptionSuccess === "success" && sessionId) {
+      try {
+        setSubscriptionLoading(true)
+        setSubscriptionError(null)
+
+        console.log("Processing subscription success for session:", sessionId)
+
+        // Call server action to verify and save subscription
+        const result = await verifyAndSaveSubscription(sessionId, tempSessionId || undefined)
+
+        if (result.success) {
+          console.log("✅ Subscription verified and saved successfully!")
+
+          // Remove query params from URL
+          router.replace("/dashboard")
+
+          // Refresh dashboard data
+          fetchDashboardData()
+
+          // Show success message
+          alert("Subscription activated successfully! Your plan has been upgraded.")
+        } else {
+          const errorMessage = 'error' in result ? (result.error as string) : "Failed to activate subscription"
+          console.error("❌ Failed to save subscription:", errorMessage)
+          setSubscriptionError(errorMessage)
+        }
+      } catch (error) {
+        console.error("Error processing subscription:", error)
+        setSubscriptionError("An error occurred while activating your subscription")
+      } finally {
+        setSubscriptionLoading(false)
+      }
+    }
+  }
 
   async function fetchDashboardData() {
     try {
@@ -168,6 +212,10 @@ export function DashboardOverview({ user }: DashboardOverviewProps) {
       setLoading(false)
     }
   }
+
+  useEffect(() => {
+    fetchDashboardData()
+  }, [])
 
   const getPlanIcon = (plan: string) => {
     switch (plan) {

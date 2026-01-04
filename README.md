@@ -54,71 +54,70 @@ Before you begin, ensure you have installed:
 ## 🚀 Quick Start
 
 ### 1. Clone the Repository
-```bash
-git clone <your-repository-url>
-cd recruiting-platform-dashboard
-2. Install Dependencies
-bash
-npm install
-# or
-yarn install
-3. Environment Setup
-Create a .env.local file in the root directory with the following variables:
 
-env
-# Supabase Configuration
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
+- **git clone <your-repository-url>** 
+- **cd recruiting-platform-dashboard** 
 
-# Stripe Configuration
-STRIPE_SECRET_KEY=your_stripe_secret_key
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key
-NEXT_PUBLIC_STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
+### 2. Install Dependencies
 
-# App Configuration
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL=http://localhost:3000/dashboard
+- **npm install**
 
-# Stripe Price IDs (for subscription plans)
-STRIPE_STARTER_MONTHLY_PRICE_ID=price_xxxx
-STRIPE_PROFESSIONAL_MONTHLY_PRICE_ID=price_xxxx
-STRIPE_ENTERPRISE_MONTHLY_PRICE_ID=price_xxxx
+### 3. Environment Setup
+- **Create a .env.local file in the root directory with the following variables:**
 
-4. Database Setup
-Run the SQL migration scripts in order:
+  #### Supabase Configuration
+  - **NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url**
+  - **NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key**
+  - **SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key**
+  
+  #### Stripe Configuration
+  - **STRIPE_SECRET_KEY=your_stripe_secret_key**
+  - **NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key**
+  - **NEXT_PUBLIC_STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret**
+  
+  #### App Configuration
+  - **NEXT_PUBLIC_APP_URL=http://localhost:3000**
+  - **NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL=http://localhost:3000/dashboard**
+  
+  #### Stripe Price IDs (for subscription plans)
+  - **STRIPE_STARTER_MONTHLY_PRICE_ID=price_xxxx**
+  - **STRIPE_PROFESSIONAL_MONTHLY_PRICE_ID=price_xxxx**
+  - **STRIPE_ENTERPRISE_MONTHLY_PRICE_ID=price_xxxx**
 
-Navigate to the scripts/ directory
+### 4. Database Setup
 
-Execute the scripts in numerical order:
+- **Run the SQL migration scripts in order:**
 
-sql
-001_create_profiles.sql
-002_create_jobs.sql
-003_create_candidates.sql
-004_create_applications.sql
-005_create_interviews.sql
-006_create_subscriptions.sql
-007_handle_free_trial.sql
-008_create_communications.sql
-009_enhance_candidates_and_applications.sql
-010_create_support_tickets.sql
-You can run these in your Supabase SQL editor or via the Supabase CLI.
+- **Navigate to the scripts/ directory**
 
-5. Development Server
-Start the development server:
+- **Execute the scripts in numerical order:**
 
-npm run dev
+  - ***001_create_profiles.sql***
+  - ***002_create_jobs.sql***
+  - ***003_create_candidates.sql***
+  - ***004_create_applications.sql***
+  - ***005_create_interviews.sql***
+  - ***006_create_subscriptions.sql***
+  - ***007_handle_free_trial.sql***
+  - ***008_create_communications.sql***
+  - ***009_enhance_candidates_and_applications.sql***
+  - ***010_create_support_tickets.sql***
+- **You can run these in your Supabase SQL editor or via the Supabase CLI.**
 
-Open http://localhost:3000 in your browser.
+### 5. Development Server
 
-6. Build for Production
+- **Start the development server:**
 
-npm run build
-npm start
+  - ***npm run dev***
+  - ***Open http://localhost:3000 in your browser.***
 
-📁 Project Structure
-tex
+### 6. Build for Production
+
+- **npm run build**
+- **npm start**
+
+### 📁 Project Structure
+```markdown
 recruiting-platform-dashboard/
 ├── app/                    # Next.js 15 app router pages
 │   ├── actions/           # Server actions
@@ -136,129 +135,130 @@ recruiting-platform-dashboard/
 ├── scripts/             # Database migration scripts
 └── ...config files
 🔧 Configuration
+```
+### Supabase Setup
 
-Supabase Setup
-Create a new project at supabase.com
+- **Create a new project at supabase.com**
 
-Copy your project URL and anon key
+- **Copy your project URL and anon key**
 
-Set up the required tables using the migration scripts
+- **Set up the required tables using the migration scripts**
 
-Stripe Setup
+### Stripe Setup
 
-Create a Stripe account at stripe.com
+- **Create a Stripe account at stripe.com**
 
-Create subscription products and copy their price IDs
+- **Create subscription products and copy their price IDs**
 
-Set up webhooks for payment processing
+- **Set up webhooks for payment processing**
 
-Google OAuth
+### Google OAuth
 
-Follow the instructions in GOOGLE_OAUTH_SETUP.md to configure Google authentication.
+- **Follow the instructions in GOOGLE_OAUTH_SETUP.md to configure Google authentication.**
 
-📊 Database Schema
+### 📊 Database Schema
 
-Key tables:
+- **Key tables:**
 
-profiles - User profiles
+  - ***profiles - User profiles***
+  
+  - ***jobs - Job listings***
+  
+  - ***candidates - Candidate information***
+  
+  - ***applications - Job applications***
+  
+  - ***interviews - Interview scheduling***
+  
+  - ***subscriptions - User subscription plans***
+  
+  - ***communications - Communication history***
 
-jobs - Job listings
+### 🎨 UI Components
 
-candidates - Candidate information
+- **The project uses shadcn/ui for consistent, accessible components including:**
 
-applications - Job applications
+  - ***Cards, Buttons, Forms***
+  
+  - ***Data Tables, Badges***
+  
+  - ***Dialogs, Alerts***
+  
+  - ***Navigation, Layout components***
 
-interviews - Interview scheduling
+### 🔐 Authentication
 
-subscriptions - User subscription plans
+- **Supports multiple authentication methods:**
 
-communications - Communication history
+  - ***Email/Password***
+  
+  - ***Google OAuth***
+  
+  - ***Session management with Supabase Auth***
 
-🎨 UI Components
+### 💳 Subscription Plans
 
-The project uses shadcn/ui for consistent, accessible components including:
+- **Three subscription tiers:**
 
-Cards, Buttons, Forms
+  - ***Free Trial - Basic features, limited records***
+  
+  - ***Starter - Enhanced features, CSV exports***
+  
+  - ***Professional - Advanced analytics, PDF/Excel exports***
+  
+  - ***Enterprise - Predictive analytics, unlimited data***
 
-Data Tables, Badges
+### 🌐 Internationalization
 
-Dialogs, Alerts
+- **Built-in support for multiple languages:**
 
-Navigation, Layout components
-
-🔐 Authentication
-
-Supports multiple authentication methods:
-
-Email/Password
-
-Google OAuth
-
-Session management with Supabase Auth
-
-💳 Subscription Plans
-
-Three subscription tiers:
-
-Free Trial - Basic features, limited records
-
-Starter - Enhanced features, CSV exports
-
-Professional - Advanced analytics, PDF/Excel exports
-
-Enterprise - Predictive analytics, unlimited data
-
-🌐 Internationalization
-
-Built-in support for multiple languages:
-
-English (default)
-
-Arabic (RTL support)
-
-Easy to extend to other languages
-
-
-📈 Analytics
-
-The platform includes comprehensive analytics:
-
-Conversion funnels
-
-Source effectiveness
-
-Interviewer performance
-
-Time-to-hire metrics
-
-Quality metrics
-
-Predictive analytics (Enterprise tier)
+  - ***English (default)***
+  
+  - ***Arabic (RTL support)***
+  
+  - ***Easy to extend to other languages***
 
 
-🤝 Contributing
-Fork the repository
+### 📈 Analytics
 
-Create a feature branch
+- **The platform includes comprehensive analytics:**
 
-Commit your changes
+  - ***Conversion funnels***
+  
+  - ***Source effectiveness***
+  
+  - ***Interviewer performance***
+  
+  - ***Time-to-hire metrics***
+  
+  - ***Quality metrics***
+  
+  - ***Predictive analytics (Enterprise tier)***
 
-Push to the branch
+### 🤝 Contributing
 
-Open a Pull Request
+- **Fork the repository**
 
-👥 Team
+- **Create a feature branch**
 
-Fatima Salman - Project Lead & Developer
+- **Commit your changes**
 
-🙏 Acknowledgments
+- **Push to the branch**
 
-Next.js - React framework
+- **Open a Pull Request**
 
-Supabase - Backend as a service
+### 👥 Team
 
-Stripe - Payment processing
+- **Fatima Salman - Project Lead & Developer**
 
-shadcn/ui - UI components
+### 🙏 Acknowledgments
 
-Tailwind CSS - Styling
+- **Next.js - React framework**
+
+- **Supabase - Backend as a service**
+
+- **Stripe - Payment processing**
+
+- **shadcn/ui - UI components**
+
+- **Tailwind CSS - Styling**

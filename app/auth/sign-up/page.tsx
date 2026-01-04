@@ -12,7 +12,6 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 
-
 export default function SignUpPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -23,6 +22,8 @@ export default function SignUpPage() {
   const router = useRouter()
   const { t } = useI18n()
   const supabase = useSupabase()
+
+  const origin = process.env.NEXT_PUBLIC_APP_URL 
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -40,7 +41,7 @@ export default function SignUpPage() {
         email,
         password,
         options: {
-          emailRedirectTo: process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || `${window.location.origin}/dashboard`,
+          emailRedirectTo: `${origin}/dashboard`,
           data: {
             full_name: fullName,
           },
@@ -63,7 +64,7 @@ export default function SignUpPage() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: `${origin}/auth/callback`,
           queryParams: {
             access_type: "offline",
             prompt: "consent",

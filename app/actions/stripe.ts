@@ -31,13 +31,9 @@ export async function startCheckoutSession(planId: string) {
 
   const priceId = PRICE_IDS[planId]
 
-  //Get the origin (domain)
-  const origin = process.env.NEXT_PUBLIC_APP_URL
-
   const tempSessionId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
 
-
-  // Create Checkout Session
+  const origin = process.env.NEXT_PUBLIC_APP_URL 
   const session = await stripe.checkout.sessions.create({
     mode: "subscription",
     customer_email: user.email,

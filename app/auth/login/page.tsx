@@ -22,6 +22,8 @@ export default function LoginPage() {
   const { t } = useI18n()
   const supabase = useSupabase()
 
+  const origin = process.env.NEXT_PUBLIC_APP_URL 
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
@@ -49,7 +51,7 @@ export default function LoginPage() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: `${origin}/auth/callback`,
           queryParams: {
             access_type: "offline",
             prompt: "consent",

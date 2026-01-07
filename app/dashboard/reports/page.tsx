@@ -917,7 +917,7 @@ export default function ReportsPage() {
     const baseScore = scoreCount > 0 ? totalScore / scoreCount : 7.5
 
     // Add some variation for realism
-    return Math.min(10, Math.max(5, baseScore + (Math.random() * 0.7 - 0.35)))
+    return Math.round(Math.min(10, Math.max(5, baseScore + (Math.random() * 0.7 - 0.35))))
   }
 
   function calculateCostPerHire(applications: any[]) {
@@ -1419,7 +1419,7 @@ export default function ReportsPage() {
             <h1 className="text-3xl font-bold tracking-tight mb-2">{t("reports.title")}</h1>
             <div className="flex items-center gap-3">
               <Badge className={subscriptionTier.color}>
-                {subscriptionTier.name} Plan
+                {subscriptionTier.name} {t("reports.plan")}
               </Badge>
 
               <Badge className="bg-blue-500/10 text-blue-500 border-blue-500/20">
@@ -1453,7 +1453,7 @@ export default function ReportsPage() {
                   className="bg-transparent"
                 >
                   <Download className="me-2 h-4 w-4" />
-                  CSV
+                  {t("reports.csv")}
                 </Button>
 
                 {subscriptionTier.id !== 'starter-monthly' && (
@@ -1464,7 +1464,7 @@ export default function ReportsPage() {
                       className="bg-transparent"
                     >
                       <FileText className="me-2 h-4 w-4" />
-                      PDF
+                      {t("reports.pdf")}
                     </Button>
                     {subscriptionTier.analyticsAccess.advanced && (
                       <Button
@@ -1473,7 +1473,7 @@ export default function ReportsPage() {
                         className="bg-transparent"
                       >
                         <Database className="me-2 h-4 w-4" />
-                        Excel
+                        {t("reports.excel")}
                       </Button>
                     )}
                   </>
@@ -1597,7 +1597,7 @@ export default function ReportsPage() {
                       <p className="text-sm text-muted-foreground">{t("reports.totalCandidates")}</p>
                       <p className="text-2xl font-bold">{analytics.overview.totalCandidates}</p>
                       {subscriptionTier.id === 'free-trial' && (
-                        <p className="text-xs text-muted-foreground mt-1">Limited to 100 records</p>
+                        <p className="text-xs text-muted-foreground mt-1">{t("reports.limited100")}</p>
                       )}
                     </div>
                     <div className="p-2 bg-primary/10 rounded-lg">
@@ -1614,7 +1614,7 @@ export default function ReportsPage() {
                       <p className="text-sm text-muted-foreground">{t("reports.activeJobs")}</p>
                       <p className="text-2xl font-bold">{analytics.overview.openJobs}</p>
                       {subscriptionTier.id === 'free-trial' && (
-                        <p className="text-xs text-muted-foreground mt-1">Limited to 50 records</p>
+                        <p className="text-xs text-muted-foreground mt-1">{t("reports.limited50")}</p>
                       )}
                     </div>
                     <div className="p-2 bg-blue-500/10 rounded-lg">
@@ -1857,8 +1857,8 @@ export default function ReportsPage() {
                   <CardTitle>{t("reports.dataExport")}</CardTitle>
                   <CardDescription>
                     {subscriptionTier.id === 'starter-monthly'
-                      ? 'CSV exports available (Upgrade for PDF/Excel)'
-                      : 'Export data in multiple formats'}
+                      ? t("reports.export.starterDesc")
+                      : t("reports.export.proDesc")}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -1867,8 +1867,8 @@ export default function ReportsPage() {
                       <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleExport('csv')}>
                         <CardContent className="pt-6 text-center">
                           <FileText className="w-12 h-12 mx-auto mb-3 text-blue-500" />
-                          <h4 className="font-semibold">CSV Export</h4>
-                          <p className="text-sm text-muted-foreground">Export as CSV file</p>
+                          <h4 className="font-semibold">{t("reports.export.csv")}</h4>
+                          <p className="text-sm text-muted-foreground">{t("reports.export.csvDesc")}</p>
                         </CardContent>
                       </Card>
 
@@ -1877,8 +1877,8 @@ export default function ReportsPage() {
                           <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleExport('pdf')}>
                             <CardContent className="pt-6 text-center">
                               <FileText className="w-12 h-12 mx-auto mb-3 text-red-500" />
-                              <h4 className="font-semibold">PDF Export</h4>
-                              <p className="text-sm text-muted-foreground">Professional+ plan</p>
+                              <h4 className="font-semibold">{t("reports.export.pdf")}</h4>
+                              <p className="text-sm text-muted-foreground">{t("reports.export.proPlan")}</p>
                             </CardContent>
                           </Card>
 
@@ -1886,8 +1886,8 @@ export default function ReportsPage() {
                             <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleExport('excel')}>
                               <CardContent className="pt-6 text-center">
                                 <Database className="w-12 h-12 mx-auto mb-3 text-green-500" />
-                                <h4 className="font-semibold">Excel Export</h4>
-                                <p className="text-sm text-muted-foreground">Professional+ plan</p>
+                                <h4 className="font-semibold">{t("reports.export.excel")}</h4>
+                                <p className="text-sm text-muted-foreground">{t("reports.export.proPlan")}</p>
                               </CardContent>
                             </Card>
                           )}
@@ -1917,7 +1917,7 @@ export default function ReportsPage() {
                   {t("reports.advancedMetrics")}
                 </CardTitle>
                 <CardDescription>
-                  {t("eports.advanced.analytics.desc")}
+                  {t("reports.advanced.analytics.desc")}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -1928,7 +1928,7 @@ export default function ReportsPage() {
                     trend="up"
                     change="+12%"
                     icon={UserCheck}
-                    description="Average candidate quality score"
+                    description={t("reports.metric.qualityDesc")}
                   />
                   <AdvancedMetricCard
                     title={t("reports.costPerHire")}
@@ -1936,7 +1936,7 @@ export default function ReportsPage() {
                     trend="down"
                     change="-8%"
                     icon={DollarSign}
-                    description="Average cost per hire"
+                    description={t("reports.metric.costDesc")}
                   />
                   <AdvancedMetricCard
                     title={t("reports.timeToProductivity")}
@@ -1944,7 +1944,7 @@ export default function ReportsPage() {
                     trend="down"
                     change="-15%"
                     icon={ClockIcon}
-                    description="Average time to full productivity"
+                    description={t("reports.metric.productivityDesc")}
                   />
                   <AdvancedMetricCard
                     title={t("reports.retentionRate")}
@@ -1952,7 +1952,7 @@ export default function ReportsPage() {
                     trend="up"
                     change="+3%"
                     icon={Percent}
-                    description="12-month candidate retention"
+                    description={t("reports.metric.retentionDesc")}
                   />
                 </div>
               </CardContent>
@@ -1990,15 +1990,15 @@ function UpgradeRequiredTab({
   const getFeatureDescription = (feature: string) => {
     switch (feature) {
       case 'performance_analytics':
-        return 'Performance analytics are available on Starter+ plans'
+        return t("reports.feature.performance")
       case 'trend_analysis':
-        return 'Advanced trend analysis is available on Professional+ plans'
+        return t("reports.feature.trends")
       case 'predictive_analytics':
-        return 'Predictive analytics is an Enterprise-only feature'
+        return t("reports.feature.predictive")
       case 'data_export':
-        return 'Data export is available on Starter+ plans'
+        return t("reports.feature.export")
       default:
-        return 'This feature requires an upgraded plan'
+        return t("reports.feature.upgrade")
     }
   }
 
@@ -2008,17 +2008,17 @@ function UpgradeRequiredTab({
         <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-full flex items-center justify-center">
           <Lock className="w-8 h-8 text-blue-500" />
         </div>
-        <h3 className="text-xl font-semibold mb-2">Feature Locked</h3>
+        <h3 className="text-xl font-semibold mb-2">{t("reports.featureLocked")}</h3>
         <p className="text-muted-foreground mb-4 max-w-md mx-auto">
           {getFeatureDescription(feature)}
         </p>
         <div className="flex gap-2 justify-center">
           <Button variant="outline" onClick={() => router.push("/dashboard/pricing")}>
-            View All Plans
+            {t("reports.viewPlans")}
           </Button>
           <Button onClick={onUpgrade}>
             <Crown className="me-2 h-4 w-4" />
-            Upgrade Now
+            {t("reports.upgradeNow")}
           </Button>
         </div>
       </CardContent>

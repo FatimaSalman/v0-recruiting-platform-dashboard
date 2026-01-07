@@ -66,6 +66,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       <aside
         className={cn(
           "fixed lg:static inset-y-0 start-0 z-50 w-64 bg-card border-e border-border transform transition-transform duration-200 ease-in-out",
+          sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
         )}
       >
         <div className="flex flex-col h-full">
